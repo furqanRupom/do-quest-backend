@@ -1,7 +1,6 @@
 import { Body, Controller, Get,Param,Post,Req } from '@nestjs/common';
 import { AppService } from './app.service';
 import type {Request} from "express"
-import { UserDto } from './dto';
 
 @Controller()
 export class AppController {
@@ -9,7 +8,6 @@ export class AppController {
 
   @Get()
   getHello(@Req() request:Request): string {
-    console.log(request.params)
     return this.appService.getHello();
   }
 
@@ -27,9 +25,5 @@ export class AppController {
   getVersion(): string {
     return '1.0.0';
   }
-  @Post('/create-user')
-  createUser(@Body() userDto: UserDto):UserDto {
-     const data =  this.appService.createUser(userDto)
-     return data
-  }
+  
 }
