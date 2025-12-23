@@ -1,29 +1,13 @@
-import { Body, Controller, Get,Param,Post,Req } from '@nestjs/common';
-import { AppService } from './app.service';
-import type {Request} from "express"
+import { Body, Controller, Get, HttpCode, HttpStatus,  Res } from '@nestjs/common';
+import type { Response } from "express"
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor() { }
 
   @Get()
-  getHello(@Req() request:Request): string {
-    return this.appService.getHello();
+  @HttpCode(HttpStatus.OK)
+  getHello(@Res() res: Response): void {
+    res.status(HttpStatus.OK).json({ statusCode: 200, success: true, message: "Do quest server is running successfully" });
   }
-
-  @Get('/hello/:id')
-  getNice(@Req() request: Request, @Param() params:{id:string}): string {
-    return `Id Numb is ${params.id}`
-  }
-
-  @Get('/health')
-  getHealth(): string {
-    return 'OK';
-  }
-
-  @Get('/version')
-  getVersion(): string {
-    return '1.0.0';
-  }
-  
 }
