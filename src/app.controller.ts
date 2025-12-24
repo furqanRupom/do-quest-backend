@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus,  Res } from '@nestjs/common';
+import {Controller, Get, HttpCode, HttpStatus,  Res } from '@nestjs/common';
 import type { Response } from "express"
 
 @Controller()

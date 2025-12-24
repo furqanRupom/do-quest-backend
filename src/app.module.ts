@@ -8,16 +8,18 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
-    load:[() => config],
+    load:[config],
     envFilePath:['.env'],
     isGlobal: true,
   }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory:  (config:ConfigService) => ({
-        uri: config.get<string>('mongodbUri'),
-      }),
+      useFactory:  (config:ConfigService) => {
+        return {
+          uri: config.get<string>('mongodbUri'),
+        };
+      },
     }),
     UsersModule,
     AuthModule
