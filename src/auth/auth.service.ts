@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User } from 'src/users/schemas/users.schema';
+import { User } from '../users/schemas/users.schema';
 import { CreateUserDto } from './dto';
 import { AuthRepository } from './auth.repository';
 
