@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from './dto';
+import { CreateUserDto, LoginUserDto } from './dto';
 import type { Response } from 'express';
+import { HttpStatus } from '@nestjs/common';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -12,6 +13,7 @@ describe('AuthController', () => {
   beforeEach(async () => {
     mockAuthService = {
       registerUser: jest.fn(),
+      loginUser: jest.fn(),
     };
 
     mockResponse = {
@@ -54,8 +56,37 @@ describe('AuthController', () => {
       expect(mockAuthService.registerUser).toHaveBeenCalledWith(createUserDto);
       expect(mockResponse.status).toHaveBeenCalledWith(201);
       expect(mockResponse.json).toHaveBeenCalledWith({
+        success: true,
         message: 'User registered successfully',
         data: serviceResult,
+      });
+    });
+  });
+  describe('login', () => {
+    it('should login a user and return tokens with success response', async () => {
+      const loginUserDto: LoginUserDto = {
+        usernameOrEmail: 'testuser',
+        password: 'password123',
+      };
+
+      const tokens = {
+        accessToken: 'jwt.access.token.here',
+        refreshToken: 'jwt.refresh.token.here',
+      };
+
+      // Mock the service to return tokens
+      mockAuthService.loginUser.mockResolvedValue(tokens);
+
+      // Call the login method
+      await controller.login(loginUserDto, mockResponse as Response);
+
+      // Assertions
+      expect(mockAuthService.loginUser).toHaveBeenCalledWith(loginUserDto);
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.OK);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'User logged in successfully',
+        data: tokens,
       });
     });
   });
