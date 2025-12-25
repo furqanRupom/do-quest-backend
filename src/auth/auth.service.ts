@@ -1,5 +1,4 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { User } from '../users/schemas/users.schema';
 import { CreateUserDto } from './dto';
 import { AuthRepository } from './auth.repository';
 import { JwtService } from '@nestjs/jwt';
