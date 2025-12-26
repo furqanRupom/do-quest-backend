@@ -1,5 +1,4 @@
-import {Controller, Get, HttpCode, HttpStatus,  Res } from '@nestjs/common';
-import type { Response } from "express"
+import { Controller, Get, HttpCode, HttpStatus, Res } from '@nestjs/common';
 
 @Controller()
 export class AppController {
@@ -7,7 +6,12 @@ export class AppController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  getHello(@Res() res: Response): void {
-    res.status(HttpStatus.OK).json({ statusCode: 200, success: true, message: "Do quest server is running successfully" });
+  getHello() {
+    return {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Do quest server is running successfully',
+      docs: '/api/v1/docs'
+    }
   }
 }
