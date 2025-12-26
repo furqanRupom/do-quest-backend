@@ -13,7 +13,7 @@ export class AuthService {
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
     ) {}
-    async registerUser(userData: CreateUserDto): Promise<Partial<IUser>> {
+    async registerUser(userData: CreateUserDto): Promise<IUser> {
         return await this.authRepository.createUser(userData);
     }
     async loginUser(loginUserDto: LoginUserDto):Promise<{accessToken:string,refreshToken:string}> {
@@ -22,23 +22,21 @@ export class AuthService {
             throw new HttpException('User not found via username or email', HttpStatus.NOT_FOUND);
         }
         const isPasswordValid = await user.comparePassword(loginUserDto.password);
+        
         if (!isPasswordValid) {
             throw new HttpException('Password is incorrect', HttpStatus.UNAUTHORIZED);
         }
         const payload = { sub: user._id, username: user.username, email: user.email };
 
-        const createAccessToken = this.jwtService.signAsync(payload,{
+        const accessToken = await this.jwtService.signAsync(payload,{
             secret: this.configService.get<string>('secretAccessToken'),
             expiresIn: this.configService.get<number>('accessTokenExpiry'),
         })
-        
-        const createRefreshToken = this.jwtService.signAsync(payload,{
+
+        const refreshToken = await this.jwtService.signAsync(payload,{
             secret: this.configService.get<string>('secretRefreshToken'),
             expiresIn: this.configService.get<number>('refreshTokenExpiry'),
         })
-        return {
-            accessToken: await createAccessToken,
-            refreshToken: await createRefreshToken,
-        };
+        return {accessToken, refreshToken};
     }
 }

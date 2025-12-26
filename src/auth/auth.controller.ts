@@ -1,8 +1,9 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from './dto';
-import type { Response } from 'express';
-import { LoginUserDto } from './dto/login-user.dto';
+import { CreateUserDto, createUserResponseDto } from './dto';
+import { LoginResponseDto, LoginUserDto } from './dto/login-user.dto';
+import {ApiOkResponse} from '@nestjs/swagger';
+import { sendResponse } from '../common/utils';
 
 @Controller('auth')
 export class AuthController {
@@ -10,9 +11,10 @@ export class AuthController {
     
     @HttpCode(HttpStatus.CREATED)
     @Post('register')
-    async register(@Body() createUserDto:CreateUserDto,@Res() res:Response) {
+    @ApiOkResponse({type: createUserResponseDto})
+    async register(@Body() createUserDto:CreateUserDto):Promise<createUserResponseDto> {
         const result = await this.authService.registerUser(createUserDto);
-        return res.status(HttpStatus.CREATED).json({
+        return sendResponse({
             success: true,
             message: 'User registered successfully',
             data: result,
@@ -21,12 +23,14 @@ export class AuthController {
 
     @HttpCode(HttpStatus.OK)
     @Post('login')
-    async login(@Body() loginUserDto:LoginUserDto,@Res() res:Response) {
-        const tokens = await this.authService.loginUser(loginUserDto);
-        return res.status(HttpStatus.OK).json({
+    @ApiOkResponse({type: LoginResponseDto})
+    async login(@Body() loginUserDto:LoginUserDto):Promise<LoginResponseDto> {
+        const result =  await this.authService.loginUser(loginUserDto);
+        return sendResponse({
             success: true,
             message: 'User logged in successfully',
-            data: tokens,
+            data: result,
         });
+       
     }
 }

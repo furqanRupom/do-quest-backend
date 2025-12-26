@@ -2,23 +2,17 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { CreateUserDto, LoginUserDto } from './dto';
-import type { Response } from 'express';
-import { HttpStatus } from '@nestjs/common';
+import { IUser } from './interfaces/user.interface';
+import mongoose from 'mongoose';
 
 describe('AuthController', () => {
   let controller: AuthController;
-  let mockAuthService: any;
-  let mockResponse: Partial<Response>;
+  let authService: AuthService;
 
   beforeEach(async () => {
-    mockAuthService = {
+    const mockAuthService = {
       registerUser: jest.fn(),
       loginUser: jest.fn(),
-    };
-
-    mockResponse = {
-      status: jest.fn().mockReturnThis(), 
-      json: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -32,6 +26,7 @@ describe('AuthController', () => {
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
+    authService = module.get<AuthService>(AuthService);
   });
 
   it('should be defined', () => {
@@ -47,21 +42,30 @@ describe('AuthController', () => {
         email: 'test@example.com',
       };
 
-      const serviceResult = { username: 'testuser', email: 'test@example.com' };
+      const serviceResult:IUser = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'testuser',
+        name: 'Test User',
+        email: 'test@example.com',
+        role: 'user',
+        location: 'Test Location',
+        company: 'Test Company',
+        socialLinks: ['http://example.com'],
+};
 
-      mockAuthService.registerUser.mockResolvedValue(serviceResult);
+      jest.spyOn(authService, 'registerUser').mockResolvedValue(serviceResult);
 
-      await controller.register(createUserDto, mockResponse as Response);
+      const result = await controller.register(createUserDto);
 
-      expect(mockAuthService.registerUser).toHaveBeenCalledWith(createUserDto);
-      expect(mockResponse.status).toHaveBeenCalledWith(201);
-      expect(mockResponse.json).toHaveBeenCalledWith({
+      expect(authService.registerUser).toHaveBeenCalledWith(createUserDto);
+      expect(result).toEqual({
         success: true,
         message: 'User registered successfully',
         data: serviceResult,
       });
     });
   });
+
   describe('login', () => {
     it('should login a user and return tokens with success response', async () => {
       const loginUserDto: LoginUserDto = {
@@ -74,16 +78,12 @@ describe('AuthController', () => {
         refreshToken: 'jwt.refresh.token.here',
       };
 
-      // Mock the service to return tokens
-      mockAuthService.loginUser.mockResolvedValue(tokens);
+      jest.spyOn(authService, 'loginUser').mockResolvedValue(tokens);
 
-      // Call the login method
-      await controller.login(loginUserDto, mockResponse as Response);
+      const result = await controller.login(loginUserDto);
 
-      // Assertions
-      expect(mockAuthService.loginUser).toHaveBeenCalledWith(loginUserDto);
-      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.OK);
-      expect(mockResponse.json).toHaveBeenCalledWith({
+      expect(authService.loginUser).toHaveBeenCalledWith(loginUserDto);
+      expect(result).toEqual({
         success: true,
         message: 'User logged in successfully',
         data: tokens,
