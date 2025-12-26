@@ -12,7 +12,13 @@ async function bootstrap() {
     .setVersion('1.0.0')
     .build();
   const documentFactory = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/v1/docs', app, documentFactory);
+  SwaggerModule.setup('api/v1/docs', app, documentFactory, {
+    customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css',
+    customJs: [
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-bundle.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-standalone-preset.js',
+    ],
+  });
   app.useGlobalFilters(new AllExceptionsFilter());
   await app.listen(process.env.PORT ?? 3000);
 }
