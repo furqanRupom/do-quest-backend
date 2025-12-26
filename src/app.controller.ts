@@ -11,7 +11,8 @@ export class AppController {
       statusCode: HttpStatus.OK,
       success: true,
       message: 'Do quest server is running successfully',
-      docs: '/api/v1/docs'
+      docs: '/api/v1/docs',
+      docsJson:'/api/v1/docs-json',
     }
   }
 }

@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString, Matches, MinLength } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { ApiResponseDto } from "../../common/dto/api-response.dto";
 import mongoose from "mongoose";
@@ -17,7 +17,17 @@ export class CreateUserDto {
 
     @IsString()
     @IsNotEmpty()
-    @ApiProperty({ example: 'strongPassword123' })
+    @MinLength(8)
+    @Matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+        {
+            message: 'Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, 1 special character (@$!%*?&), and be at least 8 characters long',
+        }
+    )
+    @ApiProperty({
+        example: 'StrongPass123!',
+        description: 'Password must contain at least 1 uppercase, 1 lowercase, 1 number, 1 special character, and minimum 8 characters'
+    })
     password: string;
 }
 
@@ -45,7 +55,6 @@ export class UserResponseDto {
 
     @ApiProperty({type:[String]})
     socialLinks?:string[];
-
 }
 
 export class createUserResponseDto extends ApiResponseDto<UserResponseDto> {
