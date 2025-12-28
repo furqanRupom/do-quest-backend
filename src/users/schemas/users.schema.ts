@@ -1,13 +1,11 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
 import bcrypt from "bcryptjs";
+import { UserRole } from "../../common/enums";
 
 
 export type UserDocument = HydratedDocument<User, UserMethods>;
-enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-}
+
 @Schema({ timestamps: true })
 export class User {
   @Prop({ required: true })
@@ -22,7 +20,7 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ enum: UserRole, default: UserRole.USER })
+  @Prop({ enum: UserRole, default: UserRole.User })
   role: UserRole;
 
   @Prop()

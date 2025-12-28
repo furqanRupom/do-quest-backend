@@ -29,7 +29,7 @@ export class AuthService {
         if (!isPasswordValid) {
             throw new HttpException('Password is incorrect', HttpStatus.UNAUTHORIZED);
         }
-        const payload = { sub: user._id, username: user.username, email: user.email };
+        const payload = { sub: user._id, username: user.username, email: user.email, role: user.role };
 
         const accessToken = await this.jwtService.signAsync(payload, {
             secret: this.configService.get<string>('secretAccessToken'),
@@ -81,5 +81,30 @@ export class AuthService {
 
         user.password = newPassword;
         await user.save();
+    }
+    async refreshTokens(refreshToken: string): Promise<{ accessToken: string, refreshToken: string }> {
+        let decoded: { sub: string; username: string; email: string; role: string };
+
+        try {
+            decoded = await this.jwtService.verifyAsync<{ sub: string; username: string; email: string; role: string }>(refreshToken, {
+                secret: this.configService.get<string>('secretRefreshToken'),
+            });
+        } catch (error) {
+            throw new HttpException('Invalid or expired refresh token', HttpStatus.BAD_REQUEST);
+        }
+
+        const payload = { sub: decoded.sub, username: decoded.username, email: decoded.email, role: decoded.role };
+
+        const newAccessToken = await this.jwtService.signAsync(payload, {
+            secret: this.configService.get<string>('secretAccessToken'),
+            expiresIn: this.configService.get<number>('accessTokenExpiry'),
+        });
+
+        const newRefreshToken = await this.jwtService.signAsync(payload, {
+            secret: this.configService.get<string>('secretRefreshToken'),
+            expiresIn: this.configService.get<number>('refreshTokenExpiry'),
+        });
+
+        return { accessToken: newAccessToken, refreshToken: newRefreshToken };
     }
 }
