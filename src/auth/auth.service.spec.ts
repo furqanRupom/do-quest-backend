@@ -14,10 +14,12 @@ describe('AuthService', () => {
   const mockAuthRepository = {
     createUser: jest.fn(),
     findByUsernameOrEmail: jest.fn(),
+    findById: jest.fn(),
   };
 
   const mockJwtService = {
     signAsync: jest.fn(),
+    verifyAsync: jest.fn(),
   };
 
   const mockConfigService = {
@@ -206,6 +208,71 @@ describe('AuthService', () => {
 
       expect(mockJwtService.signAsync).not.toHaveBeenCalled();
       expect(mockMailService.sendEmail).not.toHaveBeenCalled();
+    });
+  });
+  describe('resetPassword', () => {
+    const validToken = 'valid-jwt-token';
+    const newPassword = 'newStrongPassword123!';
+    const mockUser = {
+      _id: '12345',
+      password: 'oldHashedPassword',
+      save: jest.fn(),
+    };
+
+    beforeEach(() => {
+      // Reset common mocks
+      mockJwtService.verifyAsync.mockReset();
+      mockAuthRepository.findById.mockReset();
+      mockUser.save.mockReset();
+    });
+
+    it('should successfully reset password when token is valid and user exists', async () => {
+      const decodedPayload = { sub: '12345', email: 'user@example.com' };
+
+      mockJwtService.verifyAsync.mockResolvedValue(decodedPayload);
+      mockAuthRepository.findById.mockResolvedValue(mockUser);
+      mockUser.save.mockResolvedValue(undefined);
+
+      await expect(service.resetPassword(validToken, newPassword)).resolves.toBeUndefined();
+
+      expect(mockJwtService.verifyAsync).toHaveBeenCalledWith(validToken, {
+        secret: expect.any(String), // resetSecret from config
+      });
+      expect(mockAuthRepository.findById).toHaveBeenCalledWith(decodedPayload.sub);
+      expect(mockUser.password).toBe(newPassword); // Direct assignment before save
+      expect(mockUser.save).toHaveBeenCalled();
+    });
+
+    it('should throw HttpException if user is not found', async () => {
+      const decodedPayload = { sub: '99999', email: 'missing@example.com' };
+
+      mockJwtService.verifyAsync.mockResolvedValue(decodedPayload);
+      mockAuthRepository.findById.mockResolvedValue(null);
+
+      await expect(service.resetPassword(validToken, newPassword)).rejects.toThrow(
+        new HttpException('User not found', HttpStatus.NOT_FOUND),
+      );
+
+      expect(mockUser.save).not.toHaveBeenCalled();
+    });
+
+    it('should throw HttpException if token is invalid or expired', async () => {
+      mockJwtService.verifyAsync.mockRejectedValue(new Error('jwt expired'));
+
+      await expect(service.resetPassword(validToken, newPassword)).rejects.toThrow(
+        new HttpException('Invalid or expired reset token', HttpStatus.BAD_REQUEST),
+      );
+
+      expect(mockAuthRepository.findById).not.toHaveBeenCalled();
+      expect(mockUser.save).not.toHaveBeenCalled();
+    });
+
+    it('should throw HttpException for any other verification error', async () => {
+      mockJwtService.verifyAsync.mockRejectedValue(new Error('invalid signature'));
+
+      await expect(service.resetPassword(validToken, newPassword)).rejects.toThrow(
+        new HttpException('Invalid or expired reset token', HttpStatus.BAD_REQUEST),
+      );
     });
   });
 });

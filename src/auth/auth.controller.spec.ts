@@ -14,6 +14,7 @@ describe('AuthController', () => {
       registerUser: jest.fn(),
       loginUser: jest.fn(),
       forgotPassword: jest.fn(),
+      resetPassword: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -113,6 +114,36 @@ describe('AuthController', () => {
       jest.spyOn(authService, 'forgotPassword').mockRejectedValue(error);
 
       await expect(controller.forgotPassword({ email })).rejects.toThrow('Failed to send email');
+    });
+  });
+
+  describe('resetPassword', () => {
+    const resetDto = {
+      token: 'valid-reset-token-123',
+      newPassword: 'newStrongPassword123!',
+    };
+
+    it('should call authService.resetPassword and return success response', async () => {
+      jest.spyOn(authService, 'resetPassword').mockResolvedValue(undefined);
+
+      const result = await controller.resetPassword(resetDto);
+
+      expect(authService.resetPassword).toHaveBeenCalledWith(
+        resetDto.token,
+        resetDto.newPassword,
+      );
+      expect(result).toEqual({
+        success: true,
+        message: 'Password reset successfully',
+        data: null,
+      });
+    });
+
+    it('should throw if authService.resetPassword fails', async () => {
+      const error = new Error('Invalid or expired token');
+      jest.spyOn(authService, 'resetPassword').mockRejectedValue(error);
+
+      await expect(controller.resetPassword(resetDto)).rejects.toThrow('Invalid or expired token');
     });
   });
 

@@ -17,6 +17,8 @@ export class AuthRepository {
        return await this.userModel.findOne({
             $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
         }).exec();
-     
+    }
+    async findById(id: string): Promise<UserDocument | null> {
+        return await this.userModel.findById(id).exec();
     }
 }

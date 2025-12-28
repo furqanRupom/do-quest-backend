@@ -4,6 +4,7 @@ import { CreateUserDto, createUserResponseDto, ForgotPasswordDto, ForgotPassword
 import { LoginResponseDto, LoginUserDto } from './dto/login-user.dto';
 import {ApiOkResponse} from '@nestjs/swagger';
 import { sendResponse } from '../common/utils';
+import { ResetPasswordDto, ResetPasswordResponseDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -42,5 +43,17 @@ export class AuthController {
             message: 'Password reset email sent successfully',
             data: null,
         });
+    }
+
+    @HttpCode(HttpStatus.OK)
+    @Post('reset-password')
+    @ApiOkResponse({type: ResetPasswordResponseDto})
+    async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<ResetPasswordResponseDto> {
+      await this.authService.resetPassword(resetPasswordDto.token, resetPasswordDto.newPassword);
+      return sendResponse({
+          success: true,
+          message: 'Password reset successfully',
+          data: null,
+      });
     }
 }

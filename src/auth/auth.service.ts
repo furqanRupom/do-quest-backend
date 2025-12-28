@@ -13,34 +13,34 @@ export class AuthService {
         private readonly authRepository: AuthRepository,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
-        private readonly mailService:MailService
+        private readonly mailService: MailService
 
-    ) {}
+    ) { }
     async registerUser(userData: CreateUserDto): Promise<IUser> {
         return await this.authRepository.createUser(userData);
     }
-    async loginUser(loginUserDto: LoginUserDto):Promise<{accessToken:string,refreshToken:string}> {
+    async loginUser(loginUserDto: LoginUserDto): Promise<{ accessToken: string, refreshToken: string }> {
         const user = await this.authRepository.findByUsernameOrEmail(loginUserDto.usernameOrEmail);
         if (!user) {
             throw new HttpException('User not found via username or email', HttpStatus.NOT_FOUND);
         }
         const isPasswordValid = await user.comparePassword(loginUserDto.password);
-        
+
         if (!isPasswordValid) {
             throw new HttpException('Password is incorrect', HttpStatus.UNAUTHORIZED);
         }
         const payload = { sub: user._id, username: user.username, email: user.email };
 
-        const accessToken = await this.jwtService.signAsync(payload,{
+        const accessToken = await this.jwtService.signAsync(payload, {
             secret: this.configService.get<string>('secretAccessToken'),
             expiresIn: this.configService.get<number>('accessTokenExpiry'),
         })
 
-        const refreshToken = await this.jwtService.signAsync(payload,{
+        const refreshToken = await this.jwtService.signAsync(payload, {
             secret: this.configService.get<string>('secretRefreshToken'),
             expiresIn: this.configService.get<number>('refreshTokenExpiry'),
         })
-        return {accessToken, refreshToken};
+        return { accessToken, refreshToken };
     }
     async forgotPassword(email: string): Promise<void> {
         const user = await this.authRepository.findByUsernameOrEmail(email);
@@ -60,6 +60,26 @@ export class AuthService {
                 resetPasswordLink: `http://localhost:3000/reset-password?token=${resetToken}`,
             },
         })
-       
-     }
+
+    }
+    async resetPassword(token: string, newPassword: string): Promise<void> {
+        let decoded: { sub: string; email: string };
+
+        try {
+            decoded = await this.jwtService.verifyAsync<{ sub: string; email: string }>(token, {
+                secret: this.configService.get<string>('resetSecret'),
+            });
+        } catch (error) {
+            throw new HttpException('Invalid or expired reset token', HttpStatus.BAD_REQUEST);
+        }
+
+        const user = await this.authRepository.findById(decoded.sub);
+
+        if (!user) {
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        }
+
+        user.password = newPassword;
+        await user.save();
+    }
 }
