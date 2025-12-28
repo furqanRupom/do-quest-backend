@@ -15,6 +15,7 @@ describe('AuthController', () => {
       loginUser: jest.fn(),
       forgotPassword: jest.fn(),
       resetPassword: jest.fn(),
+      refreshTokens: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -147,4 +148,34 @@ describe('AuthController', () => {
     });
   });
 
+  describe('refreshToken', () => {
+    const refreshToken = 'valid-refresh-token-123';
+
+    it('should call authService.refreshToken and return new tokens with success response', async () => {
+      const newTokens = {
+        accessToken: 'new.jwt.access.token',
+        refreshToken: 'new.jwt.refresh.token',
+      };
+
+      jest.spyOn(authService, 'refreshTokens').mockResolvedValue(newTokens);
+
+      const result = await controller.refreshToken({ refreshToken });
+
+      expect(authService.refreshTokens).toHaveBeenCalledWith(refreshToken);
+      expect(result).toEqual({
+        success: true,
+        message: 'Token refreshed successfully',
+        data: newTokens,
+      });
+    });
+
+    it('should throw if authService.refreshTokens fails', async () => {
+      const error = new Error('Invalid or expired refresh token');
+      jest.spyOn(authService, 'refreshTokens').mockRejectedValue(error);
+
+      await expect(controller.refreshToken({ refreshToken })).rejects.toThrow(
+        'Invalid or expired refresh token',
+      );
+    });
+  });
 });

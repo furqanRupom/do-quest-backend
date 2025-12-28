@@ -275,4 +275,65 @@ describe('AuthService', () => {
       );
     });
   });
+  describe('refreshTokens', () => {
+    const refreshToken = 'valid-refresh-token';
+
+    const decodedPayload = {
+      sub: '12345',
+      username: 'johndoe',
+      email: 'johndoe@gmail.com',
+      role: 'user',
+    };
+
+    beforeEach(() => {
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === 'secretAccessToken') return 'access-secret';
+        if (key === 'accessTokenExpiry') return '15m';
+        if (key === 'secretRefreshToken') return 'refresh-secret';
+        if (key === 'refreshTokenExpiry') return '7d';
+        return null;
+      });
+
+      mockJwtService.verifyAsync.mockReset();
+      mockJwtService.signAsync.mockReset();
+    });
+
+    it('should generate new access and refresh tokens when refresh token is valid', async () => {
+      mockJwtService.verifyAsync.mockResolvedValue(decodedPayload);
+
+      mockJwtService.signAsync.mockImplementation((payload, options) => {
+        if (options?.secret === 'access-secret') {
+          return Promise.resolve('new-access-token');
+        }
+        if (options?.secret === 'refresh-secret') {
+          return Promise.resolve('new-refresh-token');
+        }
+        return Promise.resolve('unknown-token');
+      });
+
+      const result = await service.refreshTokens(refreshToken);
+
+      expect(mockJwtService.verifyAsync).toHaveBeenCalledWith(refreshToken, {
+        secret: 'refresh-secret',
+      });
+
+      expect(mockJwtService.signAsync).toHaveBeenCalledTimes(2);
+
+      expect(result).toEqual({
+        accessToken: 'new-access-token',
+        refreshToken: 'new-refresh-token',
+      });
+    });
+
+    it('should throw HttpException if refresh token is invalid or expired', async () => {
+      mockJwtService.verifyAsync.mockRejectedValue(new Error('jwt expired'));
+
+      await expect(service.refreshTokens(refreshToken)).rejects.toThrow(
+        new HttpException('Invalid or expired refresh token', HttpStatus.BAD_REQUEST),
+      );
+
+      expect(mockJwtService.signAsync).not.toHaveBeenCalled();
+    });
+  });
+
 });
