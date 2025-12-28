@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
 import bcrypt from "bcryptjs";
-import { UserRole } from "../../common/enums";
+import { UserRole } from "../../auth/enums";
 
 
 export type UserDocument = HydratedDocument<User, UserMethods>;
@@ -31,8 +31,8 @@ export class User {
 
   @Prop()
   socialLinks: string[];
- 
- 
+
+
 }
 export const UserSchema = SchemaFactory.createForClass(User);
 

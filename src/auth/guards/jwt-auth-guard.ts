@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
-import { UserRole } from '../../common/enums';
+import { UserRole } from '../enums';
 import { ROLES_KEY } from '../../common/decorators/roles.decorators';
 
 @Injectable()
@@ -22,7 +22,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         }
 
         const request = context.switchToHttp().getRequest();
-        const user = request.user; 
+        const user = request.user;
 
         if (!user) {
             throw new UnauthorizedException('Invalid or missing token');

@@ -1,13 +1,10 @@
-import { Body, Controller, Header, Headers, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller,HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto, createUserResponseDto, ForgotPasswordDto, ForgotPasswordResponseDto } from './dto';
 import { LoginResponseDto, LoginUserDto } from './dto/login-user.dto';
 import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { sendResponse } from '../common/utils';
 import { ResetPasswordDto, ResetPasswordResponseDto } from './dto/reset-password.dto';
-import { JwtAuthGuard } from './guards/jwt-auth-guard';
-import { Roles } from 'src/common/decorators';
-import { UserRole } from 'src/common/enums';
 import { RefreshAuthGuard } from './guards/refresh-auth.guard';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 
