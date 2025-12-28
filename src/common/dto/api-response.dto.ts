@@ -7,5 +7,5 @@ export class ApiResponseDto<T> {
     @ApiProperty({ example: 'Operation completed successfully' })
     message: string;
 
-    data: T;
+    data: T | null;
 }

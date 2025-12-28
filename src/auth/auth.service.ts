@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { LoginUserDto } from './dto/login-user.dto';
 import { IUser } from './interfaces/user.interface';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +13,8 @@ export class AuthService {
         private readonly authRepository: AuthRepository,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
+        private readonly mailService:MailService
+
     ) {}
     async registerUser(userData: CreateUserDto): Promise<IUser> {
         return await this.authRepository.createUser(userData);
@@ -39,4 +42,24 @@ export class AuthService {
         })
         return {accessToken, refreshToken};
     }
+    async forgotPassword(email: string): Promise<void> {
+        const user = await this.authRepository.findByUsernameOrEmail(email);
+        if (!user) {
+            throw new HttpException('User not found via email', HttpStatus.NOT_FOUND);
+        }
+        const resetToken = await this.jwtService.signAsync({ sub: user._id, email: user.email }, {
+            secret: this.configService.get<string>('resetSecret'),
+            expiresIn: this.configService.get<number>('resetTokenExpiry'),
+        });
+        this.mailService.sendEmail({
+            subject: 'Password Reset',
+            template: 'forgot-password',
+            recipeintEmail: user.email,
+            context: {
+                name: user.name,
+                resetPasswordLink: `http://localhost:3000/reset-password?token=${resetToken}`,
+            },
+        })
+       
+     }
 }

@@ -13,6 +13,7 @@ describe('AuthController', () => {
     const mockAuthService = {
       registerUser: jest.fn(),
       loginUser: jest.fn(),
+      forgotPassword: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -90,4 +91,29 @@ describe('AuthController', () => {
       });
     });
   });
+
+  describe('forgotPassword', () => {
+    const email = 'test@example.com';
+
+    it('should call authService.forgotPassword and return success response', async () => {
+      jest.spyOn(authService, 'forgotPassword').mockResolvedValue(undefined);
+
+      const result = await controller.forgotPassword({ email });
+
+      expect(authService.forgotPassword).toHaveBeenCalledWith(email);
+      expect(result).toEqual({
+        success: true,
+        message: 'Password reset email sent successfully',
+        data: null,
+      });
+    });
+
+    it('should throw if authService.forgotPassword fails', async () => {
+      const error = new Error('Failed to send email');
+      jest.spyOn(authService, 'forgotPassword').mockRejectedValue(error);
+
+      await expect(controller.forgotPassword({ email })).rejects.toThrow('Failed to send email');
+    });
+  });
+
 });

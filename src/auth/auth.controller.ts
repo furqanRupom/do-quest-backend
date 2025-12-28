@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto, createUserResponseDto } from './dto';
+import { CreateUserDto, createUserResponseDto, ForgotPasswordDto, ForgotPasswordResponseDto } from './dto';
 import { LoginResponseDto, LoginUserDto } from './dto/login-user.dto';
 import {ApiOkResponse} from '@nestjs/swagger';
 import { sendResponse } from '../common/utils';
@@ -31,6 +31,16 @@ export class AuthController {
             message: 'User logged in successfully',
             data: result,
         });
-       
+    }
+    @HttpCode(HttpStatus.OK)
+    @Post('forgot-password')
+    @ApiOkResponse({type: ForgotPasswordResponseDto})
+    async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<ForgotPasswordResponseDto> {
+        await this.authService.forgotPassword(forgotPasswordDto.email);
+        return sendResponse({
+            success: true,
+            message: 'Password reset email sent successfully',
+            data: null,
+        });
     }
 }
