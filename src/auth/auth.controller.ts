@@ -61,7 +61,6 @@ export class AuthController {
     @UseGuards(RefreshAuthGuard)
     @HttpCode(HttpStatus.OK)
     @Post('refresh-token')
-    @ApiBearerAuth('refresh-token')
     @ApiOkResponse({ type: LoginResponseDto })
     async refreshToken(@Body() refreshTokenDto: RefreshTokenDto): Promise<LoginResponseDto> {
         const result = await this.authService.refreshTokens(refreshTokenDto.refreshToken);

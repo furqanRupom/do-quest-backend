@@ -11,7 +11,7 @@ import { RefreshAuthGuard } from './guards/refresh-auth.guard';
 import { RefreshTokenStrategy } from './strategies/refreshToken.strategy';
 
 @Module({
-  imports: [UsersModule, JwtModule.register({}), PassportModule],
+  imports: [UsersModule, JwtModule.register({}), PassportModule.register({defaultStrategy: 'jwt'})],
   providers: [AuthService, AuthRepository, JwtStrategy, JwtAuthGuard, RefreshAuthGuard, RefreshTokenStrategy],
   controllers: [AuthController],
   exports: [AuthService, JwtAuthGuard],
