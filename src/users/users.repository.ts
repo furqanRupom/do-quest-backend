@@ -23,22 +23,64 @@ export class UsersRepository {
     }
     async updateProfile(
         userId: string,
-        updateData: Partial<UserDocument>,
+        updateData: Partial<User>,
     ): Promise<UserDocument | null> {
         const { socialLinks, ...otherFields } = updateData;
 
-        const update: any = { $set: otherFields };
-
-        // Handle socialLinks separately with $addToSet only if provided
-        if (Array.isArray(socialLinks)) {
-            update.$addToSet = { socialLinks: { $each: socialLinks } };
+        if (Array.isArray(socialLinks) && socialLinks.length > 0) {
+            return this.userModel
+                .findByIdAndUpdate(
+                    userId,
+                    [
+                        {
+                            $set: {
+                                ...otherFields,
+                                socialLinks: {
+                                    $concatArrays: [
+                                        {
+                                            $filter: {
+                                                input: { $ifNull: ['$socialLinks', []] },
+                                                as: 'link',
+                                                cond: {
+                                                    $not: {
+                                                        $in: [
+                                                            { $arrayElemAt: [{ $split: ['$$link', '/'] }, 0] },
+                                                            {
+                                                                $map: {
+                                                                    input: socialLinks,
+                                                                    as: 'newLink',
+                                                                    in: { $arrayElemAt: [{ $split: ['$$newLink', '/'] }, 0] }
+                                                                }
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        socialLinks
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    {
+                        new: true,
+                        runValidators: true,
+                        updatePipeline:true
+                    }
+                )
+                .exec();
         }
 
         return this.userModel
-            .findByIdAndUpdate(userId, update, {
-                new: true,
-                runValidators: true,
-            })
+            .findByIdAndUpdate(
+                userId,
+                { $set: otherFields },
+                {
+                    new: true,
+                    runValidators: true,
+                }
+            )
             .exec();
     }
 
