@@ -8,16 +8,15 @@ export class UsersService {
     constructor(
         private readonly usersRepository: UsersRepository
     ) { }
-    async getUserProfile(userId: string):Promise<IUser | null> {
-        const user = this.usersRepository.getUserWithoutPassword(userId)
+    async getUserProfile(userId: string):Promise<IUser> {
+        const user = await this.usersRepository.getUserWithoutPassword(userId)
         if (!user) {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND)
         }
         return user;
-
     }
     async updateUserProfile(userId: string, userProfileDto: UpdateUserDto): Promise<IUser | null> {
-        const user = this.usersRepository.updateProfile(userId,userProfileDto)
+        const user = await this.usersRepository.updateProfile(userId,userProfileDto)
         return user;
      }
     async changeUserPassword(userId: string, changePasswordDto: ChangePasswordDto): Promise<void> {

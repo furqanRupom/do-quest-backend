@@ -1,9 +1,9 @@
 import { Body, Controller, HttpCode, HttpStatus, Put, Req, UseGuards,Get } from '@nestjs/common';
 import { ChangePasswordDto, ChangePasswordResponseDto, UpdateProfileResponseDto, UpdateUserDto, UserProfileResponseDto } from './dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { UsersService } from './users.service';
-import { sendResponse } from 'src/common/utils';
-import type { AuthRequest } from 'src/auth/types/auth-request.type';
+import { sendResponse } from '../common/utils';
+import type { AuthRequest } from '../auth/types/auth-request.type';
 import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 
 @Controller('users')

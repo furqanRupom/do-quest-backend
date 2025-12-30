@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString, Matches } from "class-validator";
-import { ApiResponseDto } from "src/common/dto";
+import { ApiResponseDto } from "../../common/dto";
 
 export class ChangePasswordDto {
     @IsString()

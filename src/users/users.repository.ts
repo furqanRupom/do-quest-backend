@@ -14,12 +14,7 @@ export class UsersRepository {
         return await this.userModel.findById(id).exec();
     }
     async getUserWithoutPassword(id: string): Promise<IUser | null> {
-        const user = await this.userModel.findById(id).select("-password").exec()
-        if (!user) {
-            return null
-        }
-        return user
-
+       return await this.userModel.findById(id).select("-password").exec()
     }
     async updateProfile(
         userId: string,

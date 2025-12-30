@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString } from 'class-validator';
-import mongoose, { StringQueryTypeCasting, Types } from 'mongoose';
-import { ApiResponseDto } from 'src/common/dto';
+import mongoose from 'mongoose';
+import { ApiResponseDto } from '../../common/dto';
 
 export class UserResponseDto {
     @ApiProperty()
