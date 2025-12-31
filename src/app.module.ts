@@ -6,6 +6,13 @@ import config from './config/config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
+import { AdminController } from './admin/admin.controller';
+import { AdminService } from './admin/admin.service';
+import { AdminRepository } from './admin/admin.repository';
+import { TasksController } from './tasks/tasks.controller';
+import { TasksService } from './tasks/tasks.service';
+import { TasksRepository } from './tasks/tasks.repository';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -24,9 +31,10 @@ import { MailModule } from './mail/mail.module';
     }),
     UsersModule,
     AuthModule,
-    MailModule
+    MailModule,
+    TasksModule
   ],
-  controllers: [AppController],
-  providers: [],
+  controllers: [AppController, AdminController, TasksController],
+  providers: [AdminService, AdminRepository, TasksService, TasksRepository],
 })
 export class AppModule {}
