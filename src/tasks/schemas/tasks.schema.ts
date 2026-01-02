@@ -1,4 +1,4 @@
-import { Prop, Schema } from "@nestjs/mongoose";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 
 @Schema({timestamps:true})
 export class Task {
@@ -32,6 +32,6 @@ export class Task {
 
     @Prop({required:false})
     tags: string[];
-
-    
 }
+
+export const TaskSchema = SchemaFactory.createForClass(Task)
