@@ -13,6 +13,7 @@ import { TasksController } from './tasks/tasks.controller';
 import { TasksService } from './tasks/tasks.service';
 import { TasksRepository } from './tasks/tasks.repository';
 import { TasksModule } from './tasks/tasks.module';
+import { WalletModule } from './wallet/wallet.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -32,7 +33,8 @@ import { TasksModule } from './tasks/tasks.module';
     UsersModule,
     AuthModule,
     MailModule,
-    TasksModule
+    TasksModule,
+    WalletModule
   ],
   controllers: [AppController, AdminController, TasksController],
   providers: [AdminService, AdminRepository, TasksService, TasksRepository],
