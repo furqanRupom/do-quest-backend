@@ -7,7 +7,7 @@ import { IUser } from "./interfaces/user.interface";
 
 @Injectable()
 export class AuthRepository {
-    constructor(@InjectModel(User.name)private userModel:Model<UserDocument>) {}
+    constructor(@InjectModel(User.name) private userModel:Model<UserDocument>) {}
     async createUser(createUserDto: CreateUserDto): Promise<IUser> {
         const user = (await this.userModel.create(createUserDto)).toObject();
         const { password, ...result } = user;

@@ -9,7 +9,7 @@ export class LoginUserDto {
     usernameOrEmail:string
     @IsString()
     @IsNotEmpty()
-    @ApiProperty({ example: 'strongPassword123' })
+    @ApiProperty({ example: 'StrongPassword123!' })
     password:string
 }
 

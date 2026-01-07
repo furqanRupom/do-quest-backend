@@ -18,6 +18,7 @@ async function bootstrap() {
         name: 'Authorization',
         in: 'header',
       })
+    
     .build();
   const documentFactory = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/v1/docs', app, documentFactory, {
@@ -27,6 +28,9 @@ async function bootstrap() {
       'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-standalone-preset.js',
     ],
     jsonDocumentUrl: 'api/v1/docs-json',
+    swaggerOptions:{
+       tagsSorter:'alpha',
+    }
   });
   app.useGlobalFilters(new AllExceptionsFilter());
   await app.listen(process.env.PORT ?? 3000);
