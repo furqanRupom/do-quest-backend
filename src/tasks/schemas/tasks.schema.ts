@@ -9,28 +9,25 @@ export class Task {
     @Prop({ type: Types.ObjectId, ref: User.name, required: true, index: true })
     user: Types.ObjectId;
 
-    @Prop({ required: true })
-    userId: string;
-
-    @Prop({ required: true })
+    @Prop({ type:String, required: true })
     title: string;
 
-    @Prop({ required: true })
+    @Prop({ type:String, required: true })
     description: string;
 
-    @Prop({ required: true })
-    successRequirements: string;
+    @Prop({type:[String], required: true })
+    successRequirements: string[];
 
-    @Prop({ required: false })
+    @Prop({type:String, required: false })
     attachments: string
 
-    @Prop({ required: true })
+    @Prop({type:Number, required: true })
     budget: number;
 
-    @Prop({ required: true })
-    deadline: string;
+    @Prop({type:Date, required: true })
+    deadline: Date;
 
-    @Prop({ required: false })
+    @Prop({type:Number, required: false })
     maxSubmissions: number;
 
     @Prop({ enum: Object.values(TaskStatus) ,required: true, default: TaskStatus.pending,index:true })
@@ -39,10 +36,10 @@ export class Task {
     @Prop({ enum: Object.values(PaymentStatus), required: true, default: PaymentStatus.active })
     paymentStatus: PaymentStatus
 
-    @Prop({ required: true })
+    @Prop({type:[String], required: true })
     categories: string[];
 
-    @Prop({ required: false })
+    @Prop({type:[String], required: false })
     tags: string[];
 
 }
