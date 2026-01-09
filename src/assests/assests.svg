@@ -1,0 +1,36 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Money Bag Body -->
+  <path d="M60 90C60 75 70 65 85 65H115C130 65 140 75 140 90V140C140 160 125 175 100 175C75 175 60 160 60 140V90Z" fill="#e46c2a"/>
+  
+  <!-- Money Bag Top (Tied Part) -->
+  <ellipse cx="100" cy="65" rx="30" ry="10" fill="#d35f23"/>
+  
+  <!-- Rope/String Detail -->
+  <path d="M70 65C70 57.5 82.5 55 100 55C117.5 55 130 57.5 130 65" stroke="#b84f1c" stroke-width="5" fill="none"/>
+  
+  <!-- Left Knot -->
+  <path d="M80 65C80 60 77.5 57.5 75 60C72.5 62.5 72.5 67.5 75 70C77.5 72.5 80 70 80 65Z" fill="#b84f1c"/>
+  
+  <!-- Right Knot -->
+  <path d="M120 65C120 60 122.5 57.5 125 60C127.5 62.5 127.5 67.5 125 70C122.5 72.5 120 70 120 65Z" fill="#b84f1c"/>
+  
+  <!-- Dollar Sign -->
+  <g>
+    <!-- Top Line -->
+    <path d="M100 85L100 77.5" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+    
+    <!-- Bottom Line -->
+    <path d="M100 142.5L100 135" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+    
+    <!-- S Shape -->
+    <path d="M112.5 97.5C112.5 90.5 107 85 100 85C93 85 87.5 90.5 87.5 97.5C87.5 104.5 93 110 100 110C107 110 112.5 115.5 112.5 122.5C112.5 129.5 107 135 100 135C93 135 87.5 129.5 87.5 122.5" 
+          stroke="#ffffff" 
+          stroke-width="6" 
+          stroke-linecap="round" 
+          fill="none"/>
+  </g>
+  
+  <!-- Shine/Highlight Effect -->
+  <ellipse cx="80" cy="100" rx="8" ry="15" fill="#f5a278" opacity="0.4"/>
+  <ellipse cx="85" cy="105" rx="5" ry="10" fill="#ffffff" opacity="0.3"/>
+</svg>
