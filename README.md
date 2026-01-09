@@ -1,7 +1,7 @@
 # DoQuest
 
 <p align="center">
-  <a href="https://doquest.com/" target="_blank"><img src="./src/assests/assests.svg" width="120" alt="DoQuest Logo" /></a>
+  <a href="https://do-quest.vercel.app" target="_blank"><img src="./src/assests/assests.svg" width="120" alt="DoQuest Logo" /></a>
 </p>
 
 <p align="center">A dynamic platform built with <a href="http://nodejs.org" target="_blank">Node.js</a> and NestJS for connecting quest posters with skilled hunters to complete tasks, projects, and challenges for rewards.</p>
@@ -13,6 +13,7 @@
   <a href="https://circleci.com/gh/furqanRupom/do-quest-backend" target="_blank"><img src="https://img.shields.io/circleci/build/github/furqanRupom/do-quest-backend/master" alt="CircleCI" /></a>
   <a href="https://discord.gg/doquest" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
   <a href="https://twitter.com/doquestplatform" target="_blank"><img src="https://img.shields.io/twitter/follow/doquestplatform.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+
 </p>
 
 ## Description
@@ -80,7 +81,7 @@ DoQuest is an open-source project licensed under MIT. It thrives with community 
 ## Stay in Touch
 
 - Author: [Furqan Rupom](https://github.com/furqanRupom)
-- Website: [https://doquest.com](https://doquest.com/)
+- Website: [https://do-quest.vercel.app](https://do-quest.vercel.app)
 - Twitter: [@doquestplatform](https://twitter.com/doquestplatform)
 
 ## License
