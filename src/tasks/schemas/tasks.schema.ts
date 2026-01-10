@@ -41,6 +41,9 @@ export class Task {
 
     @Prop({type:[String], required: false })
     tags: string[];
+    
+    @Prop({ type: Boolean, default:false})
+    isDeleted: boolean;
 
 }
 

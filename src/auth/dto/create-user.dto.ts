@@ -3,7 +3,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { ApiResponseDto } from "../../common/dto/api-response.dto";
 import mongoose from "mongoose";
 export class CreateUserDto {
-    @IsString()
+@IsString()
     @ApiProperty({ example: 'John Doe' })
     name: string;
     

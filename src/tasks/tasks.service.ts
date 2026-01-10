@@ -10,5 +10,11 @@ export class TasksService {
   async createNewTask(taskData: CreateNewTaskDto,userId:string): Promise<CreateTaskResponseDto> {
     return await this.tasksRepository.createTask(taskData,userId)
   }
+  async deleteTask(taskId:string,userId:string): Promise<void> {
+    return await this.tasksRepository.deleteTask(taskId,userId)
+  }
+  async getAllTasks(userId:string): Promise<CreateTaskResponseDto[]> {
+    return await this.tasksRepository.getAllTasks(userId)
+  }
 
 }
