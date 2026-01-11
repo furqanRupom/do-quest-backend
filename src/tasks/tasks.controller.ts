@@ -45,6 +45,7 @@ export class TasksController {
     @Get('')
     @ApiBearerAuth()
     @ApiOkResponse({ type: GetAllTaskDto})
+    // TODO: return type issue
     async getAllTasks(@Req() req: AuthRequest){
         const result = await this.tasksService.getAllTasks(req.user.sub);
         return sendResponse({
@@ -53,4 +54,18 @@ export class TasksController {
             data: result
         })
     }
+
+    @Get(':id')
+    @ApiBearerAuth()
+    @ApiOkResponse({ type: CreateNewTaskResponseDto })
+    // TODO: return type issue
+    async getSingleTask(@Param('id') taskId: string){
+        const result = await this.tasksService.getTaskById(taskId);
+        return sendResponse({
+            success: true,
+            message: "Task fetched successfully",
+            data: result
+        })
+    }
+
 }

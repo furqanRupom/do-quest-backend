@@ -16,5 +16,9 @@ export class TasksService {
   async getAllTasks(userId:string): Promise<CreateTaskResponseDto[]> {
     return await this.tasksRepository.getAllTasks(userId)
   }
+  // TODO: fixed any type issue
+  async getTaskById(taskId:string): Promise<any> {
+    return await this.tasksRepository.getTaskById(taskId)
+  }
 
 }

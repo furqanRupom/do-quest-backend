@@ -48,4 +48,14 @@ export class TasksRepository {
         const tasks = await this.taskModel.find();
         return tasks.map(task => ({ ...task.toObject(), deadline: task.deadline.toISOString() }));
     }
+
+    // TODO: we will fixed any type to our response type
+    async getTaskById(taskId: string): Promise<any> {
+        const task = await this.taskModel.findById(taskId);
+        if (!task || task.isDeleted) {
+            throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
+        }
+        return task.toJSON()
+    }
+
 }
