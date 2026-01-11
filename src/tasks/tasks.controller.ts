@@ -4,7 +4,7 @@ import { CreateNewTaskDto, CreateNewTaskResponseDto, DeleteTaskDto, GetAllTaskDt
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { Roles } from '../common/decorators';
 import { UserRole } from '../auth/enums/role.enum';
-import { sendResponse } from 'src/common/utils';
+import { sendResponse, SendResponseOptions } from 'src/common/utils';
 import { ApiBearerAuth, ApiOkResponse, ApiParam } from '@nestjs/swagger';
 import type { AuthRequest } from '../auth/types/auth-request.type';
 
@@ -59,7 +59,7 @@ export class TasksController {
     @ApiBearerAuth()
     @ApiOkResponse({ type: CreateNewTaskResponseDto })
     // TODO: return type issue
-    async getSingleTask(@Param('id') taskId: string){
+    async getSingleTask(@Param('id') taskId: string):Promise<SendResponseOptions<any>>{
         const result = await this.tasksService.getTaskById(taskId);
         return sendResponse({
             success: true,
