@@ -51,13 +51,14 @@ export class AuthService {
             secret: this.configService.get<string>('resetSecret'),
             expiresIn: this.configService.get<number>('resetTokenExpiry'),
         });
+        const forgotPasswordUrl = this.configService.get<string>('forgotPasswordUrl')
         this.mailService.sendEmail({
             subject: 'Password Reset',
             template: 'forgot-password',
             recipeintEmail: user.email,
             context: {
                 name: user.name,
-                resetPasswordLink: `http://localhost:3000/reset-password?token=${resetToken}`,
+                resetPasswordLink: `${ forgotPasswordUrl}/reset-password?token=${resetToken}`,
             },
         })
 
