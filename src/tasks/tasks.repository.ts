@@ -52,8 +52,11 @@ export class TasksRepository {
     // TODO: we will fixed any type to our response type
     async getTaskById(taskId: string): Promise<any> {
         const task = await this.taskModel.findById(taskId);
-        if (!task || task.isDeleted) {
+        if (!task) {
             throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
+        }
+        if (!task.isDeleted){
+            throw new HttpException('Task is deleted',HttpStatus.BAD_REQUEST)
         }
         return task.toJSON()
     }
