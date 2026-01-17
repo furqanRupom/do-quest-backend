@@ -8,7 +8,6 @@ import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { AdminController } from './admin/admin.controller';
 import { AdminService } from './admin/admin.service';
-import { AdminRepository } from './admin/admin.repository';
 import { AdminModule } from './admin/admin.module';
 import { TasksController } from './tasks/tasks.controller';
 import { TasksService } from './tasks/tasks.service';
