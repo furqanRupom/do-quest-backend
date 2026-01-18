@@ -30,10 +30,10 @@ export class Task {
     @Prop({type:Number, required: false })
     maxSubmissions: number;
 
-    @Prop({ enum: Object.values(TaskStatus) ,required: true, default: TaskStatus.pending,index:true })
+    @Prop({ type: String, enum: Object.values(TaskStatus), required: true, default: TaskStatus.pending,index:true })
     status: TaskStatus
 
-    @Prop({ enum: Object.values(PaymentStatus), required: true, default: PaymentStatus.active })
+    @Prop({ type: String, enum: Object.values(PaymentStatus), required: true, default: PaymentStatus.active })
     paymentStatus: PaymentStatus
 
     @Prop({type:[String], required: true })

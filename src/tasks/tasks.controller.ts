@@ -1,13 +1,13 @@
 import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards,Query } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateNewTaskDto, CreateNewTaskResponseDto, DeleteTaskDto, GetAllTaskDto, SingleTaskDto } from './dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { Roles } from '../common/decorators';
 import { UserRole } from '../auth/enums/role.enum';
-import { sendResponse} from 'src/common/utils';
+import { sendResponse} from '../common/utils';
 import { ApiBearerAuth, ApiOkResponse, ApiParam } from '@nestjs/swagger';
 import type { AuthRequest } from '../auth/types/auth-request.type';
-import { BaseQueryDto } from 'src/common/dto/base-query.dto';
+import { BaseQueryDto } from '../common/dto/base-query.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('tasks')
