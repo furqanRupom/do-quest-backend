@@ -45,13 +45,14 @@ export class TasksController {
     @Get('')
     @ApiBearerAuth()
     @ApiOkResponse({ type: GetAllTaskDto})
-    // TODO: return type issue
-    async getAllTasks(@Req() req: AuthRequest){
-        const result = await this.tasksService.getAllTasks(req.user.sub);
+    async getAllTasks(@Req() req: AuthRequest):Promise<GetAllTaskDto<CreateNewTaskDto>> {
+        const result = await this.tasksService.getAllTasks(req.user.sub,req.query);
+
         return sendResponse({
             success: true,
             message: "Tasks fetched successfully",
-            data: result
+            meta:result.meta,
+            data: result.data
         })
     }
 

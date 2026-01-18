@@ -3,6 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Task } from './schemas/tasks.schema';
 import { Model, Types } from 'mongoose';
 import { CreateNewTaskDto, CreateTaskResponseDto } from './dto';
+import { QueryBuilder } from '../common/db/query-builder';
+import { MetaResponseDto } from '../common/dto';
 
 @Injectable()
 export class TasksRepository {
@@ -42,11 +44,17 @@ export class TasksRepository {
         await task.save();
     }
 
-    async getAllTasks(userId:string): Promise<CreateTaskResponseDto[]> {
-        // TODO: We will implement a robust query builder later. For now, we will fetch all tasks for the user.
-        // TODO: some fixes like userId is geting the following tasks
-        const tasks = await this.taskModel.find();
-        return tasks.map(task => ({ ...task.toObject(), deadline: task.deadline.toISOString() }));
+    async getAllTasks(userId:string,query:Record<string,unknown>): Promise<MetaResponseDto<Partial<CreateTaskResponseDto>>> {
+        const builder =  new QueryBuilder(this.taskModel,query)
+        .search(['title','description'])
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+        const data = await builder.modelQuery.find({user:new Types.ObjectId(userId),isDeleted:false}).lean() 
+        const meta = await builder.countTotal();
+        return { data, meta };
+       
     }
 
     // TODO: we will fixed any type to our response type

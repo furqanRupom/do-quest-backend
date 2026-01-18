@@ -1,7 +1,15 @@
-import { ApiResponseDto } from "src/common/dto";
-import { CreateNewTaskResponseDto } from "./new-task.dto";
+import { ApiMetaResponseDto } from "src/common/dto";
+import { CreateTaskResponseDto } from "./new-task.dto";
 
 // TODO: we will add all the other additional dtos later
-export class GetAllTaskDto extends ApiResponseDto<CreateNewTaskResponseDto[]> {
-    declare data: CreateNewTaskResponseDto[]
+export class GetAllTaskDto<T> extends ApiMetaResponseDto<Partial<T>> {
+    declare data: Partial<T>[];
 }
+
+
+// export class GetAllTaskDto {
+//     success: boolean;
+//     message: string;
+//     data: CreateTaskResponseDto[];
+//     meta?: any
+// }
