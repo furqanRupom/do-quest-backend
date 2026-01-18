@@ -4,7 +4,7 @@ import { Task } from './schemas/tasks.schema';
 import { Model, Types } from 'mongoose';
 import { CreateNewTaskDto, CreateTaskResponseDto } from './dto';
 import { QueryBuilder } from '../common/db/query-builder';
-import { MetaResponseDto } from '../common/dto';
+import { BaseQueryDto, MetaResponseDto } from '../common/dto';
 
 @Injectable()
 export class TasksRepository {
@@ -44,7 +44,7 @@ export class TasksRepository {
         await task.save();
     }
 
-    async getAllTasks(userId:string,query:Record<string,unknown>): Promise<MetaResponseDto<Partial<CreateTaskResponseDto>>> {
+    async getAllTasks(userId:string,query:BaseQueryDto): Promise<MetaResponseDto<Partial<CreateTaskResponseDto>>> {
         const builder =  new QueryBuilder(this.taskModel,query)
         .search(['title','description'])
         .filter()
@@ -57,8 +57,7 @@ export class TasksRepository {
        
     }
 
-    // TODO: we will fixed any type to our response type
-    async getTaskById(taskId: string): Promise<any> {
+    async getTaskById(taskId: string): Promise<Partial<CreateTaskResponseDto>> {
         const task = await this.taskModel.findById(taskId);
         if (!task) {
             throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
@@ -66,7 +65,7 @@ export class TasksRepository {
         if (!task.isDeleted){
             throw new HttpException('Task is deleted',HttpStatus.BAD_REQUEST)
         }
-        return task.toJSON()
+        return { ...task.toObject(), deadline: task.deadline.toISOString() };
     }
 
 }

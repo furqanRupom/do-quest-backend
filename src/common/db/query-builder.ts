@@ -1,16 +1,16 @@
-import type { Model, Query } from 'mongoose';
+import type { Model, Query } from "mongoose";
 
-export class QueryBuilder<T> {
+export class QueryBuilder<T, Q extends Record<string, any> = Record<string, any>> {
     public modelQuery: Query<T[], T>;
-    public query: Record<string, unknown>;
+    public query: Q;
 
-    constructor(model: Model<T>, query: Record<string, unknown>) {
+    constructor(model: Model<T>, query: Q) {
         this.modelQuery = model.find();
         this.query = query;
     }
 
     search(searchableFields: (keyof T | string)[]) {
-        const searchTerm = this.query?.searchTerm as string;
+        const searchTerm = (this.query as any).searchTerm as string;
 
         if (searchTerm) {
             this.modelQuery = this.modelQuery.find({
@@ -24,26 +24,24 @@ export class QueryBuilder<T> {
     }
 
     filter() {
-        const queryObj = { ...this.query };
+        const queryObj = { ...this.query } as any;
 
         const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
         excludeFields.forEach(el => delete queryObj[el]);
 
-        this.modelQuery = this.modelQuery.find(queryObj as any);
+        this.modelQuery = this.modelQuery.find(queryObj);
         return this;
     }
 
     sort() {
-        const sort =
-            (this.query?.sort as string)?.split(',').join(' ') || '-createdAt';
-
+        const sort = (this.query as any).sort?.split(',').join(' ') || '-createdAt';
         this.modelQuery = this.modelQuery.sort(sort);
         return this;
     }
 
     paginate() {
-        const page = Number(this.query?.page) || 1;
-        const limit = Number(this.query?.limit) || 10;
+        const page = Number((this.query as any).page) || 1;
+        const limit = Number((this.query as any).limit) || 10;
         const skip = (page - 1) * limit;
 
         this.modelQuery = this.modelQuery.skip(skip).limit(limit);
@@ -51,9 +49,7 @@ export class QueryBuilder<T> {
     }
 
     fields() {
-        const fields =
-            (this.query?.fields as string)?.split(',').join(' ') || '-__v';
-
+        const fields = (this.query as any).fields?.split(',').join(' ') || '-__v';
         this.modelQuery = this.modelQuery.select(fields);
         return this;
     }
@@ -62,8 +58,8 @@ export class QueryBuilder<T> {
         const filter = this.modelQuery.getFilter();
         const total = await this.modelQuery.model.countDocuments(filter);
 
-        const page = Number(this.query?.page) || 1;
-        const limit = Number(this.query?.limit) || 10;
+        const page = Number((this.query as any).page) || 1;
+        const limit = Number((this.query as any).limit) || 10;
         const totalPage = Math.ceil(total / limit);
 
         return {
