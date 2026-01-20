@@ -2,11 +2,12 @@ import { Body, Controller,HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/
 import { AuthService } from './auth.service';
 import { CreateUserDto, createUserResponseDto, ForgotPasswordDto, ForgotPasswordResponseDto } from './dto';
 import { LoginResponseDto, LoginUserDto } from './dto/login-user.dto';
-import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
+import {  ApiOkResponse } from '@nestjs/swagger';
 import { sendResponse } from '../common/utils';
 import { ResetPasswordDto, ResetPasswordResponseDto } from './dto/reset-password.dto';
 import { RefreshAuthGuard } from './guards/refresh-auth.guard';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+
 
 @Controller('auth')
 export class AuthController {
