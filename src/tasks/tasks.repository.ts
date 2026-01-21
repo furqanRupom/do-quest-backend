@@ -1,4 +1,4 @@
-import { ConsoleLogger, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {  HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Task } from './schemas/tasks.schema';
 import { Model, Types } from 'mongoose';
