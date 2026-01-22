@@ -10,10 +10,7 @@
   <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
   <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
   <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-  <a href="https://circleci.com/gh/furqanRupom/do-quest-backend" target="_blank"><img src="https://img.shields.io/circleci/build/github/furqanRupom/do-quest-backend/master" alt="CircleCI" /></a>
-  <a href="https://discord.gg/doquest" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-  <a href="https://twitter.com/doquestplatform" target="_blank"><img src="https://img.shields.io/twitter/follow/doquestplatform.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-
+ 
 </p>
 
 ## Description
