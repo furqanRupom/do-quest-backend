@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { UserRole } from '../auth/enums/role.enum';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { Roles } from '../common/decorators';
@@ -6,7 +6,7 @@ import { SubmissionService } from './submission.service';
 import { ApproveResponseDto, CreateSubmissionDto, CreateSubmissionResponseDto, RejectResponseDto } from './dto';
 import type { AuthRequest } from '../auth/types/auth-request.type';
 import { sendResponse } from '../common/utils';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
 import { SubmissionListDto } from './dto/submission.list.dto';
 
 @Controller('tasks/:taskId/submissions')
@@ -19,6 +19,8 @@ export class SubmissionController {
     ) { }
 
     @Post()
+    @HttpCode(HttpStatus.CREATED)
+    @ApiOkResponse({ type: CreateSubmissionResponseDto })
     async createSubmission(
         @Param('taskId') taskId: string,
         @Body() createSubmissionDto: CreateSubmissionDto,
@@ -33,6 +35,8 @@ export class SubmissionController {
     }
 
     @Get()
+    @HttpCode(HttpStatus.OK)
+    @ApiOkResponse({ type: SubmissionListDto })
     async list(@Param('taskId') taskId: string): Promise<SubmissionListDto> {
         const result = await this.submissionService.getSubmissionsByTaskId(taskId);
         return sendResponse({
@@ -44,6 +48,8 @@ export class SubmissionController {
 
 
     @Put(':submissionId/approve')
+    @ApiResponse({ type: ApproveResponseDto })
+    @HttpCode(HttpStatus.OK)
     async approveSubmission(
         @Param('taskId') taskId: string,
         @Param('submissionId') submissionId: string,
@@ -63,6 +69,8 @@ export class SubmissionController {
     }
 
     @Put(':submissionId/reject')
+    @HttpCode(HttpStatus.OK)
+    @ApiResponse({ type: RejectResponseDto })
     async rejectSubmission(
         @Param('taskId') taskId: string,
         @Param('submissionId') submissionId: string,
