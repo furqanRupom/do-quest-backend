@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString } from "class-validator";
+import { ApiResponseDto } from "src/common/dto";
 
 export class ApproveOrRejectDto {
     @IsString()
@@ -13,4 +14,17 @@ export class ApproveOrRejectDto {
     @IsString()
     @ApiProperty()
     submissionId: string;
+}
+
+
+class ApproveDto {
+    capturedAmount: number;
+    winnerSubmissionId: string;
+}
+
+export class ApproveResponseDto extends ApiResponseDto<ApproveDto>{
+    declare data: ApproveDto;
+}
+export class RejectResponseDto extends ApiResponseDto<null>{
+    declare data: null;
 }

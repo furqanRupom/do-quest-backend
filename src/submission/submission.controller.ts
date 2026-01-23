@@ -3,12 +3,16 @@ import { UserRole } from '../auth/enums/role.enum';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { Roles } from '../common/decorators';
 import { SubmissionService } from './submission.service';
-import { CreateSubmissionDto } from './dto';
+import { ApproveResponseDto, CreateSubmissionDto, CreateSubmissionResponseDto, RejectResponseDto } from './dto';
 import type { AuthRequest } from '../auth/types/auth-request.type';
+import { sendResponse } from '../common/utils';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { SubmissionListDto } from './dto/submission.list.dto';
 
 @Controller('tasks/:taskId/submissions')
 @UseGuards(JwtAuthGuard)
 @Roles(UserRole.User)
+@ApiBearerAuth()
 export class SubmissionController {
     constructor(
         private readonly submissionService: SubmissionService,
@@ -19,42 +23,62 @@ export class SubmissionController {
         @Param('taskId') taskId: string,
         @Body() createSubmissionDto: CreateSubmissionDto,
         @Req() req: AuthRequest,
-    ) {
-        return this.submissionService.createSubmission(createSubmissionDto, taskId, req.user.sub);
+    ): Promise<CreateSubmissionResponseDto> {
+        const result = await this.submissionService.createSubmission(createSubmissionDto, taskId, req.user.sub);
+        return sendResponse({
+            success: true,
+            message: "Submission created successfully",
+            data: result
+        })
     }
 
     @Get()
-    list(@Param('taskId') taskId: string) {
-        return this.submissionService.getSubmissionsByTaskId(taskId);
+    async list(@Param('taskId') taskId: string): Promise<SubmissionListDto> {
+        const result = await this.submissionService.getSubmissionsByTaskId(taskId);
+        return sendResponse({
+            success: true,
+            message: "Submissions retrieved successfully",
+            data: result
+        });
     }
 
 
     @Put(':submissionId/approve')
-    approveSubmission(
+    async approveSubmission(
         @Param('taskId') taskId: string,
         @Param('submissionId') submissionId: string,
         @Req() req: AuthRequest,
-    ) {
+    ): Promise<ApproveResponseDto> {
         const approveSubmissionDto = {
             taskId,
             submissionId,
             approverId: req.user.sub
         };
-        return this.submissionService.approveSubmission(approveSubmissionDto);
+        const result = await this.submissionService.approveSubmission(approveSubmissionDto);
+        return sendResponse({
+            success: true,
+            message: "Submission approved successfully",
+            data: result
+        });
     }
 
     @Put(':submissionId/reject')
-    rejectSubmission(
+    async rejectSubmission(
         @Param('taskId') taskId: string,
         @Param('submissionId') submissionId: string,
         @Req() req: AuthRequest,
-    ) {
+    ): Promise<RejectResponseDto> {
         const rejectSubmissionDto = {
             taskId,
             submissionId,
             approverId: req.user.sub
         };
-        return this.submissionService.rejectSubmission(rejectSubmissionDto);
+        await this.submissionService.rejectSubmission(rejectSubmissionDto);
+        return sendResponse({
+            success: true,
+            message: "Submission rejected successfully",
+            data: null
+        });
     }
 
 }

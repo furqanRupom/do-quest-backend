@@ -1,5 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, IsString } from "class-validator";
+import { ApiResponseDto } from "src/common/dto";
+import { Submission } from "../schemas/submission.schema";
 
 export class CreateSubmissionDto {
     @IsString()
@@ -10,4 +12,9 @@ export class CreateSubmissionDto {
     @IsString({ each: true })
     @ApiProperty()
     attachments: string[]
+}
+
+export class CreateSubmissionResponseDto extends ApiResponseDto<Submission> {
+    @ApiProperty({type:Submission})
+    declare data: Submission
 }
