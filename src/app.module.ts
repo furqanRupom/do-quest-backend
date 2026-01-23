@@ -15,6 +15,8 @@ import { TasksRepository } from './tasks/tasks.repository';
 import { TasksModule } from './tasks/tasks.module';
 import { WalletModule } from './wallet/wallet.module';
 import { AdminRepository } from './admin/admin.repository';
+import { SubmissionModule } from './submission/submission.module';
+import { StripeModule } from './stripe/stripe.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -36,7 +38,9 @@ import { AdminRepository } from './admin/admin.repository';
     MailModule,
     TasksModule,
     WalletModule,
-    AdminModule
+    AdminModule,
+    SubmissionModule,
+    StripeModule
   ],
   controllers: [AppController, AdminController, TasksController],
   providers: [AdminService, AdminRepository, TasksService, TasksRepository],

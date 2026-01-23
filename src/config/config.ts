@@ -16,6 +16,7 @@ export default () => ({
     forgotPasswordUrl:process.env.FORGOT_PASSWORD_URL,
     stripe: {
         secretKey:process.env.SECRET_KEY,
-        publishedKey:process.env.PUBLISHED_KEY
+        publishedKey:process.env.PUBLISHED_KEY,
+        apiVersion: process.env.STRIPE_API_VERSION || '2025-11-15.clover',
     }
 });

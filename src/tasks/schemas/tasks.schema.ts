@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Types } from "mongoose";
 import { User } from "../../users/schemas/users.schema";
-import { PaymentStatus, TaskStatus } from "../enums/tasks.enum";
+import { PaymentFlowStatus, PaymentStatus, TaskStatus } from "../enums/tasks.enum";
 
 
 @Schema({ timestamps: true })
@@ -41,6 +41,12 @@ export class Task {
 
     @Prop({type:[String], required: false })
     tags: string[];
+
+    @Prop({ type: String })
+    paymentIntentId?: string;
+
+    @Prop({ type: String, enum: Object.values(PaymentFlowStatus), default: PaymentFlowStatus.no_payment })
+    paymentFlowStatus: string;
     
     @Prop({ type: Boolean, default:false})
     isDeleted: boolean;

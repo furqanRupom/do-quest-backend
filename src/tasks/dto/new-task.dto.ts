@@ -2,6 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, IsDateString, IsNumber, IsOptional, IsString } from "class-validator";
 import { Types } from "mongoose";
 import { ApiResponseDto } from "../../common/dto";
+import { TaskStatus } from "../enums/tasks.enum";
 
 export class CreateNewTaskDto {
     @IsString()
@@ -50,6 +51,9 @@ export class CreateNewTaskDto {
 export class CreateTaskResponseDto extends CreateNewTaskDto {
     @ApiProperty()
     _id: Types.ObjectId
+    status: TaskStatus
+    paymentIntentId?: string
+    clientSecret?: string | null
 }
 
 export class CreateNewTaskResponseDto extends ApiResponseDto<CreateTaskResponseDto> {

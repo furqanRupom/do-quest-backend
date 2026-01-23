@@ -5,6 +5,7 @@ import { Model, Types } from 'mongoose';
 import { CreateNewTaskDto, CreateTaskResponseDto } from './dto';
 import { QueryBuilder } from '../common/db/query-builder';
 import { BaseQueryDto, MetaResponseDto } from '../common/dto';
+import { PaymentFlowStatus, TaskStatus } from './enums/tasks.enum';
 
 @Injectable()
 export class TasksRepository {
@@ -68,4 +69,19 @@ export class TasksRepository {
         return { ...task.toObject(), deadline: task.deadline.toISOString() };
     }
 
+    async findTaskById(taskId: string): Promise<Task | null> {
+        return this.taskModel.findById(taskId).exec();
+    }
+
+    async updateTask(taskId: string, updateData: {status:TaskStatus,paymentFlowStatus:PaymentFlowStatus,paymentIntentId?:string}): Promise<Task | null> {
+        const updatedTask = await this.taskModel.findByIdAndUpdate(
+            taskId,
+            updateData,
+            { new: true },
+        );
+        if (!updatedTask) {
+            throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
+        }
+        return updatedTask;
+    }
 }
