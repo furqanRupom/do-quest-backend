@@ -3,7 +3,7 @@ import { SubmissionRepository } from './submission.repository';
 import { StripeService } from '../stripe/stripe.service';
 import { TasksRepository } from '../tasks/tasks.repository';
 import { ApproveOrRejectDto, CreateSubmissionDto } from './dto';
-import { PaymentFlowStatus, TaskStatus } from 'src/tasks/enums/tasks.enum';
+import { PaymentFlowStatus, TaskStatus } from '../tasks/enums/tasks.enum';
 import { Submission } from './schemas/submission.schema';
 
 @Injectable()

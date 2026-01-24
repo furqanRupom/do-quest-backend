@@ -1,4 +1,4 @@
-import { ApiResponseDto } from "src/common/dto";
+import { ApiResponseDto } from "../../common/dto";
 import { Submission } from "../schemas/submission.schema";
 import { ApiProperty } from "@nestjs/swagger";
 

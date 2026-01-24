@@ -1,17 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TasksService } from './tasks.service';
 import { TasksRepository } from './tasks.repository';
-import { CreateNewTaskDto, CreateTaskResponseDto } from './dto';
-import { BaseQueryDto} from '../common/dto';
+import { StripeService } from '../stripe/stripe.service';
+import { CreateNewTaskDto } from './dto';
+import { BaseQueryDto } from '../common/dto';
+import { PaymentFlowStatus } from './enums/tasks.enum';
 
 describe('TasksService', () => {
   let service: TasksService;
-  let repository: TasksRepository;
+  let repository: any;
+  let stripeService: any;
 
   const mockUserId = 'user-id-123';
 
-  const mockTask: CreateTaskResponseDto = {
-    _id: 'task-id-1' as any,
+  const mockTask = {
+    _id: 'task-id-1',
     title: 'Task 1',
     description: 'Task description',
     successRequirements: ['Requirement 1'],
@@ -21,6 +24,12 @@ describe('TasksService', () => {
     maxSubmissions: 5,
     categories: ['Category 1'],
     tags: ['tag1'],
+    status: 'active',
+  };
+
+  const mockPaymentIntent = {
+    id: 'pi_123',
+    client_secret: 'secret_123',
   };
 
   const mockMeta = { page: 1, limit: 10, total: 1, totalPage: 1 };
@@ -32,28 +41,36 @@ describe('TasksService', () => {
         {
           provide: TasksRepository,
           useValue: {
-            createTask: jest.fn().mockResolvedValue(mockTask),
-            deleteTask: jest.fn().mockResolvedValue(undefined),
-            getAllTasks: jest.fn().mockResolvedValue({
-              data: [mockTask],
-              meta: mockMeta,
-            }),
-            getTaskById: jest.fn().mockResolvedValue(mockTask),
+            createTask: jest.fn(),
+            updateTask: jest.fn(),
+            deleteTask: jest.fn(),
+            getAllTasks: jest.fn(),
+            getTaskById: jest.fn(),
+          },
+        },
+        {
+          provide: StripeService,
+          useValue: {
+            createPaymentIntent: jest.fn(),
           },
         },
       ],
     }).compile();
 
     service = module.get<TasksService>(TasksService);
-    repository = module.get<TasksRepository>(TasksRepository);
+    repository = module.get(TasksRepository);
+    stripeService = module.get(StripeService);
+
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
+
   describe('createNewTask', () => {
-    it('should call repository.createTask and return task', async () => {
+    it('should create task, create payment intent, update task, and return enriched response', async () => {
       const dto: CreateNewTaskDto = {
         title: 'Task 1',
         description: 'Task description',
@@ -66,32 +83,71 @@ describe('TasksService', () => {
         tags: ['tag1'],
       };
 
+      repository.createTask.mockResolvedValue(mockTask);
+      stripeService.createPaymentIntent.mockResolvedValue(mockPaymentIntent);
+      repository.updateTask.mockResolvedValue({});
+
       const result = await service.createNewTask(dto, mockUserId);
+
       expect(repository.createTask).toHaveBeenCalledWith(dto, mockUserId);
-      expect(result).toEqual(mockTask);
+      expect(stripeService.createPaymentIntent).toHaveBeenCalledWith({
+        amount: 100,
+        currency: 'usd',
+        metadata: {
+          taskId: 'task-id-1',
+          userId: mockUserId,
+        },
+      });
+      expect(repository.updateTask).toHaveBeenCalledWith('task-id-1', {
+        status: mockTask.status,
+        paymentFlowStatus: PaymentFlowStatus.pending,
+        paymentIntentId: 'pi_123',
+      });
+
+      expect(result).toEqual({
+        ...mockTask,
+        paymentIntentId: 'pi_123',
+        clientSecret: 'secret_123',
+      });
     });
   });
 
+
   describe('deleteTask', () => {
     it('should call repository.deleteTask', async () => {
+      repository.deleteTask.mockResolvedValue(undefined);
+
       await service.deleteTask('task-id-1', mockUserId);
+
       expect(repository.deleteTask).toHaveBeenCalledWith('task-id-1', mockUserId);
     });
   });
 
+
   describe('getAllTasks', () => {
-    it('should call repository.getAllTasks and return data with meta', async () => {
+    it('should return paginated tasks', async () => {
       const query: BaseQueryDto = { searchTerm: 'Task 1', page: 1, limit: 10 };
+
+      repository.getAllTasks.mockResolvedValue({
+        data: [mockTask],
+        meta: mockMeta,
+      });
+
       const result = await service.getAllTasks(mockUserId, query);
+
       expect(repository.getAllTasks).toHaveBeenCalledWith(mockUserId, query);
       expect(result.data).toEqual([mockTask]);
       expect(result.meta).toEqual(mockMeta);
     });
   });
 
+
   describe('getTaskById', () => {
-    it('should call repository.getTaskById and return task', async () => {
+    it('should return task by id', async () => {
+      repository.getTaskById.mockResolvedValue(mockTask);
+
       const result = await service.getTaskById('task-id-1');
+
       expect(repository.getTaskById).toHaveBeenCalledWith('task-id-1');
       expect(result).toEqual(mockTask);
     });
