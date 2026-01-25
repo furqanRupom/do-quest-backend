@@ -22,7 +22,6 @@ Key features include:
 - **Reward System**: Secure handling of rewards, including cryptocurrency or fiat integrations (configurable).
 - **User Profiles and Ratings**: Build reputation through completed quests, reviews, and ratings.
 - **Secure Authentication**: Includes password reset flows, email notifications, and JWT-based sessions.
-- **Real-time Updates**: WebSocket support for live notifications on quest status changes.
 - **Admin Dashboard Tools**: Moderation features for managing quests and users.
 - **Integration Ready**: APIs for frontend clients, mobile apps, and third-party services.
 
