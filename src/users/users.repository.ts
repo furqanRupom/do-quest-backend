@@ -3,6 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/users.schema';
 import { Model } from 'mongoose';
 import { IUser } from '../auth/interfaces/user.interface';
+import { UserRole } from '../auth/enums/role.enum';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersRepository {
@@ -84,6 +86,20 @@ export class UsersRepository {
         if (!user) return;
         user.password = newPassword;
         await user.save();
+    }
+
+    async findByEmail(email: string) {
+        return this.userModel.findOne({ email });
+    }
+
+    async createAdmin(username:string,name:string,email: string, password: string) {
+        return this.userModel.create({
+            email,
+            username,
+            name,
+            password,
+            role: UserRole.Admin,
+        });
     }
 
 }
