@@ -50,7 +50,7 @@ describe('AuthService', () => {
         },
         {
           provide: MailService,
-          useValue: mockMailService, // ← Critical fix: MailService is now always provided
+          useValue: mockMailService, 
         },
       ],
     }).compile();
