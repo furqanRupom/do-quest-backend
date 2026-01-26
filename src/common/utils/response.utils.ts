@@ -8,8 +8,8 @@ interface IMeta {
 export interface SendResponseOptions<T> {
     success: boolean;
     message: string;
-    data: T;
     meta?:IMeta
+    data: T;
 
 }
 
