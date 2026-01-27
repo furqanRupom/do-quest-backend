@@ -42,3 +42,7 @@ export class MetaResponseDto<T> {
     @ApiProperty({ isArray: true })
     declare data: T[];
 }
+
+export class ListResponseDto<T> extends ApiMetaResponseDto<Partial<T>> {
+    declare data: Partial<T>[];
+}
