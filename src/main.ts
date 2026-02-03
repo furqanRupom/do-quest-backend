@@ -33,6 +33,16 @@ async function bootstrap() {
     }
   });
   app.useGlobalFilters(new AllExceptionsFilter());
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'https://do-quest.vercel.app'
+  ]
+  app.enableCors({
+    origin: allowedOrigins,
+    methods: 'GET,POST,PUT,DELETE,OPTIONS,HEAD,PATCH',
+    credentials: true,
+    allowedHeaders: 'Content-Type, Authorization',
+  });
   await app.listen(process.env.PORT ?? 3000);
 }
 
