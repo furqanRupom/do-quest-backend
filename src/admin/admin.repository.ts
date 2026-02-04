@@ -5,7 +5,7 @@ import { User } from '../users/schemas/users.schema';
 import { Submission } from '../submission/schemas/submission.schema';
 import { Task } from '../tasks/schemas/tasks.schema';
 import { BaseQueryDto } from '../common/dto';
-import { QueryBuilder } from 'src/common/db/query-builder';
+import { QueryBuilder } from '../common/db/query-builder';
 
 @Injectable()
 export class AdminRepository {
@@ -27,7 +27,6 @@ export class AdminRepository {
         return this.taskModel.countDocuments().exec();
     }
 
-    // TODO: we will add return type later
     async getAllUsers(query: BaseQueryDto) {
         const users = new QueryBuilder(this.userModel, query)
             .search(['name', 'email'])
@@ -41,7 +40,6 @@ export class AdminRepository {
 
     }
 
-    // TODO: we will add return type later
    async getAllSubmissions(query: BaseQueryDto) {
         const submissions = new QueryBuilder(this.submissionModel, query)
             .search(['title', 'content'])
@@ -54,7 +52,6 @@ export class AdminRepository {
         return { data, meta };
     }
 
-    // TODO: we will add return type later
     async getAllTasks(query: BaseQueryDto) {
         const tasks = new QueryBuilder(this.taskModel, query)
             .search(['title', 'description'])

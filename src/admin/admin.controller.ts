@@ -12,7 +12,6 @@ import { CountTotalsResponseDto } from './dto';
 @UseGuards(JwtAuthGuard)
 @Roles(UserRole.Admin)
 @ApiBearerAuth()
-// TODO : admin return types is remaining and also test cases
 export class AdminController {
     constructor(private readonly adminService: AdminService) {}
 
