@@ -30,7 +30,7 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @Post('login')
     @ApiOkResponse({ type: LoginResponseDto })
-    async login(@Body() loginUserDto: LoginUserDto, @Res({ passthrough: true }) res: Response): Promise<LoginResponseDto> {
+    async login(@Res({ passthrough: true }) res: Response, @Body() loginUserDto: LoginUserDto): Promise<LoginResponseDto> {
         const result = await this.authService.loginUser(loginUserDto);
         setAuthCookies(res, result.accessToken, result.refreshToken);
         return sendResponse({
