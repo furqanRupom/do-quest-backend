@@ -6,9 +6,8 @@ import { ApiOkResponse } from '@nestjs/swagger';
 import { sendResponse } from '../common/utils';
 import { ResetPasswordDto, ResetPasswordResponseDto } from './dto/reset-password.dto';
 import { RefreshAuthGuard } from './guards/refresh-auth.guard';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
 import type { Request, Response } from 'express';
-import { setAuthCookies } from 'src/common/utils/cookie.utils';
+import { setAuthCookies } from '../common/utils/cookie.utils';
 
 
 @Controller('auth')
