@@ -4,11 +4,11 @@ import { IsNumber, IsString, IsOptional, IsObject } from "class-validator";
 export class CreatePaymentDto {
     @IsNumber()
     @ApiProperty()
-    amount: number;
+    amount: number = 0;
 
     @ApiProperty()
     @IsString()
-    currency: string;
+    currency: string ='usd';
 
     @IsOptional()
     @IsObject()

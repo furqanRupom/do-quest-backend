@@ -3,26 +3,26 @@ import { IsOptional } from 'class-validator';
 
 export class ApiResponseDto<T> {
     @ApiProperty({ example: true })
-    success: boolean;
+    success: boolean = true;
 
     @ApiProperty({ example: 'Operation completed successfully' })
-    message: string;
+    message: string = 'Operation completed successfully';
 
-    data: T | null;
+    data: T | null = null;
 }
 
 export class PaginationMetaDto {
     @ApiProperty({ example: 1 })
-    page: number;
+    page: number = 1;
 
     @ApiProperty({ example: 10 })
-    limit: number;
+    limit: number = 10;
 
     @ApiProperty({ example: 100 })
-    total: number;
+    total: number = 0;
 
     @ApiProperty({ example: 10 })
-    totalPage: number;
+    totalPage: number = 0;
 }
 
 export class ApiMetaResponseDto<T> extends ApiResponseDto<T[]> {
@@ -37,7 +37,7 @@ export class ApiMetaResponseDto<T> extends ApiResponseDto<T[]> {
 
 export class MetaResponseDto<T> {
     @ApiProperty({ type: () => PaginationMetaDto })
-    meta: PaginationMetaDto;
+    meta: PaginationMetaDto = new PaginationMetaDto();
 
     @ApiProperty({ isArray: true })
     declare data: T[];

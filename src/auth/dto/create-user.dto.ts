@@ -5,15 +5,15 @@ import mongoose from "mongoose";
 export class CreateUserDto {
 @IsString()
     @ApiProperty({ example: 'John Doe' })
-    name: string;
+    name: string = 'John Doe';
     
     @IsString()
     @ApiProperty({ example: 'johndoe' })
-    username: string;
+    username: string = 'johndoe';
 
     @IsEmail()
     @ApiProperty({ example: 'john.doe@example.com' })
-    email: string;
+    email: string = 'john.doe@example.com';
 
     @IsString()
     @IsNotEmpty()
@@ -28,24 +28,24 @@ export class CreateUserDto {
         example: 'StrongPass123!',
         description: 'Password must contain at least 1 uppercase, 1 lowercase, 1 number, 1 special character, and minimum 8 characters'
     })
-    password: string;
+    password: string = 'StrongPass123!';
 }
 
 export class UserResponseDto {
     @ApiProperty({example:"64a7b2f5c9e4f2a1b3d6e7f8"})
     @IsString()
-    _id:mongoose.Types.ObjectId;
+    _id:mongoose.Types.ObjectId = new mongoose.Types.ObjectId();
     
     @ApiProperty({example:"John Doe"})
     @IsString()
-    username:string;
+    username:string = 'John Doe';
 
     @ApiProperty({example:"johndoe@example.com"})
     @IsString()
-    email:string;
+    email:string = 'john.doe@example.com';
 
     @ApiProperty({example:"user"})
-    role:string;
+    role:string = 'user';
 
     @ApiProperty()
     location?:string;

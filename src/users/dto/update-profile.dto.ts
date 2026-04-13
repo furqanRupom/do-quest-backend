@@ -5,23 +5,23 @@ import { ApiResponseDto } from '../../common/dto';
 
 export class UserResponseDto {
     @ApiProperty()
-    _id: mongoose.Types.ObjectId;
+    _id: mongoose.Types.ObjectId = new mongoose.Types.ObjectId();
 
     @ApiProperty()
     @IsString()
-    name: string;
+    name: string = '';
 
     @ApiProperty()
-    username: string;
+    username: string = '';
 
     @ApiProperty()
-    email: string;
+    email: string = '';
 
     @ApiProperty()
-    role: string;
+    role: string = '';
 
     @ApiProperty()
-    location?: string
+    location?: string = '';
 
     @ApiProperty()
     company?: string

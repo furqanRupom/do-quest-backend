@@ -7,28 +7,28 @@ import { TaskStatus } from "../enums/tasks.enum";
 export class CreateNewTaskDto {
     @IsString()
     @ApiProperty()
-    title: string
+    title: string = ''
 
     @IsString()
     @ApiProperty()
-    description: string
+    description: string = ''
 
     @IsArray()
     @IsString({ each: true })
     @ApiProperty()
-    successRequirements: string[]
+    successRequirements: string[] = []
 
     @IsString()
     @ApiProperty()
     attachments?: string
 
     @IsNumber()
-    @ApiProperty()
-    budget: number
+    @ApiProperty() 
+    budget: number = 0;
 
     @IsDateString()
     @ApiProperty()
-    deadline: string
+    deadline: string = new Date().toISOString();
 
     @IsOptional()
     @IsNumber()
@@ -38,7 +38,7 @@ export class CreateNewTaskDto {
     @IsArray()
     @IsString({ each: true })
     @ApiProperty()
-    categories: string[]
+    categories: string[] = []
 
     @IsOptional()
     @IsArray()
@@ -50,8 +50,8 @@ export class CreateNewTaskDto {
 
 export class CreateTaskResponseDto extends CreateNewTaskDto {
     @ApiProperty()
-    _id: Types.ObjectId
-    status: TaskStatus
+    _id: Types.ObjectId = new Types.ObjectId();
+    status: TaskStatus = TaskStatus.active;
     paymentIntentId?: string
     clientSecret?: string | null
 }

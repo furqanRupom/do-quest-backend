@@ -6,15 +6,15 @@ import { Submission } from "../schemas/submission.schema";
 export class CreateSubmissionDto {
     @IsString()
     @ApiProperty()
-    message: string
+    message: string = ''
 
     @IsArray()
     @IsString({ each: true })
     @ApiProperty()
-    attachments: string[]
+    attachments: string[] = []
 }
 
 export class CreateSubmissionResponseDto extends ApiResponseDto<Submission> {
-    @ApiProperty({type:Submission})
+    @ApiProperty({ type: Submission })
     declare data: Submission
 }

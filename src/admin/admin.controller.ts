@@ -5,13 +5,13 @@ import { BaseQueryDto } from '../common/dto';
 import { UserRole } from '../auth/enums/role.enum';
 import { Roles } from '../common/decorators/roles.decorators';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
-import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
+import { ApiCookieAuth, ApiOkResponse } from '@nestjs/swagger';
 import { CountTotalsResponseDto } from './dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard)
 @Roles(UserRole.Admin)
-@ApiBearerAuth()
+@ApiCookieAuth('accessToken')
 export class AdminController {
     constructor(private readonly adminService: AdminService) {}
 

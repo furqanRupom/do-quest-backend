@@ -10,15 +10,15 @@ async function bootstrap() {
     .setTitle('Do Quest API')
     .setDescription('API for managing quests and tasks')
     .setVersion('1.0.0')
-    .addBearerAuth(
+    .addCookieAuth(
+      'accessToken',
       {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        name: 'Authorization',
-        in: 'header',
-      })
-    
+        type: 'apiKey',
+        in: 'cookie',
+        description: 'JWT access token stored in httpOnly cookie',
+      },
+    )
+
     .build();
   const documentFactory = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/v1/docs', app, documentFactory, {
@@ -28,8 +28,8 @@ async function bootstrap() {
       'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui-standalone-preset.js',
     ],
     jsonDocumentUrl: 'api/v1/docs-json',
-    swaggerOptions:{
-       tagsSorter:'alpha',
+    swaggerOptions: {
+      tagsSorter: 'alpha',
     }
   });
   app.useGlobalFilters(new AllExceptionsFilter());

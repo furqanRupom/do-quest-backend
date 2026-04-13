@@ -1,12 +1,14 @@
-import { Body, Controller,HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto, createUserResponseDto, ForgotPasswordDto, ForgotPasswordResponseDto } from './dto';
 import { LoginResponseDto, LoginUserDto } from './dto/login-user.dto';
-import {  ApiOkResponse } from '@nestjs/swagger';
+import { ApiOkResponse } from '@nestjs/swagger';
 import { sendResponse } from '../common/utils';
 import { ResetPasswordDto, ResetPasswordResponseDto } from './dto/reset-password.dto';
 import { RefreshAuthGuard } from './guards/refresh-auth.guard';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import type { Request, Response } from 'express';
+import { setAuthCookies } from 'src/common/utils/cookie.utils';
 
 
 @Controller('auth')
@@ -28,8 +30,9 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @Post('login')
     @ApiOkResponse({ type: LoginResponseDto })
-    async login(@Body() loginUserDto: LoginUserDto): Promise<LoginResponseDto> {
+    async login(@Body() loginUserDto: LoginUserDto, @Res({ passthrough: true }) res: Response): Promise<LoginResponseDto> {
         const result = await this.authService.loginUser(loginUserDto);
+        setAuthCookies(res, result.accessToken, result.refreshToken);
         return sendResponse({
             success: true,
             message: 'User logged in successfully',
@@ -63,8 +66,9 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @Post('refresh-token')
     @ApiOkResponse({ type: LoginResponseDto })
-    async refreshToken(@Body() refreshTokenDto: RefreshTokenDto): Promise<LoginResponseDto> {
-        const result = await this.authService.refreshTokens(refreshTokenDto.refreshToken);
+    async refreshToken(@Req() req: Request): Promise<LoginResponseDto> {
+        const refreshToken = req.cookies.refreshToken;
+        const result = await this.authService.refreshTokens(refreshToken);
         return sendResponse({
             success: true,
             message: 'Token refreshed successfully',

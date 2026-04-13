@@ -5,13 +5,13 @@ import { ApiResponseDto } from "../../common/dto";
 export class CountTotalsDto {
     @IsNumber()
     @ApiProperty()
-    users: number;
+    users: number = 0;
     @IsNumber()
     @ApiProperty()
-    submissions: number;
+    submissions: number = 0;
     @IsNumber()
     @ApiProperty()
-    tasks: number;
+    tasks: number = 0;
 }
 
 export class CountTotalsResponseDto extends ApiResponseDto<CountTotalsDto> {

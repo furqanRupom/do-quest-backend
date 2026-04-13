@@ -5,21 +5,21 @@ import { ApiResponseDto } from "../../common/dto";
 export class ApproveOrRejectDto {
     @IsString()
     @ApiProperty()
-    taskId: string;
+    taskId: string = '';
 
     @IsString()
     @ApiProperty()
-    approverId: string;
+    approverId: string = '';
 
     @IsString()
     @ApiProperty()
-    submissionId: string;
+    submissionId: string = '';
 }
 
 
 class ApproveDto {
-    capturedAmount: number;
-    winnerSubmissionId: string;
+    capturedAmount: number = 0;
+    winnerSubmissionId: string = '';
 }
 
 export class ApproveResponseDto extends ApiResponseDto<ApproveDto>{
