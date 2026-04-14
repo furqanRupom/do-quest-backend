@@ -13,7 +13,7 @@ export default () => ({
     },
     resetSecret: process.env.RESET_SECRET,
     resetTokenExpiry: parseInt(process.env.RESET_TOKEN_EXPIRY!, 10) || 3600,
-    forgotPasswordUrl:process.env.FORGOT_PASSWORD_URL,
+    frontendUrl: process.env.FRONTEND_URL,
     stripe: {
         secretKey:process.env.SECRET_KEY,
         publishedKey:process.env.PUBLISHED_KEY,

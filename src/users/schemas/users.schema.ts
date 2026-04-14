@@ -33,8 +33,9 @@ export class User {
   @Prop()
   socialLinks: string[] = [];
 
-  @Prop()
+  @Prop({ default: false })
   needPasswordChange: boolean = false
+ 
 
 
 }

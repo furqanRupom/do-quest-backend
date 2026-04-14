@@ -4,19 +4,16 @@ import { ApiResponseDto } from "../../common/dto";
 
 export class ResetPasswordDto {
     @IsString()
-    @ApiProperty({example: 'eyJhb..' })
-    token: string;
-    @IsString()
     @ApiProperty({example: 'newStrongPassword123!' })
-    newPassword: string;
+    newPassword: string = 'newStrongPassword123!';
 }
 
 export class ResetPasswordResDto {
     @ApiProperty({example:true})
-    success: boolean;
+    success: boolean = true;
 
     @ApiProperty({example:"Password reset successfully"})
-    message: string;
+    message: string = "Password reset successfully";
 }
 export class ResetPasswordResponseDto extends ApiResponseDto<ResetPasswordResDto> {
     declare data: null;

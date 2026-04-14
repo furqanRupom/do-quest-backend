@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto, createUserResponseDto, ForgotPasswordDto, ForgotPasswordResponseDto } from './dto';
 import { LoginResponseDto, LoginUserDto } from './dto/login-user.dto';
@@ -53,8 +53,8 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @Post('reset-password')
     @ApiOkResponse({ type: ResetPasswordResponseDto })
-    async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<ResetPasswordResponseDto> {
-        await this.authService.resetPassword(resetPasswordDto.token, resetPasswordDto.newPassword);
+    async resetPassword(@Query('token') token: string, @Body() resetPasswordDto: ResetPasswordDto): Promise<ResetPasswordResponseDto> {
+        await this.authService.resetPassword(token, resetPasswordDto.newPassword);
         return sendResponse({
             success: true,
             message: 'Password reset successfully',

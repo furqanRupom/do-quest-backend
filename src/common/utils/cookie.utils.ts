@@ -3,7 +3,7 @@ import { Response } from 'express';
 export const setAuthCookies = (
     res: Response,
     accessToken: string,
-    refreshToken: string
+    refreshToken: string,
 ) => {
     const isProd = process.env.NODE_ENV === 'production';
 
@@ -22,4 +22,6 @@ export const setAuthCookies = (
         maxAge: 1000 * 60 * 60 * 24 * 7, 
         path: '/',
     });
+
+
 };
