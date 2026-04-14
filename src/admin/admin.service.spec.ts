@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AdminService } from './admin.service';
 import { AdminRepository } from './admin.repository';
 import { BaseQueryDto } from '../common/dto';
+import { describe, it, expect, beforeEach, jest,afterEach } from '@jest/globals';
 
 describe('AdminService', () => {
   let service: AdminService;

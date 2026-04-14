@@ -3,7 +3,7 @@ import { UsersService } from './users.service';
 import { UsersRepository } from './users.repository';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ChangePasswordDto, UpdateUserDto } from './dto';
-
+import { describe, it, expect, beforeEach, jest, afterEach } from '@jest/globals';
 describe('UsersService', () => {
   let service: UsersService;
   let usersRepository: jest.Mocked<UsersRepository>;
@@ -13,7 +13,7 @@ describe('UsersService', () => {
   const mockUser = {
     _id: mockUserId,
     email: 'test@example.com',
-    comparePassword: jest.fn(),
+    comparePassword: jest.fn<(password: string) => Promise<boolean>>(),
   };
 
   const mockUsersRepository = {

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { WalletController } from './wallet.controller';
-
+import { describe, it, expect, beforeEach, jest, afterEach } from '@jest/globals';
 describe('WalletController', () => {
   let controller: WalletController;
 

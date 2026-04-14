@@ -29,6 +29,7 @@ export class CreateUserDto {
         description: 'Password must contain at least 1 uppercase, 1 lowercase, 1 number, 1 special character, and minimum 8 characters'
     })
     password: string = 'StrongPass123!';
+    needPasswordChange: boolean = false;
 }
 
 export class UserResponseDto {
@@ -55,6 +56,7 @@ export class UserResponseDto {
 
     @ApiProperty({type:[String]})
     socialLinks?:string[];
+    needPasswordChange: boolean = false;
 }
 
 export class createUserResponseDto extends ApiResponseDto<UserResponseDto> {

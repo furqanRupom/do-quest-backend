@@ -10,4 +10,5 @@ export interface IUser {
     location?: string;
     company?: string;
     socialLinks?: string[];
+    needPasswordChange: boolean;
 }

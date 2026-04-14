@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { BaseQueryDto } from '../common/dto';
-
+import { describe, it, expect, beforeEach, jest,afterEach } from '@jest/globals';
 describe('AdminController', () => {
   let controller: AdminController;
   let service: jest.Mocked<AdminService>;

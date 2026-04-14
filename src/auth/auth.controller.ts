@@ -18,7 +18,7 @@ export class AuthController {
     @Post('register')
     @ApiOkResponse({ type: createUserResponseDto })
     async register(@Body() createUserDto: CreateUserDto): Promise<createUserResponseDto> {
-        const result = await this.authService.registerUser(createUserDto);
+        const result = await this.authService.registerUser({...createUserDto, needPasswordChange: true});
         return sendResponse({
             success: true,
             message: 'User registered successfully',

@@ -4,6 +4,8 @@ import { TasksService } from './tasks.service';
 import { BaseQueryDto } from '../common/dto';
 import { CreateNewTaskDto, CreateTaskResponseDto } from './dto';
 import { Reflector } from '@nestjs/core';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { TaskStatus } from './enums/tasks.enum';
 
 describe('TasksController', () => {
   let controller: TasksController;
@@ -22,6 +24,7 @@ describe('TasksController', () => {
     deadline: new Date().toISOString(),
     maxSubmissions: 5,
     categories: ['Category 1'],
+    status: TaskStatus.active,
     tags: ['tag1'],
   };
 
@@ -36,13 +39,13 @@ describe('TasksController', () => {
         {
           provide: TasksService,
           useValue: {
-            createNewTask: jest.fn().mockResolvedValue(mockTask),
-            deleteTask: jest.fn().mockResolvedValue(undefined),
-            getAllTasks: jest.fn().mockResolvedValue({
+            createNewTask: jest.fn<any>().mockResolvedValue(mockTask),
+            deleteTask: jest.fn<any>().mockResolvedValue(undefined),
+            getAllTasks: jest.fn<any>().mockResolvedValue({
               data: [mockTask],
               meta: mockMeta,
             }),
-            getTaskById: jest.fn().mockResolvedValue(mockTask),
+            getTaskById: jest.fn<any>().mockResolvedValue(mockTask),
           },
         },
         Reflector,

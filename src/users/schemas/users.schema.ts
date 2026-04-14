@@ -10,28 +10,31 @@ export type UserDocument = HydratedDocument<User, UserMethods>;
 export class User {
 
   @Prop({ required: true })
-  name: string;
+  name: string = '';
 
   @Prop({ required: true, unique: true })
-  username: string;
+  username: string = '';
 
   @Prop({ required: true, unique: true })
-  email: string;
+  email: string = '';
 
   @Prop({ required: true })
-  password: string;
+  password: string = '';
 
   @Prop({ type: String, enum: UserRole, default: UserRole.User })
-  role: UserRole;
+  role: UserRole = UserRole.User;
 
   @Prop()
-  location: string;
+  location: string = '';
 
   @Prop()
-  company: string
+  company: string = '';
 
   @Prop()
-  socialLinks: string[];
+  socialLinks: string[] = [];
+
+  @Prop()
+  needPasswordChange: boolean = false
 
 
 }

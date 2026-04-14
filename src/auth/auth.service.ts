@@ -29,6 +29,9 @@ export class AuthService {
         if (!isPasswordValid) {
             throw new HttpException('Password is incorrect', HttpStatus.UNAUTHORIZED);
         }
+        if(user.needPasswordChange) {
+            throw new HttpException('Password change required', HttpStatus.FORBIDDEN);
+        }
         const payload = { sub: user._id, username: user.username, email: user.email, role: user.role };
 
         const accessToken = await this.jwtService.signAsync(payload, {
