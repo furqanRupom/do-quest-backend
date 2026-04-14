@@ -104,7 +104,7 @@ export class AuthService {
         if (!user) {
             throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
-        if (user.needPasswordChange === true) {
+        if (user.needPasswordChange) {
             user.needPasswordChange = false;
         }
 
