@@ -202,17 +202,17 @@ describe('AuthController', () => {
   // ─────────────────────────────────────────────
   describe('resetPassword', () => {
     const resetDto = {
-      token: 'valid-reset-token-123',
       newPassword: 'newStrongPassword123!',
     };
+    const token = "valid-reset-token-123"
 
     it('should return a success response after resetting the password', async () => {
       authService.resetPassword.mockResolvedValue(undefined);
 
-      const result = await controller.resetPassword(resetDto);
+      const result = await controller.resetPassword(token,resetDto);
 
       expect(authService.resetPassword).toHaveBeenCalledWith(
-        resetDto.token,
+        token,
         resetDto.newPassword,
       );
       expect(result).toEqual({
@@ -227,7 +227,7 @@ describe('AuthController', () => {
         new HttpException('Invalid or expired reset token', HttpStatus.BAD_REQUEST),
       );
 
-      await expect(controller.resetPassword(resetDto)).rejects.toThrow(
+      await expect(controller.resetPassword(token,resetDto)).rejects.toThrow(
         new HttpException('Invalid or expired reset token', HttpStatus.BAD_REQUEST),
       );
     });
@@ -237,7 +237,7 @@ describe('AuthController', () => {
         new HttpException('User not found', HttpStatus.NOT_FOUND),
       );
 
-      await expect(controller.resetPassword(resetDto)).rejects.toThrow(
+      await expect(controller.resetPassword(token,resetDto)).rejects.toThrow(
         new HttpException('User not found', HttpStatus.NOT_FOUND),
       );
     });

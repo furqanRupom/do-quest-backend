@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MailService } from './mail.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 
 describe('MailService', () => {
   let service: MailService;
@@ -15,13 +16,13 @@ describe('MailService', () => {
         {
           provide: MailerService,
           useValue: {
-            sendMail: jest.fn().mockResolvedValue('mocked-response'),
+            sendMail: jest.fn().mockResolvedValue('mocked-response' as never),
           },
         },
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn().mockImplementation((key: string) => {
+            get: jest.fn().mockImplementation((key: string | unknown) => {
               if (key === 'mail.user') return 'test@example.com';
               return null;
             }),
