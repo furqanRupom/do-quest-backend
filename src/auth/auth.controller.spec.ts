@@ -112,6 +112,17 @@ describe('AuthController', () => {
     const tokens = {
       accessToken: 'jwt.access.token',
       refreshToken: 'jwt.refresh.token',
+      user: {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'testuser',
+        name: 'Test User',
+        email: 'test@example.com',
+        role: 'user',
+        needPasswordChange: false,
+        location: 'Test Location',
+        company: 'Test Company',
+        socialLinks: ['http://example.com'],
+      },
     };
 
     it('should return a success response with access and refresh tokens', async () => {

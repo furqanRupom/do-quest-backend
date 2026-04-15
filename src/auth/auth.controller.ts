@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto, createUserResponseDto, ForgotPasswordDto, ForgotPasswordResponseDto } from './dto';
+import { CreateUserDto, createUserResponseDto, ForgotPasswordDto, ForgotPasswordResponseDto, RefreshTokenApiResponseDto } from './dto';
 import { LoginResponseDto, LoginUserDto } from './dto/login-user.dto';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { sendResponse } from '../common/utils';
@@ -64,8 +64,8 @@ export class AuthController {
     @UseGuards(RefreshAuthGuard)
     @HttpCode(HttpStatus.OK)
     @Post('refresh-token')
-    @ApiOkResponse({ type: LoginResponseDto })
-    async refreshToken(@Req() req: Request): Promise<LoginResponseDto> {
+    @ApiOkResponse({ type: RefreshTokenApiResponseDto })
+    async refreshToken(@Req() req: Request): Promise<RefreshTokenApiResponseDto> {
         const refreshToken = req.cookies.refreshToken;
         const result = await this.authService.refreshTokens(refreshToken);
         return sendResponse({

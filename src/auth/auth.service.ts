@@ -41,11 +41,12 @@ export class AuthService {
         })
         return result;
     }
-    async loginUser(loginUserDto: LoginUserDto): Promise<{ accessToken: string, refreshToken: string }> {
+    async loginUser(loginUserDto: LoginUserDto): Promise<{ accessToken: string, refreshToken: string, user: Omit<IUser, 'password'> }> {
         const user = await this.authRepository.findByUsernameOrEmail(loginUserDto.usernameOrEmail);
         if (!user) {
             throw new HttpException('User not found via username or email', HttpStatus.NOT_FOUND);
         }
+        const {password, ...userData} = user;
         const isPasswordValid = await user.comparePassword(loginUserDto.password);
 
         if (!isPasswordValid) {
@@ -63,12 +64,12 @@ export class AuthService {
             })
             throw new HttpException('Password change required. Check your email.', HttpStatus.FORBIDDEN);
         }
-        const payload = { sub: user._id, username: user.username, email: user.email, role: user.role };
+        const payload = { sub: user._id, name: user.name, username: user.username, email: user.email, role: user.role };
 
         const accessToken = await generateAccessToken(this.jwtService, this.configService, payload)
 
         const refreshToken = await generateRefreshToken(this.jwtService, this.configService, payload)
-        return { accessToken, refreshToken };
+        return { accessToken, refreshToken, user: userData };
     }
     async forgotPassword(email: string): Promise<void> {
         const user = await this.authRepository.findByUsernameOrEmail(email);
@@ -112,17 +113,17 @@ export class AuthService {
         await user.save();
     }
     async refreshTokens(refreshToken: string): Promise<{ accessToken: string, refreshToken: string }> {
-        let decoded: { sub: string; username: string; email: string; role: string };
+        let decoded: { sub: string; name: string; username: string; email: string; role: string };
 
         try {
-            decoded = await this.jwtService.verifyAsync<{ sub: string; username: string; email: string; role: string }>(refreshToken, {
+            decoded = await this.jwtService.verifyAsync<{ sub: string; name: string; username: string; email: string; role: string }>(refreshToken, {
                 secret: this.configService.get<string>('secretRefreshToken'),
             });
         } catch (error) {
             throw new HttpException('Invalid or expired refresh token', HttpStatus.BAD_REQUEST);
         }
 
-        const payload = { sub: decoded.sub, username: decoded.username, email: decoded.email, role: decoded.role };
+        const payload = { sub: decoded.sub, name: decoded.name, username: decoded.username, email: decoded.email, role: decoded.role };
 
         const newAccessToken = await generateAccessToken(this.jwtService, this.configService, payload)
 
@@ -130,8 +131,6 @@ export class AuthService {
 
         return { accessToken: newAccessToken, refreshToken: newRefreshToken };
     }
-    async googleLogin(session:Record<string,any>){
-        
-    }
+  
 
 }

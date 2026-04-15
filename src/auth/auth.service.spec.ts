@@ -173,6 +173,13 @@ describe('AuthService', () => {
       expect(result).toEqual({
         accessToken: 'mock-access-token',
         refreshToken: 'mock-refresh-token',
+        user: {
+          _id: mockUser._id,
+          username: mockUser.username,
+          email: mockUser.email,
+          role: mockUser.role,
+          needPasswordChange: mockUser.needPasswordChange,
+        }
       });
     });
 
@@ -216,6 +223,7 @@ describe('AuthService', () => {
       const expectedPayload = {
         sub: mockUser._id,
         username: mockUser.username,
+        name: mockUser.name,
         email: mockUser.email,
         role: mockUser.role,
       };
@@ -367,6 +375,7 @@ describe('AuthService', () => {
       username: 'johndoe',
       email: 'johndoe@gmail.com',
       role: 'user',
+      name: 'John Doe',
     };
 
     beforeEach(() => {
@@ -410,6 +419,7 @@ describe('AuthService', () => {
 
       const expectedPayload = {
         sub: decodedPayload.sub,
+        name: decodedPayload.name,
         username: decodedPayload.username,
         email: decodedPayload.email,
         role: decodedPayload.role,
