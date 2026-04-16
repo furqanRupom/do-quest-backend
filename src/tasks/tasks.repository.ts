@@ -1,8 +1,8 @@
-import {  HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Task } from './schemas/tasks.schema';
 import { Model, Types } from 'mongoose';
-import { CreateNewTaskDto, CreateTaskResponseDto } from './dto';
+import { CreateNewTaskDto, CreateTaskResponseDto, UpdateTaskDto } from './dto';
 import { QueryBuilder } from '../common/db/query-builder';
 import { BaseQueryDto, MetaResponseDto } from '../common/dto';
 import { PaymentFlowStatus, TaskStatus } from './enums/tasks.enum';
@@ -45,17 +45,17 @@ export class TasksRepository {
         await task.save();
     }
 
-    async getAllTasks(userId:string,query:BaseQueryDto): Promise<MetaResponseDto<Partial<CreateTaskResponseDto>>> {
-        const builder =  new QueryBuilder(this.taskModel,query)
-        .search(['title','description'])
-        .filter()
-        .sort()
-        .paginate()
-        .fields();
-        const data = await builder.modelQuery.find({user:new Types.ObjectId(userId),isDeleted:false}).lean() 
+    async getAllTasks(userId: string, query: BaseQueryDto): Promise<MetaResponseDto<Partial<CreateTaskResponseDto>>> {
+        const builder = new QueryBuilder(this.taskModel, query)
+            .search(['title', 'description'])
+            .filter()
+            .sort()
+            .paginate()
+            .fields();
+        const data = await builder.modelQuery.find({ user: new Types.ObjectId(userId), isDeleted: false }).lean()
         const meta = await builder.countTotal();
         return { data, meta };
-       
+
     }
 
     async getTaskById(taskId: string): Promise<Partial<CreateTaskResponseDto>> {
@@ -63,8 +63,8 @@ export class TasksRepository {
         if (!task) {
             throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
         }
-        if (!task.isDeleted){
-            throw new HttpException('Task is deleted',HttpStatus.BAD_REQUEST)
+        if (!task.isDeleted) {
+            throw new HttpException('Task is deleted', HttpStatus.BAD_REQUEST)
         }
         return { ...task.toObject(), deadline: task.deadline.toISOString() };
     }
@@ -73,7 +73,7 @@ export class TasksRepository {
         return this.taskModel.findById(taskId).exec();
     }
 
-    async updateTask(taskId: string, updateData: {status:TaskStatus,paymentFlowStatus:PaymentFlowStatus,paymentIntentId?:string}): Promise<Task | null> {
+    async updateTask(taskId: string, updateData: { status: TaskStatus, paymentFlowStatus: PaymentFlowStatus, paymentIntentId?: string }): Promise<Task | null> {
         const updatedTask = await this.taskModel.findByIdAndUpdate(
             taskId,
             updateData,
@@ -82,6 +82,25 @@ export class TasksRepository {
         if (!updatedTask) {
             throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
         }
+        return updatedTask;
+    }
+
+    async updateWholeTask(
+        taskId: string,
+        userId: string,
+        updateData: Partial<UpdateTaskDto>
+    ): Promise<Task | null> {
+
+        const updatedTask = await this.taskModel.findOneAndUpdate(
+            { _id: taskId, user: userId },
+            updateData,
+            { new: true, runValidators: true },
+        );
+
+        if (!updatedTask) {
+            throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
+        }
+
         return updatedTask;
     }
 }

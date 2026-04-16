@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { User } from "../../users/schemas/users.schema";
 import { PaymentFlowStatus, PaymentStatus, TaskStatus } from "../enums/tasks.enum";
 
@@ -7,49 +7,49 @@ import { PaymentFlowStatus, PaymentStatus, TaskStatus } from "../enums/tasks.enu
 @Schema({ timestamps: true })
 export class Task {
     @Prop({ type: Types.ObjectId, ref: User.name, required: true, index: true })
-    user: Types.ObjectId;
+    user: Types.ObjectId = new mongoose.Types.ObjectId();
 
     @Prop({ type:String, required: true })
-    title: string;
+    title: string = '';
 
     @Prop({ type:String, required: true })
-    description: string;
+    description: string = '';
 
     @Prop({type:[String], required: true })
-    successRequirements: string[];
+    successRequirements: string[] = [];
 
     @Prop({type:String, required: false })
-    attachments: string
+    attachments: string = ''
 
     @Prop({type:Number, required: true })
-    budget: number;
+    budget: number = 0;
 
     @Prop({type:Date, required: true })
-    deadline: Date;
+    deadline: Date = new Date();
 
     @Prop({type:Number, required: false })
-    maxSubmissions: number;
+    maxSubmissions: number = 1;
 
     @Prop({ type: String, enum: Object.values(TaskStatus), required: true, default: TaskStatus.pending,index:true })
-    status: TaskStatus
+    status: TaskStatus = TaskStatus.pending
 
     @Prop({ type: String, enum: Object.values(PaymentStatus), required: true, default: PaymentStatus.active })
-    paymentStatus: PaymentStatus
+    paymentStatus: PaymentStatus = PaymentStatus.active
 
     @Prop({type:[String], required: true })
-    categories: string[];
+    categories: string[] = [];
 
     @Prop({type:[String], required: false })
-    tags: string[];
+    tags: string[] = [];
 
     @Prop({ type: String })
     paymentIntentId?: string;
 
     @Prop({ type: String, enum: Object.values(PaymentFlowStatus), default: PaymentFlowStatus.no_payment })
-    paymentFlowStatus: string;
+    paymentFlowStatus: string = '';
     
     @Prop({ type: Boolean, default:false})
-    isDeleted: boolean;
+    isDeleted: boolean = false;
 
 }
 

@@ -1,10 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards,Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards, Query, Put } from '@nestjs/common';
 import { TasksService } from './tasks.service';
-import { CreateNewTaskDto, CreateNewTaskResponseDto, DeleteTaskDto, GetAllTaskDto, SingleTaskDto } from './dto';
+import { CreateNewTaskDto, CreateNewTaskResponseDto, DeleteTaskDto, GetAllTaskDto, SingleTaskDto, UpdateTaskDto, UpdateWholeTaskDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { Roles } from '../common/decorators';
 import { UserRole } from '../auth/enums/role.enum';
-import { sendResponse} from '../common/utils';
+import { sendResponse } from '../common/utils';
 import { ApiBearerAuth, ApiOkResponse, ApiParam } from '@nestjs/swagger';
 import type { AuthRequest } from '../auth/types/auth-request.type';
 import { BaseQueryDto } from '../common/dto/base-query.dto';
@@ -45,25 +45,39 @@ export class TasksController {
     @Roles(UserRole.User)
     @Get('')
     @ApiBearerAuth()
-    @ApiOkResponse({ type: GetAllTaskDto})
-    async getAllTasks(@Req() req: AuthRequest, @Query() query: BaseQueryDto):Promise<GetAllTaskDto<CreateNewTaskDto>> {
-        const result = await this.tasksService.getAllTasks(req.user.sub,query);
+    @ApiOkResponse({ type: GetAllTaskDto })
+    async getAllTasks(@Req() req: AuthRequest, @Query() query: BaseQueryDto): Promise<GetAllTaskDto<CreateNewTaskDto>> {
+        const result = await this.tasksService.getAllTasks(req.user.sub, query);
         return sendResponse({
             success: true,
             message: "Tasks fetched successfully",
-            meta:result.meta,
+            meta: result.meta,
             data: result.data
         })
     }
 
+    @Roles(UserRole.User, UserRole.Admin)
     @Get(':id')
     @ApiBearerAuth()
     @ApiOkResponse({ type: CreateNewTaskResponseDto })
-    async getSingleTask(@Param('id') taskId: string):Promise<SingleTaskDto>{
+    async getSingleTask(@Param('id') taskId: string): Promise<SingleTaskDto> {
         const result = await this.tasksService.getTaskById(taskId);
         return sendResponse({
             success: true,
             message: "Task fetched successfully",
+            data: result
+        })
+    }
+
+    @Roles(UserRole.User,UserRole.Admin)
+    @Put(':id')
+    @ApiBearerAuth()
+    @ApiOkResponse({ type: UpdateWholeTaskDto })
+    async updateWholeTask(@Body() UpdateTaskDto: UpdateTaskDto, @Param('id') taskId: string, @Req() req: AuthRequest): Promise<UpdateWholeTaskDto> {
+        const result = await this.tasksService.updateWholeTask(taskId, req.user.sub, UpdateTaskDto)
+        return sendResponse({
+            success: true,
+            message: "Task updated successfully",
             data: result
         })
     }
