@@ -13,7 +13,7 @@ describe('AdminController', () => {
     getAllSubmissions: jest.fn(),
     getAllTasks: jest.fn(),
   };
-
+    
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AdminController],
@@ -104,7 +104,7 @@ describe('AdminController', () => {
         message: 'Tasks retrieved successfully',
         data: tasks,
       });
-      expect(service.getAllTasks).toHaveBeenCalledWith(query);
+     expect(service.getAllTasks).toHaveBeenCalledWith(query);
     });
   });
 });
