@@ -1,5 +1,4 @@
 import { Controller, Get, HttpCode, HttpStatus, Res } from '@nestjs/common';
-
 @Controller()
 export class AppController {
   constructor() { }
