@@ -42,12 +42,13 @@ export class AuthService {
         return result;
     }
     async loginUser(loginUserDto: LoginUserDto): Promise<{ accessToken: string, refreshToken: string, user: Omit<IUser, 'password'> }> {
-        const user = await this.authRepository.findByUsernameOrEmail(loginUserDto.usernameOrEmail);
-        if (!user) {
+        const isUserExists = await this.authRepository.findByUsernameOrEmail(loginUserDto.usernameOrEmail);
+        if (!isUserExists) {
             throw new HttpException('User not found via username or email', HttpStatus.NOT_FOUND);
         }
+        const user = isUserExists.toObject()
         const {password, ...userData} = user;
-        const isPasswordValid = await user.comparePassword(loginUserDto.password);
+        const isPasswordValid = await isUserExists.comparePassword(loginUserDto.password);
 
         if (!isPasswordValid) {
             throw new HttpException('Password is incorrect', HttpStatus.UNAUTHORIZED);
@@ -62,7 +63,6 @@ export class AuthService {
                     resetPasswordLink: await this.resetPasswordLink(user._id, user.email),
                 },
             })
-            throw new HttpException('Password change required. Check your email.', HttpStatus.FORBIDDEN);
         }
         const payload = { sub: user._id, name: user.name, username: user.username, email: user.email, role: user.role };
 
