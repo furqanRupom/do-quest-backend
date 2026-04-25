@@ -9,9 +9,10 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth-guard';
 import { RefreshAuthGuard } from './guards/refresh-auth.guard';
 import { RefreshTokenStrategy } from './strategies/refreshToken.strategy';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [UsersModule, JwtModule.register({}), PassportModule.register({defaultStrategy: 'jwt'})],
+  imports: [ConfigModule,UsersModule, JwtModule.register({}), PassportModule.register({defaultStrategy: 'jwt'})],
   providers: [AuthService, AuthRepository, JwtStrategy, JwtAuthGuard, RefreshAuthGuard, RefreshTokenStrategy],
   controllers: [AuthController],
   exports: [AuthService, JwtAuthGuard],
