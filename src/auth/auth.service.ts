@@ -188,6 +188,7 @@ export class AuthService {
     }
 
     IsUserExits.password = dto.newPassword
+    IsUserExits.needPasswordChange = false
     IsUserExits.save()
     return null
 
