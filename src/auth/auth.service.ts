@@ -54,7 +54,7 @@ export class AuthService {
     async registerUser(userData: CreateUserDto): Promise<IUser> {
         const result = await this.authRepository.createUser(userData);
 
-        const resetPasswordLink = await this.resetPasswordLink(
+        const resetLink = await this.resetPasswordLink(
             result._id,
             result.email,
         );
@@ -65,7 +65,7 @@ export class AuthService {
             recipeintEmail: result.email,
             context: {
                 name: result.name,
-                resetPasswordLink,
+                resetPasswordLink:resetLink,
             },
         });
 
@@ -106,7 +106,7 @@ export class AuthService {
         const { password, ...userData } = user;
 
         if (user.needPasswordChange) {
-            const resetPasswordLink = await this.resetPasswordLink(
+            const resetLink = await this.resetPasswordLink(
                 user._id,
                 user.email,
             );
@@ -117,7 +117,7 @@ export class AuthService {
                 recipeintEmail: user.email,
                 context: {
                     name: user.name,
-                    resetPasswordLink,
+                    resetPasswordLink:resetLink,
                 },
             });
         }
@@ -153,7 +153,7 @@ export class AuthService {
             );
         }
 
-        const resetPasswordLink = await this.resetPasswordLink(
+        const resetLink = await this.resetPasswordLink(
             user._id,
             user.email,
         );
@@ -164,7 +164,7 @@ export class AuthService {
             recipeintEmail: user.email,
             context: {
                 name: user.name,
-                resetPasswordLink,
+                resetPasswordLink:resetLink,
             },
         });
     }
