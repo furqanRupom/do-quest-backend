@@ -53,22 +53,6 @@ export class AuthService {
 
   async registerUser(userData: CreateUserDto): Promise<IUser> {
     const result = await this.authRepository.createUser(userData);
-
-    const resetLink = await this.resetPasswordLink(
-      result._id,
-      result.email,
-    );
-
-    await this.mailService.sendEmail({
-      subject: 'Welcome to DoQuest!',
-      template: 'welcome',
-      recipeintEmail: result.email,
-      context: {
-        name: result.name,
-        resetPasswordLink: resetLink,
-      },
-    });
-
     return result;
   }
 
@@ -104,24 +88,7 @@ export class AuthService {
 
     const user = isUserExists.toObject();
     const { password, ...userData } = user;
-
-    if (user.needPasswordChange) {
-      const resetLink = await this.resetPasswordLink(
-        user._id,
-        user.email,
-      );
-
-      await this.mailService.sendEmail({
-        subject: 'Password Change Required',
-        template: 'change-password',
-        recipeintEmail: user.email,
-        context: {
-          name: user.name,
-          resetPasswordLink: resetLink,
-        },
-      });
-    }
-
+    
     const payload = {
       sub: user._id,
       name: user.name,
