@@ -8,70 +8,83 @@ import { ResetPasswordDto, ResetPasswordResponseDto } from './dto/reset-password
 import { RefreshAuthGuard } from './guards/refresh-auth.guard';
 import type { Request, Response } from 'express';
 import { setAuthCookies } from '../common/utils/cookie.utils';
+import { NeedChangePasswordDto, NeedChangePasswordResponseDto } from './dto/need-change-password.dto';
 
 
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) { }
 
-    @HttpCode(HttpStatus.CREATED)
-    @Post('register')
-    @ApiOkResponse({ type: createUserResponseDto })
-    async register(@Body() createUserDto: CreateUserDto): Promise<createUserResponseDto> {
-        const result = await this.authService.registerUser({...createUserDto, needPasswordChange: true});
-        return sendResponse({
-            success: true,
-            message: 'User registered successfully',
-            data: result,
-        });
-    }
+  @HttpCode(HttpStatus.CREATED)
+  @Post('register')
+  @ApiOkResponse({ type: createUserResponseDto })
+  async register(@Body() createUserDto: CreateUserDto): Promise<createUserResponseDto> {
+    const result = await this.authService.registerUser({ ...createUserDto, needPasswordChange: true });
+    return sendResponse({
+      success: true,
+      message: 'User registered successfully',
+      data: result,
+    });
+  }
 
-    @HttpCode(HttpStatus.OK)
-    @Post('login')
-    @ApiOkResponse({ type: LoginResponseDto })
-    async login(@Res({ passthrough: true }) res: Response, @Body() loginUserDto: LoginUserDto): Promise<LoginResponseDto> {
-        const result = await this.authService.loginUser(loginUserDto);
-        setAuthCookies(res, result.accessToken, result.refreshToken);
-        return sendResponse({
-            success: true,
-            message: 'User logged in successfully',
-            data: result,
-        });
-    }
-    @HttpCode(HttpStatus.OK)
-    @Post('forgot-password')
-    @ApiOkResponse({ type: ForgotPasswordResponseDto })
-    async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<ForgotPasswordResponseDto> {
-        await this.authService.forgotPassword(forgotPasswordDto.email);
-        return sendResponse({
-            success: true,
-            message: 'Password reset email sent successfully',
-            data: null,
-        });
-    }
+  @HttpCode(HttpStatus.OK)
+  @Post('login')
+  @ApiOkResponse({ type: LoginResponseDto })
+  async login(@Res({ passthrough: true }) res: Response, @Body() loginUserDto: LoginUserDto): Promise<LoginResponseDto> {
+    const result = await this.authService.loginUser(loginUserDto);
+    setAuthCookies(res, result.accessToken, result.refreshToken);
+    return sendResponse({
+      success: true,
+      message: 'User logged in successfully',
+      data: result,
+    });
+  }
+  @HttpCode(HttpStatus.OK)
+  @Post('forgot-password')
+  @ApiOkResponse({ type: ForgotPasswordResponseDto })
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<ForgotPasswordResponseDto> {
+    await this.authService.forgotPassword(forgotPasswordDto.email);
+    return sendResponse({
+      success: true,
+      message: 'Password reset email sent successfully',
+      data: null,
+    });
+  }
 
-    @HttpCode(HttpStatus.OK)
-    @Post('reset-password')
-    @ApiOkResponse({ type: ResetPasswordResponseDto })
-    async resetPassword(@Query('token') token: string, @Body() resetPasswordDto: ResetPasswordDto): Promise<ResetPasswordResponseDto> {
-        await this.authService.resetPassword(token, resetPasswordDto.newPassword);
-        return sendResponse({
-            success: true,
-            message: 'Password reset successfully',
-            data: null,
-        });
-    }
-    @UseGuards(RefreshAuthGuard)
-    @HttpCode(HttpStatus.OK)
-    @Post('refresh-token')
-    @ApiOkResponse({ type: RefreshTokenApiResponseDto })
-    async refreshToken(@Req() req: Request): Promise<RefreshTokenApiResponseDto> {
-        const refreshToken = req.cookies.refreshToken;
-        const result = await this.authService.refreshTokens(refreshToken);
-        return sendResponse({
-            success: true,
-            message: 'Token refreshed successfully',
-            data: result,
-        });
-    }
+  @HttpCode(HttpStatus.OK)
+  @Post('reset-password')
+  @ApiOkResponse({ type: ResetPasswordResponseDto })
+  async resetPassword(@Query('token') token: string, @Body() resetPasswordDto: ResetPasswordDto): Promise<ResetPasswordResponseDto> {
+    await this.authService.resetPassword(token, resetPasswordDto.newPassword);
+    return sendResponse({
+      success: true,
+      message: 'Password reset successfully',
+      data: null,
+    });
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('change-password')
+  @ApiOkResponse({ type: NeedChangePasswordResponseDto })
+  async changePassword(@Query('email') email: string, @Body() needChangePassDto: NeedChangePasswordDto): Promise<NeedChangePasswordResponseDto> {
+    await this.authService.resetPasswordChange(email, needChangePassDto)
+    return sendResponse({
+      success: true,
+      message: 'Password changed successfully',
+      data: null,
+    });
+  }
+  @UseGuards(RefreshAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('refresh-token')
+  @ApiOkResponse({ type: RefreshTokenApiResponseDto })
+  async refreshToken(@Req() req: Request): Promise<RefreshTokenApiResponseDto> {
+    const refreshToken = req.cookies.refreshToken;
+    const result = await this.authService.refreshTokens(refreshToken);
+    return sendResponse({
+      success: true,
+      message: 'Token refreshed successfully',
+      data: result,
+    });
+  }
 }
