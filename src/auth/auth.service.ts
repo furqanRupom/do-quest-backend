@@ -40,7 +40,6 @@ export class AuthService {
     });
   }
 
-
   private async resetPasswordLink(sub: mongoose.Types.ObjectId, email: string) {
     const resetToken = await this.generateResetToken({ sub, email });
 
