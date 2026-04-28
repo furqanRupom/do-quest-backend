@@ -15,9 +15,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly mailService: MailService,
-  ) { }
-
-
+  ) {}
 
   private generateAccessToken(payload: Record<string, any>) {
     return this.jwtService.signAsync(payload, {
@@ -48,24 +46,19 @@ export class AuthService {
     return `${frontendUrl}/reset-password?token=${resetToken}`;
   }
 
-
-
   async registerUser(userData: CreateUserDto): Promise<IUser> {
     const result = await this.authRepository.createUser(userData);
     return result;
   }
-
-
 
   async loginUser(loginUserDto: LoginUserDto): Promise<{
     accessToken: string;
     refreshToken: string;
     user: Omit<IUser, 'password'>;
   }> {
-    const isUserExists =
-      await this.authRepository.findByUsernameOrEmail(
-        loginUserDto.usernameOrEmail,
-      );
+    const isUserExists = await this.authRepository.findByUsernameOrEmail(
+      loginUserDto.usernameOrEmail,
+    );
 
     if (!isUserExists) {
       throw new HttpException(
@@ -79,15 +72,12 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new HttpException(
-        'Password is incorrect',
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new HttpException('Password is incorrect', HttpStatus.UNAUTHORIZED);
     }
 
     const user = isUserExists.toObject();
     const { password, ...userData } = user;
-    
+
     const payload = {
       sub: user._id,
       name: user.name,
@@ -106,23 +96,14 @@ export class AuthService {
     };
   }
 
-
-
   async forgotPassword(email: string): Promise<void> {
-    const user =
-      await this.authRepository.findByUsernameOrEmail(email);
+    const user = await this.authRepository.findByUsernameOrEmail(email);
 
     if (!user) {
-      throw new HttpException(
-        'User not found via email',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('User not found via email', HttpStatus.NOT_FOUND);
     }
 
-    const resetLink = await this.resetPasswordLink(
-      user._id,
-      user.email,
-    );
+    const resetLink = await this.resetPasswordLink(user._id, user.email);
 
     await this.mailService.sendEmail({
       subject: 'Password Reset',
@@ -134,8 +115,6 @@ export class AuthService {
       },
     });
   }
-
-
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
     let decoded: { sub: string; email: string };
@@ -154,10 +133,7 @@ export class AuthService {
     const user = await this.authRepository.findById(decoded.sub);
 
     if (!user) {
-      throw new HttpException(
-        'User not found',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
     user.password = newPassword;
@@ -166,13 +142,13 @@ export class AuthService {
     await user.save();
   }
 
-  async resetPasswordChange(email: string, dto: { currentPassword: string, newPassword: string }) {
-    const IsUserExits = await this.authRepository.findByUsernameOrEmail(email)
+  async resetPasswordChange(
+    email: string,
+    dto: { currentPassword: string; newPassword: string },
+  ) {
+    const IsUserExits = await this.authRepository.findByUsernameOrEmail(email);
     if (!IsUserExits) {
-      throw new HttpException(
-        'User not found',
-        HttpStatus.NOT_FOUND
-      )
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
     const isPasswordValid = await IsUserExits.comparePassword(
@@ -180,17 +156,13 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new HttpException(
-        'Password is incorrect',
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new HttpException('Password is incorrect', HttpStatus.UNAUTHORIZED);
     }
 
-    IsUserExits.password = dto.newPassword
-    IsUserExits.needPasswordChange = false
-    IsUserExits.save()
-    return null
-
+    IsUserExits.password = dto.newPassword;
+    IsUserExits.needPasswordChange = false;
+    IsUserExits.save();
+    return null;
   }
 
   async refreshTokens(refreshToken: string): Promise<{
@@ -207,9 +179,7 @@ export class AuthService {
 
     try {
       decoded = await this.jwtService.verifyAsync(refreshToken, {
-        secret: this.configService.get<string>(
-          'secretRefreshToken',
-        ),
+        secret: this.configService.get<string>('secretRefreshToken'),
       });
     } catch (error) {
       throw new HttpException(
@@ -226,11 +196,9 @@ export class AuthService {
       role: decoded.role,
     };
 
-    const newAccessToken =
-      await this.generateAccessToken(payload);
+    const newAccessToken = await this.generateAccessToken(payload);
 
-    const newRefreshToken =
-      await this.generateRefreshToken(payload);
+    const newRefreshToken = await this.generateRefreshToken(payload);
 
     return {
       accessToken: newAccessToken,
