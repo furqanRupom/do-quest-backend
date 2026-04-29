@@ -3,154 +3,129 @@ html(lang="en")
   head
     meta(charset="UTF-8")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
-    title Welcome to Do.Quest
+    title Welcome to DoQuest
+
     link(href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet")
+
     style.
-      /* CSS Reset */
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
 
-      /* Base Styles */
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #faf9f6;
-        color: #2d2f2f;
+        background-color: #f6f7fb;
+        color: #1f2430;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
         align-items: center;
         padding: 2rem 1rem;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
       }
 
-      h1, h2, h3, .brand-font {
+      h1, h2, h3 {
         font-family: 'Manrope', sans-serif;
       }
 
-      /* Layout */
       .container {
         width: 100%;
         max-width: 600px;
         background-color: #ffffff;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(20, 30, 60, 0.08);
         overflow: hidden;
       }
 
-      /* Header */
       .header {
         display: flex;
         justify-content: center;
         align-items: center;
         padding: 1.5rem;
-        background-color: #ffffff;
-        border-bottom: 1px solid #eeeeee;
-      }
-
-      .logo {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        border-bottom: 1px solid #eef0f6;
       }
 
       .logo-text {
         font-size: 1.5rem;
-        font-weight: 700;
-        margin-top: 0.5rem;
-        margin-left: 0.25rem;
-        color: #333333;
-        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        color: #1f2430;
       }
 
       .logo-text span {
-        color: #fe7f3c;
+        color: #434E78;
       }
 
-      /* Content */
       .content {
-        padding: 2rem;
+        padding: 2.5rem;
       }
 
-      /* Welcome Banner */
       .welcome-banner {
-        background-color: #fff3ed;
-        border-left: 4px solid #fe7f3c;
+        background: rgba(67, 78, 120, 0.08);
+        border-left: 4px solid #434E78;
         padding: 1.5rem;
-        border-radius: 6px;
+        border-radius: 10px;
         text-align: center;
         margin-bottom: 1.5rem;
       }
 
       .welcome-banner h1 {
         font-size: 1.5rem;
-        font-weight: 700;
-        color: #333333;
+        font-weight: 800;
+        color: #1f2430;
         margin-bottom: 0.5rem;
       }
 
       .welcome-banner p {
-        font-size: 0.9375rem;
-        color: #666666;
+        font-size: 0.95rem;
+        color: #5a6275;
       }
 
       .greeting {
         font-size: 1rem;
-        color: #333333;
+        color: #1f2430;
         margin-bottom: 0.75rem;
       }
 
       .main-text {
-        font-size: 1rem;
-        color: #666666;
+        font-size: 0.95rem;
+        color: #5a6275;
         line-height: 1.6;
-        margin-bottom: 1rem;
-      }
-
-      /* Button */
-      .button-wrapper {
-        margin: 1.5rem 0;
-        text-align: center;
+        margin-bottom: 1.5rem;
       }
 
       .btn {
         display: inline-block;
-        padding: 0.875rem 2rem;
-        background-color: #fe7f3c;
+        padding: 0.95rem 2.2rem;
+        background-color: #434E78;
         color: #ffffff;
         font-weight: 600;
-        font-size: 1rem;
         text-decoration: none;
-        border-radius: 6px;
-        transition: background-color 0.15s ease;
-        cursor: pointer;
+        border-radius: 10px;
+        transition: all 0.2s ease;
       }
 
       .btn:hover {
-        background-color: #ed7330;
+        background-color: #353e63;
       }
 
       .expiry-text {
-        font-size: 0.875rem;
-        color: #888888;
+        font-size: 0.85rem;
+        color: #8a90a3;
+        margin-top: 1rem;
       }
 
-      /* Features Section */
       .features {
-        margin: 1.5rem 0;
-        padding: 1.25rem;
-        background-color: #faf9f6;
-        border-radius: 6px;
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: #f6f7fb;
+        border-radius: 10px;
       }
 
       .features h3 {
         font-size: 1rem;
-        font-weight: 600;
-        color: #333333;
         margin-bottom: 1rem;
+        color: #1f2430;
       }
 
       .feature-item {
@@ -160,112 +135,81 @@ html(lang="en")
       }
 
       .feature-icon {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         margin-right: 0.75rem;
-        font-size: 1.125rem;
+        color: #434E78;
+        font-size: 1rem;
       }
 
       .feature-item span:last-child {
-        font-size: 0.9375rem;
-        color: #666666;
-      }
-
-      /* Divider */
-      .divider {
-        height: 1px;
-        background-color: #eeeeee;
-        margin: 1.5rem 0;
+        font-size: 0.92rem;
+        color: #5a6275;
       }
 
       .signature {
-        margin-top: 1rem;
-        color: #666666;
+        margin-top: 1.5rem;
+        color: #5a6275;
         line-height: 1.6;
       }
 
-      /* Footer */
       .footer {
-        padding: 1.5rem 2rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        padding: 1.5rem;
+        background: #f6f7fb;
+        border-top: 1px solid #eef0f6;
         text-align: center;
-        gap: 0.5rem;
-        background-color: #f5f5f5;
-        border-top: 1px solid #eeeeee;
       }
 
       .footer-text {
-        color: #888888;
         font-size: 0.75rem;
-        line-height: 1.5;
+        color: #8a90a3;
       }
 
   body
     .container
-      //- Header
       .header
-        .logo
-          svg(width="48" height="48" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg")
-            path(d="M12 18C12 15 14 13 17 13H23C26 13 28 15 28 18V28C28 32 25 35 20 35C15 35 12 32 12 28V18Z" fill="#fe7f3c")
-            ellipse(cx="20" cy="13" rx="6" ry="2" fill="#ed7330")
-            path(d="M14 13C14 11.5 16.5 11 20 11C23.5 11 26 11.5 26 13" stroke="#d96820" stroke-width="1" fill="none")
-            path(d="M16 13C16 12 15.5 11.5 15 12C14.5 12.5 14.5 13.5 15 14C15.5 14.5 16 14 16 13Z" fill="#d96820")
-            path(d="M24 13C24 12 24.5 11.5 25 12C25.5 12.5 25.5 13.5 25 14C24.5 14.5 24 14 24 13Z" fill="#d96820")
-            path(
-              d="M20 17L20 15.5M20 28.5L20 27M22.5 19.5C22.5 18.1 21.4 17 20 17C18.6 17 17.5 18.1 17.5 19.5C17.5 20.9 18.6 22 20 22C21.4 22 22.5 23.1 22.5 24.5C22.5 25.9 21.4 27 20 27C18.6 27 17.5 25.9 17.5 24.5"
-              stroke="#ffffff"
-              stroke-width="2"
-              stroke-linecap="round"
-              fill="none"
-            )
-          .logo-text
-            | Do
-            span .
-            | Quest
+        .logo-text
+          | Do
+          span .
+          | Quest
 
-      //- Content
       .content
         .welcome-banner
           h1 Welcome to DoQuest, #{name}! 🎉
-          p Your account has been successfully created
+          p Your journey toward better productivity starts now
 
         p.greeting Hello #{name},
 
         p.main-text
-          | Thank you for joining DoQuest! We're excited to have you on board. Your account has been created successfully, and you're just one step away from getting started.
+          | Your account has been successfully created. You're now ready to start building habits, tracking progress, and completing quests.
 
-        .button-wrapper
-          a.btn(href=resetPasswordLink target="_blank") Set Your Password
+        a.btn(href=resetPasswordLink target="_blank") Set Your Password
 
         p.expiry-text
-          | For security reasons, please click the button above to set your password. This link will expire in 24 hours.
+          | This link will expire in 24 hours for security reasons.
 
         .features
           h3 What you can do with DoQuest:
           .feature-item
-            span.feature-icon ✅
-            span Create and manage your daily quests
+            .feature-icon 🎯
+            span Create and manage daily quests
           .feature-item
-            span.feature-icon 📊
-            span Track your progress and achievements
+            .feature-icon 📊
+            span Track progress and achievements
           .feature-item
-            span.feature-icon 🎯
-            span Set goals and build productive habits
+            .feature-icon ⚡
+            span Build consistent habits
           .feature-item
-            span.feature-icon 👥
-            span Connect with friends and share your journey
-
-        p.main-text
-          | If you have any questions or need assistance, our support team is here to help!
+            .feature-icon 👥
+            span Share progress with friends
 
         .signature
-          | Best regards,
+          | We're excited to have you on board,
           br
           | The DoQuest Team
 
-      //- Footer
       .footer
-        .footer-text
-          | © #{year || new Date().getFullYear()} Do.Quest All rights reserved.
-        .footer-text
-          | This email was sent to #{email}
+        .footer-text © #{year || new Date().getFullYear()} DoQuest. All rights reserved.
