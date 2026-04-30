@@ -3,7 +3,7 @@ html(lang="en")
   head
     meta(charset="UTF-8")
     meta(name="viewport" content="width=device-width, initial-scale=1.0")
-    title Welcome to DoQuest
+    title Welcome to Do.Quest
 
     link(href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet")
 
@@ -18,11 +18,10 @@ html(lang="en")
         font-family: 'Inter', sans-serif;
         background-color: #f6f7fb;
         color: #1f2430;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 2rem 1rem;
+      }
+
+      table {
+        border-collapse: collapse;
       }
 
       h1, h2, h3 {
@@ -30,6 +29,7 @@ html(lang="en")
       }
 
       .container {
+        margin-top:30px;
         width: 100%;
         max-width: 600px;
         background-color: #ffffff;
@@ -39,14 +39,13 @@ html(lang="en")
       }
 
       .header {
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        text-align: center;
         padding: 1.5rem;
         border-bottom: 1px solid #eef0f6;
       }
 
       .logo-text {
+        display: inline-block;
         font-size: 1.5rem;
         font-weight: 800;
         color: #1f2430;
@@ -72,7 +71,6 @@ html(lang="en")
       .welcome-banner h1 {
         font-size: 1.5rem;
         font-weight: 800;
-        color: #1f2430;
         margin-bottom: 0.5rem;
       }
 
@@ -83,7 +81,6 @@ html(lang="en")
 
       .greeting {
         font-size: 1rem;
-        color: #1f2430;
         margin-bottom: 0.75rem;
       }
 
@@ -102,11 +99,6 @@ html(lang="en")
         font-weight: 600;
         text-decoration: none;
         border-radius: 10px;
-        transition: all 0.2s ease;
-      }
-
-      .btn:hover {
-        background-color: #353e63;
       }
 
       .expiry-text {
@@ -125,27 +117,10 @@ html(lang="en")
       .features h3 {
         font-size: 1rem;
         margin-bottom: 1rem;
-        color: #1f2430;
       }
 
       .feature-item {
-        display: flex;
-        align-items: center;
         margin: 0.75rem 0;
-      }
-
-      .feature-icon {
-        width: 28px;
-        height: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 0.75rem;
-        color: #434E78;
-        font-size: 1rem;
-      }
-
-      .feature-item span:last-child {
         font-size: 0.92rem;
         color: #5a6275;
       }
@@ -169,47 +144,46 @@ html(lang="en")
       }
 
   body
-    .container
-      .header
-        .logo-text
-          | Do
-          span .
-          | Quest
+    table(width="100%" bgcolor="#f6f7fb")
+      tr
+        td(align="center")
+          table.container
+            tr
+              td.header
+                .logo-text
+                  | Do
+                  span .
+                  | Quest
 
-      .content
-        .welcome-banner
-          h1 Welcome to DoQuest, #{name}! 🎉
-          p Your journey toward better productivity starts now
+            tr
+              td.content
+                .welcome-banner
+                  h1 Welcome to DoQuest, #{name}! 🎉
+                  p Your journey toward better productivity starts now
 
-        p.greeting Hello #{name},
+                p.greeting Hello #{name},
 
-        p.main-text
-          | Your account has been successfully created. You're now ready to start building habits, tracking progress, and completing quests.
+                p.main-text
+                  | Your account has been successfully created. You're now ready to start building habits, tracking progress, and completing quests.
 
-        a.btn(href=resetPasswordLink target="_blank") Set Your Password
+                p(style="text-align:center;")
+                  a.btn(href=resetPasswordLink target="_blank") Set Your Password
 
-        p.expiry-text
-          | This link will expire in 24 hours for security reasons.
+                p.expiry-text
+                  | This link will expire in 24 hours for security reasons.
 
-        .features
-          h3 What you can do with DoQuest:
-          .feature-item
-            .feature-icon 🎯
-            span Create and manage daily quests
-          .feature-item
-            .feature-icon 📊
-            span Track progress and achievements
-          .feature-item
-            .feature-icon ⚡
-            span Build consistent habits
-          .feature-item
-            .feature-icon 👥
-            span Share progress with friends
+                .features
+                  h3 What you can do with DoQuest:
+                  .feature-item 🎯 Create and manage daily quests
+                  .feature-item 📊 Track progress and achievements
+                  .feature-item ⚡ Build consistent habits
+                  .feature-item 👥 Share progress with friends
 
-        .signature
-          | We're excited to have you on board,
-          br
-          | The DoQuest Team
+                .signature
+                  | We're excited to have you on board,
+                  br
+                  | The DoQuest Team
 
-      .footer
-        .footer-text © #{year || new Date().getFullYear()} DoQuest. All rights reserved.
+            tr
+              td.footer
+                .footer-text © #{year || new Date().getFullYear()} DoQuest. All rights reserved.
