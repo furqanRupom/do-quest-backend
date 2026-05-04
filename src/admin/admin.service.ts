@@ -31,7 +31,9 @@ export class AdminService {
   async getAllTasks(query: BaseQueryDto): Promise<any> {
     return this.adminRepository.getAllTasks(query);
   }
-
+  async getTasksBountiesBarData():Promise<any>{
+    return this.adminRepository.getTasksBountiesBarData();
+  }
   async updateTasksStatus(
     taskId: string,
     taskStatus: { taskStatus: TaskStatus },

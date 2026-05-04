@@ -18,7 +18,7 @@ export class AdminRepository {
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Submission.name) private submissionModel: Model<Submission>,
     @InjectModel(Task.name) private taskModel: Model<Task>,
-  ) {}
+  ) { }
 
   async countTotalUsers(): Promise<number> {
     return this.userModel.countDocuments().exec();
@@ -66,6 +66,45 @@ export class AdminRepository {
     const data = await tasks.modelQuery;
     const meta = await tasks.countTotal();
     return { data, meta };
+  }
+
+
+  async getTasksBountiesBarData() {
+    return await this.taskModel.aggregate([
+      {
+        $match: {
+          isDeleted: { $ne: true },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: {
+          "_id.year": 1,
+          "_id.month": 1,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          month: {
+            $dateFromParts: {
+              year: "$_id.year",
+              month: "$_id.month",
+              day: 1,
+            },
+          },
+          count: 1,
+        },
+      },
+    ]);
   }
   async updateTaskStatus(
     taskId: string,

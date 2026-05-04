@@ -71,6 +71,16 @@ export class AdminController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @Get('tasks/bar-chart')
+  async getTasksBountiesBarData() {
+    const result = await this.adminService.getTasksBountiesBarData();
+    return sendResponse({
+      success: true,
+      message: 'Tasks and bounties bar chart data retrieved successfully',
+      data: result,
+    });
+  }
+  @HttpCode(HttpStatus.OK)
   @Put('tasks/:id')
   async updateTaskStatus(
     @Param('id') taskId: string,
