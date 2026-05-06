@@ -66,7 +66,8 @@ export class AdminController {
     return sendResponse({
       success: true,
       message: 'Tasks retrieved successfully',
-      data: result,
+      meta:result.meta,
+      data: result.data,
     });
   }
 
