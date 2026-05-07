@@ -22,63 +22,29 @@ export class UsersRepository {
     userId: string,
     updateData: Partial<User>,
   ): Promise<UserDocument | null> {
+
+
     const { socialLinks, ...otherFields } = updateData;
 
+    const updatePayload: Record<string, any> = { ...otherFields };
+
     if (Array.isArray(socialLinks) && socialLinks.length > 0) {
-      return this.userModel
-        .findByIdAndUpdate(
-          userId,
-          [
-            {
-              $set: {
-                ...otherFields,
-                socialLinks: {
-                  $concatArrays: [
-                    {
-                      $filter: {
-                        input: { $ifNull: ['$socialLinks', []] },
-                        as: 'link',
-                        cond: {
-                          $not: {
-                            $in: [
-                              // ✅ index 2 = domain (e.g. "github.com")
-                              // "https://github.com/user" split by "/" → ["https:", "", "github.com", "user"]
-                              { $arrayElemAt: [{ $split: ['$$link', '/'] }, 2] },
-                              {
-                                $map: {
-                                  input: socialLinks,
-                                  as: 'newLink',
-                                  in: { $arrayElemAt: [{ $split: ['$$newLink', '/'] }, 2] },
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      },
-                    },
-                    socialLinks,
-                  ],
-                },
-              },
-            },
-          ],
-          {
-            new: true,
-            runValidators: true,
-            updatePipeline: true,
-          },
-        )
-        .exec();
+      updatePayload.socialLinks = socialLinks;
     }
 
     return this.userModel
       .findByIdAndUpdate(
         userId,
-        { $set: otherFields },
+        { $set: updatePayload },
         { new: true, runValidators: true },
       )
       .exec();
-  } async updateUserPassword(userId: string, newPassword: string): Promise<void> {
+  }
+
+
+
+
+  async updateUserPassword(userId: string, newPassword: string): Promise<void> {
     const user = await this.userModel.findById(userId);
     if (!user) return;
     user.password = newPassword;
