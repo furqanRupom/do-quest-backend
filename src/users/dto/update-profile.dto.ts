@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString } from 'class-validator';
+import { IsArray, isArray, IsEmail, IsString } from 'class-validator';
 import mongoose from 'mongoose';
 import { ApiResponseDto } from '../../common/dto';
 
@@ -55,6 +55,8 @@ export class UpdateUserDto {
     company?: string
 
     @ApiProperty({ type: [String] })
+    @IsArray()
+    @IsString({each: true})
     socialLinks?: string[];
 
 }
