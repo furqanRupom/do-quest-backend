@@ -1,5 +1,5 @@
-import { Body, Controller, HttpCode, HttpStatus, Put, Req, UseGuards, Get } from '@nestjs/common';
-import { ChangePasswordDto, ChangePasswordResponseDto, UpdateProfileResponseDto, UpdateUserDto, UserProfileResponseDto } from './dto';
+import { Body, Controller, HttpCode, HttpStatus, Put, Req, UseGuards, Get, Delete } from '@nestjs/common';
+import { ChangePasswordDto, ChangePasswordResponseDto, DeleteAccountResponseDto, UpdateProfileResponseDto, UpdateUserDto, UserProfileResponseDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { UsersService } from './users.service';
 import { sendResponse } from '../common/utils';
@@ -46,6 +46,19 @@ export class UsersController {
         return sendResponse({
             success: true,
             message: 'Password changed successfully',
+            data: null,
+        });
+    }
+
+    
+    @HttpCode(HttpStatus.ACCEPTED)
+    @Delete('delete-account')
+    @ApiOkResponse({ type: DeleteAccountResponseDto})
+    async deleteMyAccount( @Req() req: AuthRequest): Promise<DeleteAccountResponseDto> {
+        await this.usersService.deleteMyAccount(req.user.sub);
+        return sendResponse({
+            success: true,
+            message: 'User Deleted successfully',
             data: null,
         });
     }

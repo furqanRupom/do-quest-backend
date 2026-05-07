@@ -4,7 +4,6 @@ import { User, UserDocument } from './schemas/users.schema';
 import { Model } from 'mongoose';
 import { IUser } from '../auth/interfaces/user.interface';
 import { UserRole } from '../auth/enums/role.enum';
-import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersRepository {
@@ -93,6 +92,7 @@ export class UsersRepository {
     }
 
     async createAdmin(username:string,name:string,email: string, password: string) {
+
         return this.userModel.create({
             email,
             username,
@@ -101,5 +101,8 @@ export class UsersRepository {
             role: UserRole.Admin,
         });
     }
-
+    async deleteAccount(userId:string):Promise<null>{
+        await this.userModel.findByIdAndUpdate(userId,{isDeleted:true},{new:true})
+        return null
+    }
 }

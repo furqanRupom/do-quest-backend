@@ -27,7 +27,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         if (!user) {
             throw new UnauthorizedException('Invalid or missing token');
         }
-
         const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(ROLES_KEY, [
             context.getHandler(),
             context.getClass(),

@@ -66,7 +66,12 @@ export class AuthService {
         HttpStatus.NOT_FOUND,
       );
     }
-
+    if(isUserExists.isDeleted){
+      throw new HttpException(
+        "Account has been deleted. Please contact our support team.",
+        HttpStatus.BAD_REQUEST
+      )
+    }
     const isPasswordValid = await isUserExists.comparePassword(
       loginUserDto.password,
     );

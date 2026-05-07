@@ -35,7 +35,9 @@ export class User {
 
   @Prop({ default: false })
   needPasswordChange: boolean = false
- 
+
+  @Prop({ default: false })
+  isDeleted: boolean = false
 
 
 }
@@ -45,10 +47,10 @@ export interface UserMethods {
   comparePassword(password: string): Promise<boolean>;
 }
 
-UserSchema.pre('save', async function () {
+UserSchema.pre('save', async function() {
   if (!this.isModified('password')) return;
   this.password = await bcrypt.hash(this.password, 10);
 });
-UserSchema.methods.comparePassword = async function (password: string): Promise<boolean> {
+UserSchema.methods.comparePassword = async function(password: string): Promise<boolean> {
   return await bcrypt.compare(password, this.password);
 }
