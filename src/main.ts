@@ -6,7 +6,7 @@ import * as bodyParser from "body-parser"
 import cookieParser from 'cookie-parser'
 import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule, { cors: true});
   app.setGlobalPrefix('api/v1');
   const config = new DocumentBuilder()
     .setTitle('Do Quest API')
@@ -50,7 +50,9 @@ async function bootstrap() {
   app.use(
     '/stripe/webhook',
     bodyParser.raw({ type: 'application/json' }),
-  ); app.use(cookieParser())
+  );
+
+  app.use(cookieParser())
   await app.listen(process.env.PORT ?? 3000);
 }
 

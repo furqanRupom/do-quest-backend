@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import Stripe from 'stripe';
 import { CreatePaymentDto } from './dto';
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
@@ -14,45 +14,65 @@ export class StripeService {
   ) { }
 
 
-  async createOnBoardingLink(userId: string, currentStripeAccount: string | null) {
-    let accountId = currentStripeAccount
+
+  async createOnBoardingLink(
+    userId: string,
+    currentStripeAccount: string | null,
+  ) {
+    const frontendUrl = this.configService.get<string>('frontendUrl');
+
+    if (!frontendUrl) {
+      throw new HttpException(
+        'Frontend URL is not configured',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    let accountId = currentStripeAccount;
+
     if (!accountId) {
       const account = await this.stripe.accounts.create({
-        type: "express",
+        type: 'express',
         metadata: { userId },
-      })
-      accountId = account.id
+      });
+
+      accountId = account.id;
     }
-    await this.usersRepository.findUserAndUpdate(userId, { userStripeId: accountId})
-    const frontendUrl = this.configService.get<string>("frontendUrl")
+
+    await this.usersRepository.findUserAndUpdate(userId, {
+      userStripeId: accountId,
+    });
+
     const accountLink = await this.stripe.accountLinks.create({
       account: accountId,
       refresh_url: `${frontendUrl}/settings/payouts?refresh=true`,
       return_url: `${frontendUrl}/settings/payouts?success=true`,
-      type: "account_onboarding"
-    })
-    return { url: accountLink.url }
+      type: 'account_onboarding',
+    });
 
+    return { url: accountLink.url };
   }
+
 
   async createLoginLink(accountId: string) {
     const loginLink = await this.stripe.accounts.createLoginLink(accountId);
     return { url: loginLink.url };
   }
 
-  async stripeWebhook(body:any,sig:string){
-    const webhookSecretKey = this.configService.get<string>("webhookSecret") as string
-    const event = this.stripe.webhooks.constructEvent(body,sig,webhookSecretKey)
+  async stripeWebhook(body: any, sig: string) {
+    const webhookSecretKey = this.configService.get<string>("stripe.webhookSecret") as string
+    console.log("WEBHOOKSECRET",webhookSecretKey)
+    const event = this.stripe.webhooks.constructEvent(body, sig, webhookSecretKey)
 
-    if(event.type === 'account.updated') {
+    if (event.type === 'account.updated') {
       const stripeAccount = event.data.object
       const userId = stripeAccount?.metadata?.userId as string
 
-      if(stripeAccount.details_submitted && stripeAccount.payouts_enabled) {
-        await this.usersRepository.findUserAndUpdate(userId,{payoutsEnabled:true,userStripeId:stripeAccount.id})
+      if (stripeAccount.details_submitted && stripeAccount.payouts_enabled) {
+        await this.usersRepository.findUserAndUpdate(userId, { payoutsEnabled: true, userStripeId: stripeAccount.id })
       }
     }
-    return {recived:true}
+    return { recived: true }
   }
 
   async createPaymentIntent(payload: CreatePaymentDto): Promise<Stripe.Response<Stripe.PaymentIntent>> {
