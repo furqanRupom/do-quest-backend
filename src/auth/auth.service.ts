@@ -89,6 +89,7 @@ export class AuthService {
       username: user.username,
       email: user.email,
       role: user.role,
+      userStripeId:user.userStripeId
     };
 
     const accessToken = await this.generateAccessToken(payload);
@@ -180,6 +181,7 @@ export class AuthService {
       username: string;
       email: string;
       role: string;
+      userStripeId:string;
     };
 
     try {
@@ -199,6 +201,7 @@ export class AuthService {
       username: decoded.username,
       email: decoded.email,
       role: decoded.role,
+      userStripeId:decoded.userStripeId
     };
 
     const newAccessToken = await this.generateAccessToken(payload);

@@ -18,6 +18,12 @@ export class User {
   @Prop({ required: true, unique: true })
   email: string = '';
 
+  @Prop({ unique: true })
+  userStripeId: string = ''
+
+  @Prop({default: false })
+  payoutsEnabled: boolean = false
+
   @Prop({ required: true })
   password: string = '';
 

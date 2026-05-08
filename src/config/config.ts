@@ -18,5 +18,6 @@ export default () => ({
         secretKey:process.env.SECRET_KEY,
         publishedKey:process.env.PUBLISHED_KEY,
         apiVersion: process.env.STRIPE_API_VERSION || '2025-11-15.clover',
+        webhookSecret:process.env.WEBHOOK_SECRET
     }
 });

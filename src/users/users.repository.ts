@@ -69,4 +69,7 @@ export class UsersRepository {
     await this.userModel.findByIdAndUpdate(userId, { isDeleted: true }, { new: true })
     return null
   }
+  async findUserAndUpdate(userId:string,updateData:any){
+    return await this.userModel.findByIdAndUpdate(userId,updateData)
+  }
 }
