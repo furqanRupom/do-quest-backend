@@ -5,7 +5,7 @@ import type { AuthRequest } from '../auth/types/auth-request.type';
 import { Roles } from '../common/decorators';
 import { StripeService } from './stripe.service';
 import { sendResponse } from 'src/common/utils';
-
+import type {Request} from "express"
 @Controller('stripe')
 export class StripeController {
 
@@ -25,14 +25,9 @@ export class StripeController {
     })
   }
   @Post("webhook")
-  async handleWebhook(@Req() req: AuthRequest) {
+  async handleWebhook(@Req() req: Request & {rawBody: Buffer}) {
     const sig = req.headers['stripe-signature'] as string
-    const result = await this.stripeService.stripeWebhook(req.body, sig)
-    return sendResponse({
-      success: true,
-      message: "webhook updated successfully",
-      data: result
-    })
+    return await this.stripeService.stripeWebhook(req.rawBody, sig)
   }
 
   @UseGuards(JwtAuthGuard)

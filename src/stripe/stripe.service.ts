@@ -59,7 +59,7 @@ export class StripeService {
     return { url: loginLink.url };
   }
 
-  async stripeWebhook(body: any, sig: string) {
+  async stripeWebhook(body: Buffer, sig: string) {
     const webhookSecretKey = this.configService.get<string>("stripe.webhookSecret") as string
     console.log("WEBHOOKSECRET",webhookSecretKey)
     const event = this.stripe.webhooks.constructEvent(body, sig, webhookSecretKey)

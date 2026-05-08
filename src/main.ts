@@ -2,11 +2,11 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as bodyParser from "body-parser"
+// import * as bodyParser from "body-parser"
 import cookieParser from 'cookie-parser'
 import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true});
+  const app = await NestFactory.create(AppModule, { cors: true, rawBody:true,});
   app.setGlobalPrefix('api/v1');
   const config = new DocumentBuilder()
     .setTitle('Do Quest API')
@@ -47,10 +47,10 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type, Authorization',
   });
 
-  app.use(
-    '/stripe/webhook',
-    bodyParser.raw({ type: 'application/json' }),
-  );
+  // app.use(
+  //   '/stripe/webhook',
+  //   bodyParser.raw({ type: 'application/json' }),
+  // );
 
   app.use(cookieParser())
   await app.listen(process.env.PORT ?? 3000);
