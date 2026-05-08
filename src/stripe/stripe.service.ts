@@ -1,17 +1,23 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import Stripe from 'stripe';
 import { CreatePaymentDto } from './dto';
-import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 import { UsersRepository } from '../users/users.repository';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class StripeService {
+
+  private readonly stripe: Stripe
   constructor(
-    @InjectStripeClient() private readonly stripe: Stripe,
+
     private readonly usersRepository: UsersRepository,
     private readonly configService: ConfigService
-  ) { }
+  ) {
+
+    this.stripe = new Stripe(configService.getOrThrow<string>('stripe.secretKey'), {
+      apiVersion: '2025-12-15.clover' as Stripe.LatestApiVersion, // Cast to avoid TS errors if it's a preview version
+    });
+  }
 
 
 
@@ -59,22 +65,37 @@ export class StripeService {
     return { url: loginLink.url };
   }
 
+
   async stripeWebhook(body: Buffer, sig: string) {
-    console.log("WEBSOCKET______________________________________HITTED_______________-")
-    const webhookSecretKey = this.configService.get<string>("stripe.webhookSecret") as string
-    console.log("WEBHOOKSECRET",webhookSecretKey)
-    const event = this.stripe.webhooks.constructEvent(body, sig, webhookSecretKey)
+    const webhookSecretKey = this.configService.getOrThrow<string>('stripe.webhookSecret');
+
+    let event: Stripe.Event;
+    try {
+      event = this.stripe.webhooks.constructEvent(body, sig, webhookSecretKey);
+    } catch (err) {
+      // ✅ This gives you the exact reason Stripe rejects (sig mismatch, etc.)
+      throw new HttpException(
+        `Webhook signature verification failed: ${err.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     if (event.type === 'account.updated') {
-      const stripeAccount = event.data.object
-      const userId = stripeAccount?.metadata?.userId as string
-
+      const stripeAccount = event.data.object;
+      const userId = stripeAccount?.metadata?.userId as string;
       if (stripeAccount.details_submitted && stripeAccount.payouts_enabled) {
-        await this.usersRepository.findUserAndUpdate(userId, { payoutsEnabled: true, userStripeId: stripeAccount.id })
+        await this.usersRepository.findUserAndUpdate(userId, {
+          payoutsEnabled: true,
+          userStripeId: stripeAccount.id,
+        });
       }
     }
-    return { recived: true }
+
+    return { received: true };
   }
+
+
+
 
   async createPaymentIntent(payload: CreatePaymentDto): Promise<Stripe.Response<Stripe.PaymentIntent>> {
     return this.stripe.paymentIntents.create({

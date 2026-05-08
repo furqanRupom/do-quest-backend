@@ -3,36 +3,32 @@ import { AppController } from './app.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import config from './config/config';
+
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
-import { AdminController } from './admin/admin.controller';
-import { AdminService } from './admin/admin.service';
 import { AdminModule } from './admin/admin.module';
-import { TasksController } from './tasks/tasks.controller';
-import { TasksService } from './tasks/tasks.service';
-import { TasksRepository } from './tasks/tasks.repository';
 import { TasksModule } from './tasks/tasks.module';
 import { WalletModule } from './wallet/wallet.module';
-import { AdminRepository } from './admin/admin.repository';
 import { SubmissionModule } from './submission/submission.module';
 import { StripeModule } from './stripe/stripe.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({
-    load:[config],
-    envFilePath:['.env'],
-    isGlobal: true,
-  }),
+  imports: [
+    ConfigModule.forRoot({
+      load: [config],
+      envFilePath: ['.env'],
+      isGlobal: true,
+    }),
+
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory:  (config:ConfigService) => {
-        return {
-          uri: config.get<string>('mongodbUri'),
-        };
-      },
+      useFactory: (config: ConfigService) => ({
+        uri: config.get<string>('mongodbUri'),
+      }),
     }),
+
     UsersModule,
     AuthModule,
     MailModule,
@@ -40,9 +36,11 @@ import { StripeModule } from './stripe/stripe.module';
     WalletModule,
     AdminModule,
     SubmissionModule,
-    StripeModule
+    StripeModule,
   ],
-  controllers: [AppController, AdminController, TasksController],
-  providers: [AdminService, AdminRepository, TasksService, TasksRepository],
+
+  controllers: [AppController],
+
+  providers: [],
 })
 export class AppModule {}
