@@ -24,7 +24,7 @@ import { TaskStatus } from '../tasks/enums/tasks.enum';
 @Roles(UserRole.Admin)
 @ApiCookieAuth('accessToken')
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(private readonly adminService: AdminService) { }
 
   @HttpCode(HttpStatus.OK)
   @Get('count/totals')
@@ -66,7 +66,7 @@ export class AdminController {
     return sendResponse({
       success: true,
       message: 'Tasks retrieved successfully',
-      meta:result.meta,
+      meta: result.meta,
       data: result.data,
     });
   }
@@ -94,6 +94,23 @@ export class AdminController {
     return sendResponse({
       success: true,
       message: 'Tasks status updated successfully',
+      data: result,
+    });
+  }
+
+  // TODO : we have to add DTO later
+  @HttpCode(HttpStatus.OK)
+  @Put('users/:id')
+  async updateUser(
+    @Param('id') userId: string,
+    @Body() updateUserDto: any,
+  ) {
+    const result = await this.adminService.updateUser(
+      userId,
+      updateUserDto);
+    return sendResponse({
+      success: true,
+      message: 'User updated successfully',
       data: result,
     });
   }

@@ -40,4 +40,8 @@ export class AdminService {
   ) {
     return await this.adminRepository.updateTaskStatus(taskId, taskStatus);
   }
+
+  async updateUser(userId:string,updateUserDto:any) {
+    return await this.adminRepository.updateUser(userId,updateUserDto)
+  }
 }

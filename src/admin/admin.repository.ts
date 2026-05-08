@@ -123,4 +123,13 @@ export class AdminRepository {
       { new: true },
     );
   }
+
+  async updateUser(userId:string,userUpdateDto: any) {
+    const user = await this.userModel.findById(userId)
+
+    if(!user) {
+      throw new NotFoundException("User not found")
+    }
+    return await this.userModel.findByIdAndUpdate(userId,userUpdateDto,{new:true})
+  }
 }
