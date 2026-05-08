@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as bodyParser from "body-parser"
 import cookieParser from 'cookie-parser'
 import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
@@ -45,7 +46,11 @@ async function bootstrap() {
     credentials: true,
     allowedHeaders: 'Content-Type, Authorization',
   });
-  app.use(cookieParser())
+
+  app.use(
+    '/stripe/webhook',
+    bodyParser.raw({ type: 'application/json' }),
+  ); app.use(cookieParser())
   await app.listen(process.env.PORT ?? 3000);
 }
 

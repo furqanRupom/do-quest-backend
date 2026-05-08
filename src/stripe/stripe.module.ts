@@ -4,6 +4,7 @@ import { StripeModule as NestStripeModule } from '@golevelup/nestjs-stripe';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from '../users/users.module';
 import { UsersRepository } from '../users/users.repository';
+import { StripeController } from './stripe.controller';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UsersRepository } from '../users/users.repository';
     UsersModule,
     ConfigModule
   ],
+  controllers:[StripeController],
   providers: [StripeService,UsersRepository],
   exports: [StripeService], 
 })
