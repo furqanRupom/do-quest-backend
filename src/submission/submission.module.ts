@@ -5,7 +5,7 @@ import { SubmissionRepository } from './submission.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Submission, SubmissionSchema } from './schemas/submission.schema';
 import { StripeModule } from '../stripe/stripe.module';
-import { TasksModule } from 'src/tasks/tasks.module';
+import { TasksModule } from '../tasks/tasks.module';
 
 @Module({
   imports: [
@@ -15,6 +15,6 @@ import { TasksModule } from 'src/tasks/tasks.module';
   ],
   providers: [SubmissionService, SubmissionRepository],
   controllers: [SubmissionController],
-  exports: [MongooseModule.forFeature([{ name: Submission.name, schema: SubmissionSchema }])],
+  exports:[MongooseModule,SubmissionService]
 })
 export class SubmissionModule { }

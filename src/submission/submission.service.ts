@@ -9,6 +9,7 @@ import { TasksRepository } from '../tasks/tasks.repository';
 import { ApproveOrRejectDto, CreateSubmissionDto } from './dto';
 import { PaymentFlowStatus, TaskStatus } from '../tasks/enums/tasks.enum';
 import { Submission } from './schemas/submission.schema';
+import { BaseQueryDto } from '../common/dto';
 
 @Injectable()
 export class SubmissionService {
@@ -112,5 +113,11 @@ export class SubmissionService {
 
   async getSubmissionsByTaskId(taskId: string): Promise<Submission[]> {
     return this.submissionRepository.findByTaskId(taskId);
+  }
+  async countAllSubmissions(){
+    return this.submissionRepository.countTotalSubmissions()
+  }
+  async getAllSubmissions(query:BaseQueryDto){
+    return this.submissionRepository.getAllSubmissions(query)
   }
 }

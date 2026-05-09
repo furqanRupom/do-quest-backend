@@ -8,7 +8,7 @@ import { UsersRepository } from './users.repository';
 @Module({
   imports: [MongooseModule.forFeature([{name:User.name,schema:UserSchema}])],
   providers: [UsersService, UsersRepository],
-  exports: [UsersService, MongooseModule.forFeature([{ name: User.name, schema: UserSchema }])],
+  exports: [UsersService, MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),UsersRepository],
   controllers: [UsersController]
 })
 export class UsersModule {}

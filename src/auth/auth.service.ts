@@ -1,21 +1,23 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto';
-import { AuthRepository } from './auth.repository';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { LoginUserDto } from './dto/login-user.dto';
 import { IUser } from './interfaces/user.interface';
 import { MailService } from '../mail/mail.service';
 import mongoose from 'mongoose';
+import { UsersService } from '../users/users.service';
+import { WalletService } from '../wallet/wallet.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly mailService: MailService,
-  ) {}
+    private readonly usersService: UsersService,
+    private readonly walletService: WalletService,
+  ) { }
 
   private generateAccessToken(payload: Record<string, any>) {
     return this.jwtService.signAsync(payload, {
@@ -47,7 +49,8 @@ export class AuthService {
   }
 
   async registerUser(userData: CreateUserDto): Promise<IUser> {
-    const result = await this.authRepository.createUser(userData);
+    const result = await this.usersService.createUser(userData)
+    await this.walletService.createWallet(result._id)
     return result;
   }
 
@@ -56,7 +59,7 @@ export class AuthService {
     refreshToken: string;
     user: Omit<IUser, 'password'>;
   }> {
-    const isUserExists = await this.authRepository.findByUsernameOrEmail(
+    const isUserExists = await this.usersService.findByUsernameOrEmail(
       loginUserDto.usernameOrEmail,
     );
 
@@ -66,7 +69,7 @@ export class AuthService {
         HttpStatus.NOT_FOUND,
       );
     }
-    if(isUserExists.isDeleted){
+    if (isUserExists.isDeleted) {
       throw new HttpException(
         "Account has been deleted. Please contact our support team.",
         HttpStatus.BAD_REQUEST
@@ -89,7 +92,7 @@ export class AuthService {
       username: user.username,
       email: user.email,
       role: user.role,
-      userStripeId:user.userStripeId
+      userStripeId: user.userStripeId
     };
 
     const accessToken = await this.generateAccessToken(payload);
@@ -103,7 +106,7 @@ export class AuthService {
   }
 
   async forgotPassword(email: string): Promise<void> {
-    const user = await this.authRepository.findByUsernameOrEmail(email);
+    const user = await this.usersService.findByUsernameOrEmail(email);
 
     if (!user) {
       throw new HttpException('User not found via email', HttpStatus.NOT_FOUND);
@@ -136,7 +139,7 @@ export class AuthService {
       );
     }
 
-    const user = await this.authRepository.findById(decoded.sub);
+    const user = await this.usersService.findById(decoded.sub);
 
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
@@ -152,7 +155,7 @@ export class AuthService {
     email: string,
     dto: { currentPassword: string; newPassword: string },
   ) {
-    const IsUserExits = await this.authRepository.findByUsernameOrEmail(email);
+    const IsUserExits = await this.usersService.findByUsernameOrEmail(email);
     if (!IsUserExits) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
@@ -181,7 +184,7 @@ export class AuthService {
       username: string;
       email: string;
       role: string;
-      userStripeId:string;
+      userStripeId: string;
     };
 
     try {
@@ -201,7 +204,7 @@ export class AuthService {
       username: decoded.username,
       email: decoded.email,
       role: decoded.role,
-      userStripeId:decoded.userStripeId
+      userStripeId: decoded.userStripeId
     };
 
     const newAccessToken = await this.generateAccessToken(payload);

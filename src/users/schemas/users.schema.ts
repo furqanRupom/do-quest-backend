@@ -21,9 +21,6 @@ export class User {
   @Prop({ unique: true })
   userStripeId: string = ''
 
-  @Prop({unique:true})
-  walletId:string = ''
-
   @Prop({default: false })
   payoutsEnabled: boolean = false
 

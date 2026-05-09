@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import type { AuthRequest } from '../auth/types/auth-request.type';
 import { Roles } from '../common/decorators';
 import { StripeService } from './stripe.service';
-import { sendResponse } from 'src/common/utils';
+import { sendResponse } from '../common/utils';
 import type { Request } from "express"
 import type { RawBodyRequest } from '@nestjs/common';
 

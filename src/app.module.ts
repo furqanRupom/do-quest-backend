@@ -12,6 +12,7 @@ import { TasksModule } from './tasks/tasks.module';
 import { WalletModule } from './wallet/wallet.module';
 import { SubmissionModule } from './submission/submission.module';
 import { StripeModule } from './stripe/stripe.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { StripeModule } from './stripe/stripe.module';
     AdminModule,
     SubmissionModule,
     StripeModule,
+    PaymentModule
   ],
 
   controllers: [AppController],

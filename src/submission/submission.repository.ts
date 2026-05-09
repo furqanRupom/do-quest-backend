@@ -4,6 +4,8 @@ import { Submission } from './schemas/submission.schema';
 import { Model } from 'mongoose';
 import { CreateSubmissionDto } from './dto';
 import { SubmissionStatus } from './enums/submission.enum';
+import { BaseQueryDto } from '../common/dto';
+import { QueryBuilder } from '../common/db/query-builder';
 
 @Injectable()
 export class SubmissionRepository {
@@ -54,4 +56,19 @@ export class SubmissionRepository {
         );
     }
 
+
+    async countTotalSubmissions(): Promise<number> {
+        return this.submissionModel.countDocuments().exec();
+    }
+  async getAllSubmissions(query: BaseQueryDto) {
+    const submissions = new QueryBuilder(this.submissionModel, query)
+      .search(['title', 'content'])
+      .filter()
+      .sort()
+      .paginate()
+      .fields();
+    const data = await submissions.modelQuery;
+    const meta = await submissions.countTotal();
+    return { data, meta };
+  }
 }

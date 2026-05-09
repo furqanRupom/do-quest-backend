@@ -1,3 +1,3 @@
-import { ApiResponseDto } from "src/common/dto";
+import { ApiResponseDto } from "../../common/dto";
 
 export class DeleteAccountResponseDto extends ApiResponseDto<null> {}

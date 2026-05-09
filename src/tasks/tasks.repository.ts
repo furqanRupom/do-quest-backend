@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Task } from './schemas/tasks.schema';
 import { Model, Types } from 'mongoose';
@@ -9,7 +9,7 @@ import { PaymentFlowStatus, TaskStatus } from './enums/tasks.enum';
 
 @Injectable()
 export class TasksRepository {
-  constructor(@InjectModel(Task.name) private taskModel: Model<Task>) {}
+  constructor(@InjectModel(Task.name) private taskModel: Model<Task>) { }
   async createTask(
     dto: CreateNewTaskDto,
     userId: string,
@@ -122,4 +122,77 @@ export class TasksRepository {
 
     return updatedTask;
   }
+
+
+
+  async countTotalTasks(): Promise<number> {
+    return this.taskModel.countDocuments().exec();
+  }
+  async getAllTasksAdmin(query: BaseQueryDto) {
+    const tasks = new QueryBuilder(this.taskModel, query)
+      .search(['title', 'description'])
+      .filter()
+      .sort()
+      .paginate()
+      .fields();
+    const data = await tasks.modelQuery;
+    const meta = await tasks.countTotal();
+    return { data, meta };
+  }
+  async getTasksBountiesBarData() {
+    return await this.taskModel.aggregate([
+      {
+        $match: {
+          isDeleted: { $ne: true },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: {
+          "_id.year": 1,
+          "_id.month": 1,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          month: {
+            $dateFromParts: {
+              year: "$_id.year",
+              month: "$_id.month",
+              day: 1,
+            },
+          },
+          count: 1,
+        },
+      },
+    ]);
+  }
+
+  async updateTaskStatus(
+    taskId: string,
+    taskStatusDto: { taskStatus: TaskStatus },
+  ) {
+    const task = await this.taskModel.findOne({ _id: taskId });
+    if (!task) {
+      throw new NotFoundException('Task not found');
+    }
+    if (task.isDeleted) {
+      throw new BadRequestException('Task is deleted!');
+    }
+    return await this.taskModel.findByIdAndUpdate(
+      taskId,
+      { status: taskStatusDto.taskStatus },
+      { new: true },
+    );
+  }
+
 }
