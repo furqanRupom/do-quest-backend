@@ -89,7 +89,7 @@ export class StripeService {
         return { received: true };
       }
 
-      if (stripeAccount.details_submitted && stripeAccount.payouts_enabled) {
+      if (stripeAccount.charges_enabled) {
         const updated = await this.usersService.findUserAndUpdate(user._id, {
           payoutsEnabled: true,
           userStripeId: stripeAccount.id,
