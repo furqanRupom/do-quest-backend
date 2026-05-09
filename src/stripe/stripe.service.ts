@@ -43,11 +43,12 @@ export class StripeService {
       });
 
       accountId = account.id;
+
+      await this.usersService.findUserAndUpdate(userId, {
+        userStripeId: accountId,
+      });
     }
 
-    await this.usersService.findUserAndUpdate(userId, {
-      userStripeId: accountId,
-    });
 
     const accountLink = await this.stripe.accountLinks.create({
       account: accountId,
@@ -82,16 +83,19 @@ export class StripeService {
     if (event.type === 'account.updated') {
       const stripeAccount = event.data.object;
       const user = await this.usersService.findByStripeId(stripeAccount.id)
-      if(!user){
-        throw new HttpException("User not found via Stripe ID",HttpStatus.NOT_FOUND)
+      if (!user) {
+
+        console.warn(`No user found for Stripe account ${stripeAccount.id} — skipping.`);
+        return { received: true };
       }
-      
+
       if (stripeAccount.details_submitted && stripeAccount.payouts_enabled) {
-        const something = await this.usersService.findUserAndUpdate(user._id, {
+        const updated = await this.usersService.findUserAndUpdate(user._id, {
           payoutsEnabled: true,
           userStripeId: stripeAccount.id,
         });
-        console.log("User Details------------",something)
+
+        console.log('User updated for payout eligibility:', updated);
       }
     }
 
