@@ -11,14 +11,28 @@ export class WalletRepository {
 
   // TODO: return Type
   async getWallet(userId: string) {
-    const result = await this.walletModel.findOne({ user: userId })
+    const result = await this.walletModel.findOne({ user: new mongoose.Types.ObjectId(userId) })
     return result?.toObject()
   }
   // TODO: return Type
+  //
+
   async updateWallet(userId: string, walletData: any) {
-    return await this.walletModel.findOneAndUpdate({ user: userId }, walletData)
+    return await this.walletModel.findOneAndUpdate(
+      { user: new mongoose.Types.ObjectId(userId) },
+      walletData,
+      { new: true }
+    );
   }
-  async createWallet(userId:mongoose.Types.ObjectId){
-    return await this.walletModel.create({user:userId})
+
+
+  async createWallet(userId: string) {
+    return (await this.walletModel.create({
+      user: new mongoose.Types.ObjectId(userId),
+    })).toObject();
+  }
+
+  async removeAll(){
+    return await this.walletModel.deleteMany()
   }
 }

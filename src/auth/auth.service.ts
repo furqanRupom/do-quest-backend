@@ -50,7 +50,7 @@ export class AuthService {
 
   async registerUser(userData: CreateUserDto): Promise<IUser> {
     const result = await this.usersService.createUser(userData)
-    await this.walletService.createWallet(result._id)
+    await this.walletService.createWalletForUser(result._id.toString())
     return result;
   }
 

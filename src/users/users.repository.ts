@@ -21,8 +21,7 @@ export class UsersRepository {
     return await this.userModel.findById(id).select("-password").exec()
   }
   async createUser(createUserDto: CreateUserDto) {
-    const user = await this.userModel.create(createUserDto)
-    const { password, ...result } = user.toObject()
+    const {password,...result} = (await this.userModel.create(createUserDto)).toJSON()
     return result
 
   }
