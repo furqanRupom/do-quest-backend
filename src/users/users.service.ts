@@ -60,4 +60,8 @@ export class UsersService {
   async findById(id: string): Promise<UserDocument | null> {
     return await this.usersRepository.findById(id)
   }
+
+  async findUserAndUpdate(userId:string,updateData:any){
+    return await this.usersRepository.findUserAndUpdate(userId,updateData)
+  }
 }

@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import Stripe from 'stripe';
 import { CreatePaymentDto } from './dto';
-import { UsersRepository } from '../users/users.repository';
 import { ConfigService } from '@nestjs/config';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class StripeService {
@@ -10,7 +10,7 @@ export class StripeService {
   private readonly stripe: Stripe
   constructor(
 
-    private readonly usersRepository: UsersRepository,
+    private readonly usersService: UsersService,
     private readonly configService: ConfigService
   ) {
 
@@ -45,7 +45,7 @@ export class StripeService {
       accountId = account.id;
     }
 
-    await this.usersRepository.findUserAndUpdate(userId, {
+    await this.usersService.findUserAndUpdate(userId, {
       userStripeId: accountId,
     });
 
@@ -81,10 +81,12 @@ export class StripeService {
     }
 
     if (event.type === 'account.updated') {
+
+    console.log("WEBHOOOOOOOOOOOOKSSSSSS ------------------INSIDE ACCOUNT UPDATE----------------------------------- TRIGGGGERED")
       const stripeAccount = event.data.object;
       const userId = stripeAccount?.metadata?.userId as string;
       if (stripeAccount.details_submitted && stripeAccount.payouts_enabled) {
-        await this.usersRepository.findUserAndUpdate(userId, {
+        await this.usersService.findUserAndUpdate(userId, {
           payoutsEnabled: true,
           userStripeId: stripeAccount.id,
         });
