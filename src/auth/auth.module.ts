@@ -10,10 +10,12 @@ import { JwtAuthGuard } from './guards/jwt-auth-guard';
 import { RefreshAuthGuard } from './guards/refresh-auth.guard';
 import { RefreshTokenStrategy } from './strategies/refreshToken.strategy';
 import { ConfigModule } from '@nestjs/config';
+import { WalletModule } from 'src/wallet/wallet.module';
 @Module({
   imports: [
     ConfigModule,
     UsersModule,
+    WalletModule,
     JwtModule.register({}),
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],

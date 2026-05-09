@@ -1,17 +1,19 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Types } from "mongoose";
 
 @Schema({ timestamps: true })
 export class Wallet {
-    @Prop({ required: true, unique: true, index: true })
-    userId: string
+    @Prop({ type: Types.ObjectId, ref: 'User', required: true, unique: true })
+    user: Types.ObjectId;
 
     @Prop({ default: 0 })
-    availableBalance: number
+    availableBalance: number;
 
     @Prop({ default: 0 })
-    pendingBalance: number
+    pendingBalance: number;
 
     @Prop({ default: 0 })
-    totalEarnings: number
+    totalEarnings: number;
 }
-export const walletSchema = SchemaFactory.createForClass(Wallet)
+
+export const WalletSchema = SchemaFactory.createForClass(Wallet);

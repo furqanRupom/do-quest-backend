@@ -68,7 +68,7 @@ export class StripeService {
 
   async stripeWebhook(body: Buffer, sig: string) {
     const webhookSecretKey = this.configService.getOrThrow<string>('stripe.webhookSecret');
-
+    console.log("WEBHOOOOOOOOOOOOKSSSSSS ------------------------------------------------------ TRIGGGGERED")
     let event: Stripe.Event;
     try {
       event = this.stripe.webhooks.constructEvent(body, sig, webhookSecretKey);

@@ -5,13 +5,16 @@ import { TasksController } from './tasks.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Task, TaskSchema } from './schemas/tasks.schema';
 import { StripeModule } from '../stripe/stripe.module';
+import { WalletModule } from '../wallet/wallet.module';
+import { WalletRepository } from '../wallet/wallet.repository';
 
 @Module({
     imports: [
         MongooseModule.forFeature([{ name: Task.name, schema: TaskSchema }]),
-        StripeModule, 
+        StripeModule,
+        WalletModule 
     ],
-    providers: [TasksService, TasksRepository], 
+    providers: [TasksService, TasksRepository,WalletRepository], 
     controllers: [TasksController],
     exports: [MongooseModule.forFeature([{ name: Task.name, schema: TaskSchema }]), TasksRepository],
 })
