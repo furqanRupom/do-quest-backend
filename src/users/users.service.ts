@@ -61,7 +61,10 @@ export class UsersService {
     return await this.usersRepository.findById(id)
   }
 
-  async findUserAndUpdate(userId:string,updateData:any){
+  async findUserAndUpdate(userId:any,updateData:any){
     return await this.usersRepository.findUserAndUpdate(userId,updateData)
+  }
+  async findByStripeId(userStripeId:string) {
+    return await this.usersRepository.findByStripeId(userStripeId)
   }
 }

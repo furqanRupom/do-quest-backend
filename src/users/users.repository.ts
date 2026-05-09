@@ -20,9 +20,9 @@ export class UsersRepository {
   async getUserWithoutPassword(id: string): Promise<IUser | null> {
     return await this.userModel.findById(id).select("-password").exec()
   }
-  async createUser(createUserDto:CreateUserDto){
+  async createUser(createUserDto: CreateUserDto) {
     const user = await this.userModel.create(createUserDto)
-    const {password,...result} = user.toObject()
+    const { password, ...result } = user.toObject()
     return result
 
   }
@@ -77,24 +77,24 @@ export class UsersRepository {
     await this.userModel.findByIdAndUpdate(userId, { isDeleted: true }, { new: true })
     return null
   }
-  async findUserAndUpdate(userId:string,updateData:any){
-    return await this.userModel.findByIdAndUpdate(userId,updateData)
+  async findUserAndUpdate(userId: string, updateData: any) {
+    return await this.userModel.findByIdAndUpdate(userId, updateData)
   }
-    async countTotalUsers(): Promise<number> {
-      return this.userModel.countDocuments().exec();
-    }
-  
-    async getAllUsers(query: BaseQueryDto) {
-      const users = new QueryBuilder(this.userModel, query)
-        .search(['name', 'email'])
-        .filter()
-        .sort()
-        .paginate()
-        .fields();
-      const data = await users.modelQuery;
-      const meta = await users.countTotal();
-      return { data, meta };
-    }
+  async countTotalUsers(): Promise<number> {
+    return this.userModel.countDocuments().exec();
+  }
+
+  async getAllUsers(query: BaseQueryDto) {
+    const users = new QueryBuilder(this.userModel, query)
+      .search(['name', 'email'])
+      .filter()
+      .sort()
+      .paginate()
+      .fields();
+    const data = await users.modelQuery;
+    const meta = await users.countTotal();
+    return { data, meta };
+  }
 
   async updateUser(userId: string, userUpdateDto: any) {
     const user = await this.userModel.findById(userId)
@@ -105,13 +105,17 @@ export class UsersRepository {
     return await this.userModel.findByIdAndUpdate(userId, userUpdateDto, { new: true })
   }
 
-  
-    async findByUsernameOrEmail(usernameOrEmail: string): Promise<UserDocument | null> {
-       return await this.userModel.findOne({
-            $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
-        }).exec();
-    }
-    async findById(id: string): Promise<UserDocument | null> {
-        return await this.userModel.findById(id).exec();
-    }
+
+  async findByUsernameOrEmail(usernameOrEmail: string): Promise<UserDocument | null> {
+    return await this.userModel.findOne({
+      $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
+    }).exec();
+  }
+  async findById(id: string): Promise<UserDocument | null> {
+    return await this.userModel.findById(id).exec();
+  }
+  async findByStripeId(userStripeId: string) {
+    const result = await this.userModel.findOne({ userStripeId: userStripeId })
+    return result?.toObject()
+  }
 }

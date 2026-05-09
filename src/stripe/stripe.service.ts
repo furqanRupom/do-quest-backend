@@ -68,7 +68,6 @@ export class StripeService {
 
   async stripeWebhook(body: Buffer, sig: string) {
     const webhookSecretKey = this.configService.getOrThrow<string>('stripe.webhookSecret');
-    console.log("WEBHOOOOOOOOOOOOKSSSSSS ------------------------------------------------------ TRIGGGGERED")
     let event: Stripe.Event;
     try {
       event = this.stripe.webhooks.constructEvent(body, sig, webhookSecretKey);
@@ -81,15 +80,18 @@ export class StripeService {
     }
 
     if (event.type === 'account.updated') {
-
-    console.log("WEBHOOOOOOOOOOOOKSSSSSS ------------------INSIDE ACCOUNT UPDATE----------------------------------- TRIGGGGERED")
       const stripeAccount = event.data.object;
-      const userId = stripeAccount?.metadata?.userId as string;
+      const user = await this.usersService.findByStripeId(stripeAccount.id)
+      if(!user){
+        throw new HttpException("User not found via Stripe ID",HttpStatus.NOT_FOUND)
+      }
+      
       if (stripeAccount.details_submitted && stripeAccount.payouts_enabled) {
-        await this.usersService.findUserAndUpdate(userId, {
+        const something = await this.usersService.findUserAndUpdate(user._id, {
           payoutsEnabled: true,
           userStripeId: stripeAccount.id,
         });
+        console.log("User Details------------",something)
       }
     }
 
