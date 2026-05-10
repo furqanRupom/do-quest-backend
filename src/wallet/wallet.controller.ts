@@ -27,13 +27,13 @@ export class WalletController {
   @Roles(UserRole.User)
   async withdraw(
     @Req() req: AuthRequest,
-    @Body() dto: {amount:number},
+    @Body() dto: { amount: number },
   ) {
-    const result = await this.walletService.withdrawFromWallet(req.user.sub,dto)
+    const result = await this.walletService.withdrawFromWallet(req.user.sub, dto)
     return sendResponse({
-      success:true,
+      success: true,
       message: 'Withdrawal initiated. Funds will arrive in 1-2 business days.',
-      data:result
+      data: result
     })
   }
 }

@@ -10,7 +10,7 @@ import { ApiBearerAuth, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
 import { SubmissionListDto } from './dto/submission.list.dto';
 import { RejectSubmissionDto } from './dto/reject-submission.dto';
 import { RequestRevisionDto } from './dto/request-revision.dto';
-import { BaseQueryDto } from 'src/common/dto';
+import { BaseQueryDto } from '../common/dto';
 
 @Controller('tasks/:taskId/submissions')
 @UseGuards(JwtAuthGuard)
