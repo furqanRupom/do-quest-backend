@@ -214,4 +214,9 @@ export class TasksRepository {
     }
     return task.toObject() as unknown as TaskDocument
   }
+
+  async findTaskByPaymentIntentId(paymentIntentId:string){
+    const task =  await this.taskModel.findOne({paymentIntentId:paymentIntentId})
+    return task?.toObject()
+  }
 }

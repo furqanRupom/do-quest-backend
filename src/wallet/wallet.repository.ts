@@ -9,7 +9,7 @@ import { TransactionCategory, TransactionStatus, TransactionType } from './enums
 export class WalletRepository {
   constructor(
     @InjectModel(Wallet.name) private walletModel: Model<Wallet>,
-    @InjectModel(WalletTransaction.name) private walletTransactinModel:Model<WalletTransaction>
+    @InjectModel(WalletTransaction.name) private walletTransactinModel: Model<WalletTransaction>
   ) { }
 
   // TODO: return Type
@@ -35,18 +35,18 @@ export class WalletRepository {
     })).toObject();
   }
 
-  async removeAll(){
+  async removeAll() {
     return await this.walletModel.deleteMany()
   }
-  async getOrCreateWallet(userId:string):Promise<WalletDocument> {
+  async getOrCreateWallet(userId: string): Promise<WalletDocument> {
     const existingWallet = await this.walletModel.findOne({
-      user:new Types.ObjectId(userId)
+      user: new Types.ObjectId(userId)
     })
-    if(existingWallet) return existingWallet as unknown as WalletDocument
-    return await this.walletModel.create({user:new Types.ObjectId(userId)}) as unknown as  WalletDocument
+    if (existingWallet) return existingWallet as unknown as WalletDocument
+    return await this.walletModel.create({ user: new Types.ObjectId(userId) }) as unknown as WalletDocument
   }
 
-async getTransactions(
+  async getTransactions(
     userId: string,
     page = 1,
     limit = 20,
@@ -70,9 +70,9 @@ async getTransactions(
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
   }
- 
+
   // ─── Mutations ───────────────────────────────────────────────
- 
+
   /**
    * Creator funds escrow when task payment is confirmed
    */
@@ -84,7 +84,7 @@ async getTransactions(
     const wallet = await this.getOrCreateWallet(userId);
     wallet.pendingBalance += amount;
     await wallet.save();
- 
+
     await this.walletTransactinModel.create({
       user: new Types.ObjectId(userId),
       task: new Types.ObjectId(taskId),
@@ -94,10 +94,10 @@ async getTransactions(
       status: TransactionStatus.completed,
       description: `Escrow funded for task`,
     });
- 
+
     return wallet;
   }
- 
+
   /**
    * Release escrow from creator → credit worker's available balance
    */
@@ -110,12 +110,12 @@ async getTransactions(
     stripeTransferId: string;
   }) {
     const { creatorId, workerId, taskId, submissionId, amount, stripeTransferId } = params;
- 
+
     // Deduct from creator's pending (escrow)
     const creatorWallet = await this.getOrCreateWallet(creatorId);
     creatorWallet.pendingBalance = Math.max(0, creatorWallet.pendingBalance - amount);
     await creatorWallet.save();
- 
+
     await this.walletTransactinModel.create({
       user: new Types.ObjectId(creatorId),
       task: new Types.ObjectId(taskId),
@@ -127,13 +127,13 @@ async getTransactions(
       status: TransactionStatus.completed,
       description: `Escrow released to worker`,
     });
- 
+
     // Credit worker's available balance
     const workerWallet = await this.getOrCreateWallet(workerId);
     workerWallet.availableBalance += amount;
     workerWallet.totalEarnings += amount;
     await workerWallet.save();
- 
+
     await this.walletTransactinModel.create({
       user: new Types.ObjectId(workerId),
       task: new Types.ObjectId(taskId),
@@ -146,7 +146,7 @@ async getTransactions(
       description: `Bounty earned from approved submission`,
     });
   }
- 
+
   /**
    * Refund creator when task is cancelled
    */
@@ -158,7 +158,7 @@ async getTransactions(
     const wallet = await this.getOrCreateWallet(userId);
     wallet.pendingBalance = Math.max(0, wallet.pendingBalance - amount);
     await wallet.save();
- 
+
     await this.walletTransactinModel.create({
       user: new Types.ObjectId(userId),
       task: new Types.ObjectId(taskId),
@@ -168,10 +168,10 @@ async getTransactions(
       status: TransactionStatus.completed,
       description: `Refund for cancelled task`,
     });
- 
+
     return wallet;
   }
- 
+
   /**
    * Worker initiates payout to their Stripe connected account
    */
@@ -189,7 +189,7 @@ async getTransactions(
     wallet.availableBalance -= amount;
     wallet.pendingBalance += amount; // hold while payout processes
     await wallet.save();
- 
+
     const tx = await this.walletTransactinModel.create({
       user: new Types.ObjectId(userId),
       type: TransactionType.debit,
@@ -198,10 +198,10 @@ async getTransactions(
       status: TransactionStatus.pending,
       description: `Withdrawal initiated`,
     });
- 
+
     return { wallet, transactionId: tx._id.toString() };
   }
- 
+
   /**
    * Mark withdrawal transaction completed (called from webhook)
    */
@@ -213,7 +213,7 @@ async getTransactions(
     const wallet = await this.getOrCreateWallet(userId);
     wallet.pendingBalance = Math.max(0, wallet.pendingBalance - amount);
     await wallet.save();
- 
+
     await this.walletTransactinModel.findOneAndUpdate(
       {
         user: new Types.ObjectId(userId),
@@ -224,7 +224,7 @@ async getTransactions(
       { status: TransactionStatus.completed, stripePayoutId },
     );
   }
- 
+
   /**
    * Revert pending withdrawal on failure (payout.failed webhook)
    */
@@ -237,7 +237,7 @@ async getTransactions(
     wallet.pendingBalance = Math.max(0, wallet.pendingBalance - amount);
     wallet.availableBalance += amount; // return funds
     await wallet.save();
- 
+
     await this.walletTransactinModel.findOneAndUpdate(
       {
         user: new Types.ObjectId(userId),

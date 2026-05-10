@@ -61,4 +61,7 @@ export class TasksService {
   async findTaskById(taskId:string) :Promise<Task | null >{
     return await this.tasksRepository.findTaskById(taskId)
   }
+  async findTaskByPaymentIntentId(paymentIntentId:string){
+    return await  this.tasksRepository.findTaskByPaymentIntentId(paymentIntentId)
+  }
 }

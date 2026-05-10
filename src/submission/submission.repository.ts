@@ -81,4 +81,21 @@ export class SubmissionRepository {
     const meta = await submissions.countTotal();
     return { data, meta };
   }
+
+  
+  async getMySubmissions(userId:string,query: BaseQueryDto) {
+    const submissions = new QueryBuilder(this.submissionModel, query)
+      .search(['title', 'content'])
+      .filter({user: new Types.ObjectId(userId)})
+      .sort()
+      .paginate()
+      .populate({
+        path:'task',
+        select:'title budget status deadline'
+      })
+      .fields();
+    const data = await submissions.modelQuery;
+    const meta = await submissions.countTotal();
+    return { data, meta };
+  }
 }

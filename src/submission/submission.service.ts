@@ -13,6 +13,7 @@ import { PaymentFlowStatus, TaskStatus } from '../tasks/enums/tasks.enum';
 import { Submission } from './schemas/submission.schema';
 import { BaseQueryDto } from '../common/dto';
 import { TasksService } from '../tasks/tasks.service';
+import { SubmissionStatus } from './enums/submission.enum';
 
 @Injectable()
 export class SubmissionService {
@@ -54,13 +55,17 @@ export class SubmissionService {
   async approveSubmission(
     approveSubmissionDto: ApproveOrRejectDto,
   ): Promise<{ capturedAmount: number; winnerSubmissionId: string }> {
+
     const { taskId, submissionId, approverId } = approveSubmissionDto;
+
     const task = await this.tasksService.findTaskById(taskId);
+
     if (!task || task.user.toString() !== approverId) {
       throw new ForbiddenException(
         'Not authorized to approve submissions for this task',
       );
     }
+
     if (task.paymentIntentId == null) {
       throw new BadRequestException(
         'No payment intent associated with this task',
@@ -72,19 +77,27 @@ export class SubmissionService {
     }
 
     const submission = await this.submissionRepository.findById(submissionId);
+
     if (!submission || submission.task.toString() !== taskId) {
       throw new BadRequestException('Submission not found for this task');
     }
 
-    const intent = await this.stripeService.retrievePaymentIntent(
-      task.paymentIntentId,
-    );
-    if (intent.status !== 'requires_capture') {
-      throw new BadRequestException(`Stripe status invalid: ${intent.status}`);
+    if(submission.status !== SubmissionStatus.pending){
+      throw new HttpException(
+        `Submission is already ${submission.status.toLowerCase()}`,
+        HttpStatus.BAD_REQUEST
+      )
+    }
+
+    const worker = submission.user as any
+    if(!worker.userStripeId || !worker.payoutsEnabled){
+      throw new HttpException(
+        "Worker has not completed Stripe onboarding. Cannot pay out.",
+        HttpStatus.BAD_REQUEST
+      )
     }
 
     await this.stripeService.capturePaymentIntent(task.paymentIntentId);
-
     await this.submissionRepository.approveSubmission(submissionId);
     await this.submissionRepository.rejectAllExcept(taskId, submissionId);
 
@@ -94,7 +107,7 @@ export class SubmissionService {
     });
 
     return {
-      capturedAmount: intent.amount / 100,
+      capturedAmount: 100,
       winnerSubmissionId: submissionId,
     };
   }
@@ -134,5 +147,10 @@ export class SubmissionService {
   async getAllSubmissions(query:BaseQueryDto){
     return this.submissionRepository.getAllSubmissions(query)
   }
+  async getMySubmissions(userId:string,query:BaseQueryDto){
+    return await this.submissionRepository.getMySubmissions(userId,query)
+  }
+
+  
 
 }
