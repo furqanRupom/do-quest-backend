@@ -14,14 +14,18 @@ import { Submission } from './schemas/submission.schema';
 import { BaseQueryDto } from '../common/dto';
 import { TasksService } from '../tasks/tasks.service';
 import { SubmissionStatus } from './enums/submission.enum';
+import { WalletService } from '../wallet/wallet.service';
+import { RejectSubmissionDto } from './dto/reject-submission.dto';
+import { RequestRevisionDto } from './dto/request-revision.dto';
 
 @Injectable()
 export class SubmissionService {
   constructor(
     private readonly submissionRepository: SubmissionRepository,
     private readonly stripeService: StripeService,
-    private readonly tasksService:TasksService,
-  ) {}
+    private readonly tasksService: TasksService,
+    private readonly walletService: WalletService
+  ) { }
 
   async createSubmission(
     createSubmissionDto: CreateSubmissionDto,
@@ -40,9 +44,9 @@ export class SubmissionService {
     if (task.user.equals(userId)) {
       throw new BadRequestException('You cannot submit your own tasks!');
     }
-    const isSubmissionExit = await this.submissionRepository.existingSubmission(taskId,userId)
-    if(isSubmissionExit) {
-      throw new HttpException("You already have an active submission for this task",HttpStatus.CONFLICT)
+    const isSubmissionExit = await this.submissionRepository.existingSubmission(taskId, userId)
+    if (isSubmissionExit) {
+      throw new HttpException("You already have an active submission for this task", HttpStatus.CONFLICT)
     }
     const submission = await this.submissionRepository.createSubmission(
       createSubmissionDto,
@@ -54,7 +58,7 @@ export class SubmissionService {
 
   async approveSubmission(
     approveSubmissionDto: ApproveOrRejectDto,
-  ): Promise<{ capturedAmount: number; winnerSubmissionId: string }> {
+  ): Promise<any> {
 
     const { taskId, submissionId, approverId } = approveSubmissionDto;
 
@@ -82,7 +86,7 @@ export class SubmissionService {
       throw new BadRequestException('Submission not found for this task');
     }
 
-    if(submission.status !== SubmissionStatus.pending){
+    if (submission.status !== SubmissionStatus.pending) {
       throw new HttpException(
         `Submission is already ${submission.status.toLowerCase()}`,
         HttpStatus.BAD_REQUEST
@@ -90,7 +94,7 @@ export class SubmissionService {
     }
 
     const worker = submission.user as any
-    if(!worker.userStripeId || !worker.payoutsEnabled){
+    if (!worker.userStripeId || !worker.payoutsEnabled) {
       throw new HttpException(
         "Worker has not completed Stripe onboarding. Cannot pay out.",
         HttpStatus.BAD_REQUEST
@@ -98,59 +102,146 @@ export class SubmissionService {
     }
 
     await this.stripeService.capturePaymentIntent(task.paymentIntentId);
-    await this.submissionRepository.approveSubmission(submissionId);
-    await this.submissionRepository.rejectAllExcept(taskId, submissionId);
 
-    await this.tasksService.updateTask(taskId, {
-      status: TaskStatus.completed,
-      paymentFlowStatus: PaymentFlowStatus.captured,
-    });
+    const platformFreePercent = 0.10
+    const totalAmount = task.budget
+    const platformFee = Math.floor(totalAmount * platformFreePercent)
+    const workerAmount = totalAmount - platformFee
+
+    const transfer = await this.stripeService.createTransfer({
+      amount: workerAmount,
+      destination: worker.userStripeId,
+      metadata: {
+        taskId: taskId,
+        submissionId,
+        workerId: worker._id.toString()
+      }
+    })
+
+
+    await this.submissionRepository.approveSubmission(submissionId, transfer.id);
+
+    await this.walletService.releaseEscrowToWorker({
+      creatorId: approverId,
+      workerId: worker._id.toString(),
+      taskId: taskId,
+      submissionId,
+      amount: workerAmount,
+      stripeTransferId: transfer.id
+    })
+
+    await this.tasksService.incrementApprovedSubmissions(taskId)
+
 
     return {
-      capturedAmount: 100,
-      winnerSubmissionId: submissionId,
+      submission: submission,
+      transfer: { id: transfer.id, amount: workerAmount },
     };
   }
 
   async rejectSubmission(
-    approveSubmissionDto: ApproveOrRejectDto,
+    submissionId: string,
+    approverId: string,
+    dto: RejectSubmissionDto
   ): Promise<void> {
-    const { taskId, submissionId, approverId } = approveSubmissionDto;
-    const task = await this.tasksService.findTaskById(taskId);
+
+    const submission = await this.submissionRepository.findById(submissionId);
+
+    if (!submission) {
+      throw new NotFoundException("Submission not found")
+    }
+    const task = await this.tasksService.findTaskById(submission.task.toString());
+
+
     if (!task || task.user.toString() !== approverId) {
       throw new ForbiddenException(
-        'Not authorized to reject submissions for this task',
+        'You do not own this task',
       );
     }
 
-    const submission = await this.submissionRepository.findById(submissionId);
-    if (!submission || submission.task.toString() !== taskId) {
+
+    if (!submission || submission.task.toString()) {
       throw new BadRequestException('Submission not found for this task');
     }
 
-    await this.submissionRepository.rejectSubmission(submissionId);
+    if (submission.status !== SubmissionStatus.pending) {
+      throw new HttpException(
+        `Submission is already ${submission.status}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+
+    await this.submissionRepository.rejectSubmission(submissionId, dto)
+
+  }
+  async revisionSubmission(submissionId: string, ownerId: string, dto: RequestRevisionDto) {
+
+    const submission = await this.submissionRepository.findById(submissionId);
+    if (!submission) throw new NotFoundException('Submission not found');
+
+    if (submission.status !== SubmissionStatus.pending) {
+      throw new HttpException(
+        `Submission is already ${submission.status}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const task = await this.tasksService.findTaskById(
+      submission.task.toString(),
+    );
+    if (!task || task.user.toString() !== ownerId) {
+      throw new ForbiddenException('You do not own this task');
+    }
+
+    return await this.submissionRepository.revisionSubmission(submissionId, dto.revisionNote)
+
+
   }
 
-  async getSubmissionsByTaskId(taskId: string,userId:string): Promise<Submission[]> {
+
+  async reSubmit(
+    submissionId:string,
+    workerId:string,
+    dto:CreateSubmissionDto
+  ){
+    const submission = await this.submissionRepository.findById(submissionId)
+    if(!submission){
+      throw new NotFoundException("Submission not found")
+    }
+    if(submission.user.toString()!== workerId){
+      throw new ForbiddenException("This is not your submission")
+    }
+
+    if(submission.status !== SubmissionStatus.revision_requested) {
+      throw new HttpException(
+        "Only submissions with revision requested can be resubmitted.",
+        HttpStatus.BAD_REQUEST
+      )
+    }
+
+    await this.submissionRepository.resubmitSubmission(submissionId,dto)
+  }
+  async getSubmissionsByTaskId(taskId: string, userId: string): Promise<Submission[]> {
     const task = await this.tasksService.findTaskById(taskId)
-    if(!task){
+    if (!task) {
       throw new NotFoundException("Task not found")
     }
-    if(task.user.toString() !== userId){
+    if (task.user.toString() !== userId) {
       throw new ForbiddenException("You do not own this task")
     }
     return await this.submissionRepository.getSubmissionsByTaskId(taskId);
   }
-  async countAllSubmissions(){
+  async countAllSubmissions() {
     return this.submissionRepository.countTotalSubmissions()
   }
-  async getAllSubmissions(query:BaseQueryDto){
+  async getAllSubmissions(query: BaseQueryDto) {
     return this.submissionRepository.getAllSubmissions(query)
   }
-  async getMySubmissions(userId:string,query:BaseQueryDto){
-    return await this.submissionRepository.getMySubmissions(userId,query)
+  async getMySubmissions(userId: string, query: BaseQueryDto) {
+    return await this.submissionRepository.getMySubmissions(userId, query)
   }
 
-  
+
 
 }

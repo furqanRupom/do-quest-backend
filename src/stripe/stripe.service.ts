@@ -2,10 +2,10 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import Stripe from 'stripe';
 import { CreatePaymentDto } from './dto';
 import { ConfigService } from '@nestjs/config';
-import { UsersService } from 'src/users/users.service';
-import { TasksService } from 'src/tasks/tasks.service';
-import { WalletService } from 'src/wallet/wallet.service';
-import { PaymentFlowStatus, TaskStatus } from 'src/tasks/enums/tasks.enum';
+import { UsersService } from '../users/users.service';
+import { TasksService } from '../tasks/tasks.service';
+import { WalletService } from '../wallet/wallet.service';
+import { PaymentFlowStatus, TaskStatus } from '../tasks/enums/tasks.enum';
 
 @Injectable()
 export class StripeService {

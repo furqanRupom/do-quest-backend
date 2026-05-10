@@ -6,6 +6,7 @@ import { CreateSubmissionDto } from './dto';
 import { SubmissionStatus } from './enums/submission.enum';
 import { BaseQueryDto } from '../common/dto';
 import { QueryBuilder } from '../common/db/query-builder';
+import { RejectSubmissionDto } from './dto/reject-submission.dto';
 
 @Injectable()
 export class SubmissionRepository {
@@ -34,28 +35,47 @@ export class SubmissionRepository {
       status: { $in: [SubmissionStatus.pending, SubmissionStatus.approved] }
     })
   }
-  async getSubmissionsByTaskId(taskId:string) {
-    return await this.submissionModel.find({task:new Types.ObjectId(taskId)}).populate('user','nam email userStripeId payoutsEnabled').lean()
+  async getSubmissionsByTaskId(taskId: string) {
+    return await this.submissionModel.find({ task: new Types.ObjectId(taskId) }).populate('user', 'nam email userStripeId payoutsEnabled').lean()
   }
-  async rejectSubmission(submissionId: string): Promise<Submission | null> {
+  async rejectSubmission(submissionId: string, payload: RejectSubmissionDto): Promise<Submission | null> {
     return await this.submissionModel
       .findByIdAndUpdate(
         submissionId,
-        { status: SubmissionStatus.rejected },
-        { new: true },
-      )
-      .exec();
-  }
-  async approveSubmission(submissionId: string): Promise<Submission | null> {
-    return await this.submissionModel
-      .findByIdAndUpdate(
-        submissionId,
-        { status: SubmissionStatus.approved },
+        { status: SubmissionStatus.rejected, rejectionReason: payload.rejectionReason },
         { new: true },
       )
       .exec();
   }
 
+  async revisionSubmission(submissionId: string, revisionNote: string) {
+    return await this.submissionModel.findByIdAndUpdate(
+      submissionId,
+      { status: SubmissionStatus.revision_requested, revisionNote: revisionNote },
+      { new: true }
+    )
+      .exec()
+  }
+
+
+  async approveSubmission(submissionId: string, stripeTransferId: string): Promise<Submission | null> {
+    return await this.submissionModel
+      .findByIdAndUpdate(
+        submissionId,
+        { status: SubmissionStatus.approved, stripeTransferId: stripeTransferId },
+        { new: true },
+      )
+      .exec();
+  }
+  async resubmitSubmission(submissionId: string, dto: CreateSubmissionDto) {
+    return await this.submissionModel.findByIdAndUpdate(submissionId,
+      {
+        status: SubmissionStatus.pending, revisionNote: "",
+        message: dto.message,
+        attachments: dto.attachments
+      },
+      { new: true })
+  }
   async rejectAllExcept(taskId: string, approvedSubmissionId: string) {
     return await this.submissionModel.updateMany(
       {
@@ -82,16 +102,16 @@ export class SubmissionRepository {
     return { data, meta };
   }
 
-  
-  async getMySubmissions(userId:string,query: BaseQueryDto) {
+
+  async getMySubmissions(userId: string, query: BaseQueryDto) {
     const submissions = new QueryBuilder(this.submissionModel, query)
       .search(['title', 'content'])
-      .filter({user: new Types.ObjectId(userId)})
+      .filter({ user: new Types.ObjectId(userId) })
       .sort()
       .paginate()
       .populate({
-        path:'task',
-        select:'title budget status deadline'
+        path: 'task',
+        select: 'title budget status deadline'
       })
       .fields();
     const data = await submissions.modelQuery;

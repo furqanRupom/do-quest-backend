@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Param, Post, Req } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { Roles } from '../common/decorators';
 import { UserRole } from '../auth/enums/role.enum';
@@ -9,7 +9,9 @@ import { sendResponse } from '../common/utils';
 
 @Controller('payment')
 export class PaymentController {
-constructor(private readonly paymentService:PaymentService){}  
+constructor(private readonly paymentService:PaymentService){}
+
+ 
     @Roles(UserRole.User)
     @Post("tasks")
     @ApiOkResponse({ type: CreateNewTaskResponseDto })
@@ -21,4 +23,17 @@ constructor(private readonly paymentService:PaymentService){}
             data: result
         })
     }
+
+    
+    @Roles(UserRole.User)
+    @Post("tasks/:id/cancel")
+    async cancelTask(@Param()id:string, @Req() req: AuthRequest) {
+        const result = await this.paymentService.cancelTask(id, req.user.sub)
+        return sendResponse({
+            success: true,
+            message: "Task cancelled successfully",
+            data: result
+        })
+    }
+
 }

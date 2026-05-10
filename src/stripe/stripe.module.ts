@@ -7,7 +7,7 @@ import { WalletModule } from '../wallet/wallet.module';
 import { TasksModule } from '../tasks/tasks.module';
 
 @Module({
-  imports: [ConfigModule, UsersModule,WalletModule,TasksModule],
+  imports: [ConfigModule, UsersModule, WalletModule, TasksModule],
   controllers: [StripeController],
   providers: [StripeService],
   exports: [StripeService],

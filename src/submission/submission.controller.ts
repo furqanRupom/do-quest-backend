@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { UserRole } from '../auth/enums/role.enum';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { Roles } from '../common/decorators';
@@ -8,6 +8,8 @@ import type { AuthRequest } from '../auth/types/auth-request.type';
 import { sendResponse } from '../common/utils';
 import { ApiBearerAuth, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
 import { SubmissionListDto } from './dto/submission.list.dto';
+import { RejectSubmissionDto } from './dto/reject-submission.dto';
+import { RequestRevisionDto } from './dto/request-revision.dto';
 
 @Controller('tasks/:taskId/submissions')
 @UseGuards(JwtAuthGuard)
@@ -72,16 +74,15 @@ export class SubmissionController {
     @HttpCode(HttpStatus.OK)
     @ApiResponse({ type: RejectResponseDto })
     async rejectSubmission(
-        @Param('taskId') taskId: string,
         @Param('submissionId') submissionId: string,
         @Req() req: AuthRequest,
+        @Body() dto: RejectSubmissionDto
     ): Promise<RejectResponseDto> {
         const rejectSubmissionDto = {
-            taskId,
             submissionId,
             approverId: req.user.sub
         };
-        await this.submissionService.rejectSubmission(rejectSubmissionDto);
+        await this.submissionService.rejectSubmission(submissionId,req.user.sub,dto);
         return sendResponse({
             success: true,
             message: "Submission rejected successfully",
@@ -89,4 +90,36 @@ export class SubmissionController {
         });
     }
 
+    @Patch(':submissionId/revision')
+    @HttpCode(HttpStatus.OK)
+    @ApiResponse({ type: RejectResponseDto })
+    async revisionSubmission(
+        @Param('submissionId') submissionId: string,
+        @Req() req: AuthRequest,
+        @Body() dto: RequestRevisionDto
+    ): Promise<RejectResponseDto> {
+        await this.submissionService.revisionSubmission(submissionId,req.user.sub,dto);
+        return sendResponse({
+            success: true,
+            message: "Submission revisioned successfully",
+            data: null
+        });
+    }
+
+    
+    @Patch(':submissionId/resubmit')
+    @HttpCode(HttpStatus.OK)
+    @ApiResponse({ type: RejectResponseDto })
+    async resubmitSubmission(
+        @Param('submissionId') submissionId: string,
+        @Req() req: AuthRequest,
+        @Body() dto: CreateSubmissionDto
+    ): Promise<RejectResponseDto> {
+        await this.submissionService.reSubmit(submissionId,req.user.sub,dto);
+        return sendResponse({
+            success: true,
+            message: "Submission resubmitted successfully",
+            data: null
+        });
+    }
 }
