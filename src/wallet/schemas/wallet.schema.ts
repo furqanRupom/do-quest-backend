@@ -3,7 +3,7 @@ import { Types } from "mongoose";
 
 @Schema({ timestamps: true })
 export class Wallet {
-    @Prop({ type: Types.ObjectId, ref: 'User', required: true, unique: true })
+    @Prop({ type: Types.ObjectId, ref: 'User', required:true ,unique:true })
     user: Types.ObjectId;
 
     @Prop({ default: 0 })
