@@ -36,8 +36,8 @@ export class TasksRepository {
     if (task.isDeleted) {
       throw new HttpException('Task already deleted', HttpStatus.BAD_REQUEST);
     }
-    if(task.status == TaskStatus.active) {
-      throw new HttpException('Cannot delete an active task, Delete it first!',HttpStatus.BAD_REQUEST)
+    if (task.status == TaskStatus.active) {
+      throw new HttpException('Cannot delete an active task, Delete it first!', HttpStatus.BAD_REQUEST)
     }
 
     if (task.user.toString() !== userId) {
@@ -68,6 +68,23 @@ export class TasksRepository {
     return { data, meta };
   }
 
+  async browseTasks(
+    query: BaseQueryDto,
+  ): Promise<MetaResponseDto<Partial<any>>> {
+    const builder = new QueryBuilder(this.taskModel, query)
+      .search(['title', 'description'])
+      .filter()
+      .sort()
+      .paginate()
+      .fields()
+      .populate({
+        path:'user',
+        select:'name email username'
+      });
+    const data = await builder.modelQuery
+    const meta = await builder.countTotal();
+    return { data, meta };
+  }
   async getTaskById(taskId: string): Promise<Partial<CreateTaskResponseDto>> {
     const task = await this.taskModel.findById(taskId);
     if (!task) {
@@ -215,8 +232,8 @@ export class TasksRepository {
     return task.toObject() as unknown as TaskDocument
   }
 
-  async findTaskByPaymentIntentId(paymentIntentId:string){
-    const task =  await this.taskModel.findOne({paymentIntentId:paymentIntentId})
+  async findTaskByPaymentIntentId(paymentIntentId: string) {
+    const task = await this.taskModel.findOne({ paymentIntentId: paymentIntentId })
     return task?.toObject()
   }
 }

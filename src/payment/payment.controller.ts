@@ -27,11 +27,11 @@ constructor(private readonly paymentService:PaymentService){}
     
     @Roles(UserRole.User)
     @Post("tasks/:id/cancel")
-    async cancelTask(@Param()id:string, @Req() req: AuthRequest) {
+    async cancelTask(@Param('id')id:string, @Req() req: AuthRequest) {
         const result = await this.paymentService.cancelTask(id, req.user.sub)
         return sendResponse({
             success: true,
-            message: "Task cancelled successfully",
+            message: "New Task Created successfully",
             data: result
         })
     }

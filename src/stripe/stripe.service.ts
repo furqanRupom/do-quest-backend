@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import Stripe from 'stripe';
 import { CreatePaymentDto } from './dto';
 import { ConfigService } from '@nestjs/config';
@@ -16,7 +16,10 @@ export class StripeService {
 
     private readonly usersService: UsersService,
     private readonly configService: ConfigService,
+    @Inject(forwardRef(() => TasksService))
     private readonly tasksService: TasksService,
+
+    @Inject(forwardRef(() => WalletService))
     private readonly walletService: WalletService
   ) {
 
@@ -97,70 +100,70 @@ export class StripeService {
 
 
 
-  this.logger.log(`Stripe webhook received: ${event.type}`);
+    this.logger.log(`Stripe webhook received: ${event.type}`);
 
-  
+
 
     try {
       switch (event.type) {
         // ── Payment Intent Events ────────────────────────────
- 
+
         case 'payment_intent.succeeded':
           await this.handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent);
           break;
- 
+
         case 'payment_intent.payment_failed':
           await this.handlePaymentIntentFailed(event.data.object as Stripe.PaymentIntent);
           break;
- 
+
         case 'payment_intent.canceled':
           await this.handlePaymentIntentCanceled(event.data.object as Stripe.PaymentIntent);
           break;
- 
+
         case 'payment_intent.amount_capturable_updated':
           // Fired when manual-capture PI is authorized and ready to capture
           await this.handlePaymentIntentAuthorized(event.data.object as Stripe.PaymentIntent);
           break;
- 
+
         // ── Transfer Events ──────────────────────────────────
- 
+
         case 'transfer.created':
           await this.handleTransferCreated(event.data.object as Stripe.Transfer);
-          break; 
+          break;
         // ── Payout Events (connected accounts) ──────────────
- 
+
         case 'payout.paid':
           await this.handlePayoutPaid(event.data.object as Stripe.Payout, event.account);
           break;
- 
+
         case 'payout.failed':
           await this.handlePayoutFailed(event.data.object as Stripe.Payout, event.account);
           break;
- 
+
         // ── Connected Account Events ─────────────────────────
- 
+
         case 'account.updated':
           await this.handleAccountUpdated(event.data.object as Stripe.Account);
           break;
- 
+
         case 'account.application.deauthorized':
           await this.handleAccountDeauthorized(event.data.object as Stripe.Application, event.account);
           break;
- 
+
         // ── Charge Events ────────────────────────────────────
- 
+
         case 'charge.refunded':
           await this.handleChargeRefunded(event.data.object as Stripe.Charge);
           break;
- 
+
         case 'charge.dispute.created':
           await this.handleDisputeCreated(event.data.object as Stripe.Dispute);
           break;
- 
+
         case 'charge.dispute.closed':
           await this.handleDisputeClosed(event.data.object as Stripe.Dispute);
           break;
- 
+
         default:
           this.logger.verbose(`Unhandled webhook event type: ${event.type}`);
       }

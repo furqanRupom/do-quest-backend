@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Req, UseGuards ,Query} from '@nestjs/common';
 import { UserRole } from '../auth/enums/role.enum';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { Roles } from '../common/decorators';
@@ -10,6 +10,7 @@ import { ApiBearerAuth, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
 import { SubmissionListDto } from './dto/submission.list.dto';
 import { RejectSubmissionDto } from './dto/reject-submission.dto';
 import { RequestRevisionDto } from './dto/request-revision.dto';
+import { BaseQueryDto } from 'src/common/dto';
 
 @Controller('tasks/:taskId/submissions')
 @UseGuards(JwtAuthGuard)
@@ -48,6 +49,18 @@ export class SubmissionController {
         });
     }
 
+    @Get('my')
+    @HttpCode(HttpStatus.OK)
+    @ApiOkResponse({ type: SubmissionListDto })
+    async mySubmissions(@Req()req :AuthRequest ,@Query() query:BaseQueryDto): Promise<SubmissionListDto> {
+        const result = await this.submissionService.getMySubmissions(req.user.sub,query);
+        return sendResponse({
+            success: true,
+            message: "My submissions retrieved successfully",
+            meta:result.meta,
+            data: result.data
+        });
+    }
 
     @Put(':submissionId/approve')
     @ApiResponse({ type: ApproveResponseDto })

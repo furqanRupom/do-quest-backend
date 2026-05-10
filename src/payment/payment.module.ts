@@ -7,6 +7,7 @@ import { StripeModule } from '../stripe/stripe.module';
 @Module({
   imports:[StripeModule,TasksModule],
   providers: [PaymentService],
-  controllers: [PaymentController]
+  controllers: [PaymentController],
+  exports:[PaymentService]
 })
 export class PaymentModule {}

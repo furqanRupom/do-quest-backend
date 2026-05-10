@@ -9,77 +9,78 @@ import { ApiBearerAuth, ApiOkResponse, ApiParam } from '@nestjs/swagger';
 import type { AuthRequest } from '../auth/types/auth-request.type';
 import { BaseQueryDto } from '../common/dto/base-query.dto';
 
-@UseGuards(JwtAuthGuard)
+
 @Controller('tasks')
 export class TasksController {
-    constructor(private readonly tasksService: TasksService) { }
+  constructor(private readonly tasksService: TasksService) { }
 
-    @Roles(UserRole.User)
-    @Post()
-    @ApiBearerAuth()
-    @ApiOkResponse({ type: CreateNewTaskResponseDto })
-    async createNewTask(@Body() createTaskDto: CreateNewTaskDto, @Req() req: AuthRequest): Promise<CreateNewTaskResponseDto> {
-        const result = await this.tasksService.createNewTask(createTaskDto, req.user.sub)
-        return sendResponse({
-            success: true,
-            message: "New Task Created successfully",
-            data: result
-        })
-    }
+  @Get()
+  async browseTasks(query: BaseQueryDto) {
+    const result = await this.tasksService.browseAllTasks(query)
+    return sendResponse({
+      success: true,
+      message: "Fetched  all tasks successfully",
+      meta:result.meta,
+      data: result.data,
+    })
+  }
 
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.User)
+  @Delete(':id')
+  @ApiBearerAuth()
+  @ApiParam({ name: 'id', type: String })
+  @ApiOkResponse({ type: DeleteTaskDto })
+  async deleteTask(@Param() deleteTaskDto: { id: string }, @Req() req: AuthRequest): Promise<DeleteTaskDto> {
+    await this.tasksService.deleteTask(deleteTaskDto.id, req.user.sub);
+    return sendResponse({
+      success: true,
+      message: "Task deleted successfully",
+      data: null
+    })
+  }
 
-    @Roles(UserRole.User)
-    @Delete(':id')
-    @ApiBearerAuth()
-    @ApiParam({ name: 'id', type: String })
-    @ApiOkResponse({ type: DeleteTaskDto })
-    async deleteTask(@Param() deleteTaskDto: { id: string }, @Req() req: AuthRequest): Promise<DeleteTaskDto> {
-        await this.tasksService.deleteTask(deleteTaskDto.id, req.user.sub);
-        return sendResponse({
-            success: true,
-            message: "Task deleted successfully",
-            data: null
-        })
-    }
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.User)
+  @Get('my')
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: GetAllTaskDto })
+  async getAllTasks(@Req() req: AuthRequest, @Query() query: BaseQueryDto): Promise<GetAllTaskDto<CreateNewTaskDto>> {
+    const result = await this.tasksService.getAllMyTasks(req.user.sub, query);
+    return sendResponse({
+      success: true,
+      message: "Tasks fetched successfully",
+      meta: result.meta,
+      data: result.data
+    })
+  }
 
-    @Roles(UserRole.User)
-    @Get('')
-    @ApiBearerAuth()
-    @ApiOkResponse({ type: GetAllTaskDto })
-    async getAllTasks(@Req() req: AuthRequest, @Query() query: BaseQueryDto): Promise<GetAllTaskDto<CreateNewTaskDto>> {
-        const result = await this.tasksService.getAllTasks(req.user.sub, query);
-        return sendResponse({
-            success: true,
-            message: "Tasks fetched successfully",
-            meta: result.meta,
-            data: result.data
-        })
-    }
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.User, UserRole.Admin)
+  @Get(':id')
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: CreateNewTaskResponseDto })
+  async getSingleTask(@Param('id') taskId: string): Promise<SingleTaskDto> {
+    const result = await this.tasksService.getTaskById(taskId);
+    return sendResponse({
+      success: true,
+      message: "Task fetched successfully",
+      data: result
+    })
+  }
 
-    @Roles(UserRole.User, UserRole.Admin)
-    @Get(':id')
-    @ApiBearerAuth()
-    @ApiOkResponse({ type: CreateNewTaskResponseDto })
-    async getSingleTask(@Param('id') taskId: string): Promise<SingleTaskDto> {
-        const result = await this.tasksService.getTaskById(taskId);
-        return sendResponse({
-            success: true,
-            message: "Task fetched successfully",
-            data: result
-        })
-    }
-
-    @Roles(UserRole.User,UserRole.Admin)
-    @Put(':id')
-    @ApiBearerAuth()
-    @ApiOkResponse({ type: UpdateWholeTaskDto })
-    async updateWholeTask(@Body() UpdateTaskDto: UpdateTaskDto, @Param('id') taskId: string, @Req() req: AuthRequest): Promise<UpdateWholeTaskDto> {
-        const result = await this.tasksService.updateWholeTask(taskId, req.user.sub, UpdateTaskDto)
-        return sendResponse({
-            success: true,
-            message: "Task updated successfully",
-            data: result
-        })
-    }
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.User, UserRole.Admin)
+  @Put(':id')
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: UpdateWholeTaskDto })
+  async updateWholeTask(@Body() UpdateTaskDto: UpdateTaskDto, @Param('id') taskId: string, @Req() req: AuthRequest): Promise<UpdateWholeTaskDto> {
+    const result = await this.tasksService.updateWholeTask(taskId, req.user.sub, UpdateTaskDto)
+    return sendResponse({
+      success: true,
+      message: "Task updated successfully",
+      data: result
+    })
+  }
 
 }

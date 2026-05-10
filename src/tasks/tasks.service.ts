@@ -22,11 +22,18 @@ export class TasksService {
   async deleteTask(taskId: string, userId: string): Promise<void> {
     return await this.tasksRepository.deleteTask(taskId, userId);
   }
-  async getAllTasks(
+  async getAllMyTasks(
     userId: string,
     query: BaseQueryDto,
   ): Promise<MetaResponseDto<Partial<CreateTaskResponseDto>>> {
     return await this.tasksRepository.getAllTasks(userId, query);
+  }
+
+  
+  async browseAllTasks(
+    query: BaseQueryDto,
+  ): Promise<MetaResponseDto<Partial<any>>> {
+    return await this.tasksRepository.browseTasks(query)
   }
   async getTaskById(taskId: string): Promise<Partial<CreateTaskResponseDto>> {
     return await this.tasksRepository.getTaskById(taskId);

@@ -10,7 +10,6 @@ export class PaymentService {
     private readonly stripeService: StripeService,
     private readonly tasksService: TasksService
   ) { }
-
   async createTaskWithPayment(payload: CreateNewTaskDto, userId: string): Promise<CreateTaskResponseDto> {
     const task = await this.tasksService.createNewTask(payload, userId)
     const intent = await this.stripeService.createPaymentIntent({
@@ -69,9 +68,9 @@ export class PaymentService {
       }
     }
 
-    await this.tasksService.updateTask(taskId,{
-      status:TaskStatus.cancelled,
-      PaymentFlowStatus:PaymentFlowStatus.cancelled
+    await this.tasksService.updateTask(taskId, {
+      status: TaskStatus.cancelled,
+      paymentFlowStatus: PaymentFlowStatus.cancelled
     })
   }
 }
