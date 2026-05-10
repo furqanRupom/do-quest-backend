@@ -1,12 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model } from 'mongoose';
-import { Wallet } from './schemas/wallet.schema';
+import mongoose, { Model, Types } from 'mongoose';
+import { Wallet, WalletDocument } from './schemas/wallet.schema';
+import { WalletTransaction } from './schemas/wallet-transaction.schema';
+import { TransactionCategory, TransactionStatus, TransactionType } from './enums/wallet.enum';
 
 @Injectable()
 export class WalletRepository {
   constructor(
-    @InjectModel(Wallet.name) private walletModel: Model<Wallet>
+    @InjectModel(Wallet.name) private walletModel: Model<Wallet>,
+    @InjectModel(WalletTransaction.name) private walletTransactinModel:Model<WalletTransaction>
   ) { }
 
   // TODO: return Type
@@ -34,5 +37,215 @@ export class WalletRepository {
 
   async removeAll(){
     return await this.walletModel.deleteMany()
+  }
+  async getOrCreateWallet(userId:string):Promise<WalletDocument> {
+    const existingWallet = await this.walletModel.findOne({
+      user:new Types.ObjectId(userId)
+    })
+    if(existingWallet) return existingWallet as unknown as WalletDocument
+    return await this.walletModel.create({user:new Types.ObjectId(userId)}) as unknown as  WalletDocument
+  }
+
+async getTransactions(
+    userId: string,
+    page = 1,
+    limit = 20,
+  ) {
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      await this.walletTransactinModel
+        .find({ user: new Types.ObjectId(userId) })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('task', 'title budget')
+        .populate('submission', 'message status')
+        .lean(),
+      await this.walletTransactinModel.countDocuments({
+        user: new Types.ObjectId(userId),
+      }),
+    ]);
+    return {
+      data,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
+  }
+ 
+  // ─── Mutations ───────────────────────────────────────────────
+ 
+  /**
+   * Creator funds escrow when task payment is confirmed
+   */
+  async holdEscrow(
+    userId: string,
+    taskId: string,
+    amount: number,
+  ) {
+    const wallet = await this.getOrCreateWallet(userId);
+    wallet.pendingBalance += amount;
+    await wallet.save();
+ 
+    await this.walletTransactinModel.create({
+      user: new Types.ObjectId(userId),
+      task: new Types.ObjectId(taskId),
+      type: TransactionType.debit,
+      amount,
+      category: TransactionCategory.escrow_hold,
+      status: TransactionStatus.completed,
+      description: `Escrow funded for task`,
+    });
+ 
+    return wallet;
+  }
+ 
+  /**
+   * Release escrow from creator → credit worker's available balance
+   */
+  async releaseEscrowToWorker(params: {
+    creatorId: string;
+    workerId: string;
+    taskId: string;
+    submissionId: string;
+    amount: number;
+    stripeTransferId: string;
+  }) {
+    const { creatorId, workerId, taskId, submissionId, amount, stripeTransferId } = params;
+ 
+    // Deduct from creator's pending (escrow)
+    const creatorWallet = await this.getOrCreateWallet(creatorId);
+    creatorWallet.pendingBalance = Math.max(0, creatorWallet.pendingBalance - amount);
+    await creatorWallet.save();
+ 
+    await this.walletTransactinModel.create({
+      user: new Types.ObjectId(creatorId),
+      task: new Types.ObjectId(taskId),
+      submission: new Types.ObjectId(submissionId),
+      type: TransactionType.debit,
+      amount,
+      category: TransactionCategory.escrow_release,
+      stripeTransferId,
+      status: TransactionStatus.completed,
+      description: `Escrow released to worker`,
+    });
+ 
+    // Credit worker's available balance
+    const workerWallet = await this.getOrCreateWallet(workerId);
+    workerWallet.availableBalance += amount;
+    workerWallet.totalEarnings += amount;
+    await workerWallet.save();
+ 
+    await this.walletTransactinModel.create({
+      user: new Types.ObjectId(workerId),
+      task: new Types.ObjectId(taskId),
+      submission: new Types.ObjectId(submissionId),
+      type: TransactionType.credit,
+      amount,
+      category: TransactionCategory.earning,
+      stripeTransferId,
+      status: TransactionStatus.completed,
+      description: `Bounty earned from approved submission`,
+    });
+  }
+ 
+  /**
+   * Refund creator when task is cancelled
+   */
+  async refundCreator(
+    userId: string,
+    taskId: string,
+    amount: number,
+  ) {
+    const wallet = await this.getOrCreateWallet(userId);
+    wallet.pendingBalance = Math.max(0, wallet.pendingBalance - amount);
+    await wallet.save();
+ 
+    await this.walletTransactinModel.create({
+      user: new Types.ObjectId(userId),
+      task: new Types.ObjectId(taskId),
+      type: TransactionType.credit,
+      amount,
+      category: TransactionCategory.refund,
+      status: TransactionStatus.completed,
+      description: `Refund for cancelled task`,
+    });
+ 
+    return wallet;
+  }
+ 
+  /**
+   * Worker initiates payout to their Stripe connected account
+   */
+  async debitForWithdrawal(
+    userId: string,
+    amount: number,
+  ) {
+    const wallet = await this.getOrCreateWallet(userId);
+    if (wallet.availableBalance < amount) {
+      throw new HttpException(
+        'Insufficient available balance',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    wallet.availableBalance -= amount;
+    wallet.pendingBalance += amount; // hold while payout processes
+    await wallet.save();
+ 
+    const tx = await this.walletTransactinModel.create({
+      user: new Types.ObjectId(userId),
+      type: TransactionType.debit,
+      amount,
+      category: TransactionCategory.withdrawal,
+      status: TransactionStatus.pending,
+      description: `Withdrawal initiated`,
+    });
+ 
+    return { wallet, transactionId: tx._id.toString() };
+  }
+ 
+  /**
+   * Mark withdrawal transaction completed (called from webhook)
+   */
+  async completeWithdrawal(
+    userId: string,
+    amount: number,
+    stripePayoutId: string,
+  ) {
+    const wallet = await this.getOrCreateWallet(userId);
+    wallet.pendingBalance = Math.max(0, wallet.pendingBalance - amount);
+    await wallet.save();
+ 
+    await this.walletTransactinModel.findOneAndUpdate(
+      {
+        user: new Types.ObjectId(userId),
+        category: TransactionCategory.withdrawal,
+        status: TransactionStatus.pending,
+        amount,
+      },
+      { status: TransactionStatus.completed, stripePayoutId },
+    );
+  }
+ 
+  /**
+   * Revert pending withdrawal on failure (payout.failed webhook)
+   */
+  async revertWithdrawal(
+    userId: string,
+    amount: number,
+    stripePayoutId: string,
+  ) {
+    const wallet = await this.getOrCreateWallet(userId);
+    wallet.pendingBalance = Math.max(0, wallet.pendingBalance - amount);
+    wallet.availableBalance += amount; // return funds
+    await wallet.save();
+ 
+    await this.walletTransactinModel.findOneAndUpdate(
+      {
+        user: new Types.ObjectId(userId),
+        category: TransactionCategory.withdrawal,
+        status: TransactionStatus.pending,
+        amount,
+      },
+      { status: TransactionStatus.failed, stripePayoutId },
+    );
   }
 }

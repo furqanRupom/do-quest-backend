@@ -1,11 +1,12 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Task } from './schemas/tasks.schema';
+import { Task, TaskDocument } from './schemas/tasks.schema';
 import { Model, Types } from 'mongoose';
 import { CreateNewTaskDto, CreateTaskResponseDto, UpdateTaskDto } from './dto';
 import { QueryBuilder } from '../common/db/query-builder';
 import { BaseQueryDto, MetaResponseDto } from '../common/dto';
 import { PaymentFlowStatus, TaskStatus } from './enums/tasks.enum';
+import { SubmissionStatus } from 'src/submission/enums/submission.enum';
 
 @Injectable()
 export class TasksRepository {
@@ -34,6 +35,9 @@ export class TasksRepository {
     }
     if (task.isDeleted) {
       throw new HttpException('Task already deleted', HttpStatus.BAD_REQUEST);
+    }
+    if(task.status == TaskStatus.active) {
+      throw new HttpException('Cannot delete an active task, Delete it first!',HttpStatus.BAD_REQUEST)
     }
 
     if (task.user.toString() !== userId) {
@@ -96,7 +100,7 @@ export class TasksRepository {
   ): Promise<Task | null> {
     const updatedTask = await this.taskModel.findByIdAndUpdate(
       taskId,
-      updateData,
+      { $set: updateData },
       { new: true },
     );
     if (!updatedTask) {
@@ -112,7 +116,7 @@ export class TasksRepository {
   ): Promise<Task | null> {
     const updatedTask = await this.taskModel.findOneAndUpdate(
       { _id: taskId, user: userId },
-      updateData,
+      { $set: updateData },
       { new: true, runValidators: true },
     );
 
@@ -194,5 +198,20 @@ export class TasksRepository {
       { new: true },
     );
   }
+  async incrementApprovedSubmissions(taskId: string): Promise<TaskDocument> {
+    const task = await this.taskModel.findById(taskId)
+    if (!task) {
+      throw new NotFoundException("Task not found!")
+    }
+    const approvedCount = await this.taskModel.db.collection('submissions').countDocuments({
+      task: new Types.ObjectId(task._id),
+      status: SubmissionStatus.approved
+    })
 
+    if (approvedCount >= task.maxSubmissions) {
+      task.status = TaskStatus.completed
+      await task.save()
+    }
+    return task.toObject() as unknown as TaskDocument
+  }
 }

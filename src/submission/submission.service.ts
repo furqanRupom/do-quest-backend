@@ -1,22 +1,25 @@
 import {
   BadRequestException,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { SubmissionRepository } from './submission.repository';
 import { StripeService } from '../stripe/stripe.service';
-import { TasksRepository } from '../tasks/tasks.repository';
 import { ApproveOrRejectDto, CreateSubmissionDto } from './dto';
 import { PaymentFlowStatus, TaskStatus } from '../tasks/enums/tasks.enum';
 import { Submission } from './schemas/submission.schema';
 import { BaseQueryDto } from '../common/dto';
+import { TasksService } from '../tasks/tasks.service';
 
 @Injectable()
 export class SubmissionService {
   constructor(
     private readonly submissionRepository: SubmissionRepository,
     private readonly stripeService: StripeService,
-    private readonly tasksRepository: TasksRepository,
+    private readonly tasksService:TasksService,
   ) {}
 
   async createSubmission(
@@ -24,7 +27,7 @@ export class SubmissionService {
     taskId: string,
     userId: string,
   ): Promise<Submission> {
-    const task = await this.tasksRepository.findTaskById(taskId);
+    const task = await this.tasksService.findTaskById(taskId);
     if (!task) {
       throw new BadRequestException('Task not found');
     }
@@ -35,6 +38,10 @@ export class SubmissionService {
     }
     if (task.user.equals(userId)) {
       throw new BadRequestException('You cannot submit your own tasks!');
+    }
+    const isSubmissionExit = await this.submissionRepository.existingSubmission(taskId,userId)
+    if(isSubmissionExit) {
+      throw new HttpException("You already have an active submission for this task",HttpStatus.CONFLICT)
     }
     const submission = await this.submissionRepository.createSubmission(
       createSubmissionDto,
@@ -48,7 +55,7 @@ export class SubmissionService {
     approveSubmissionDto: ApproveOrRejectDto,
   ): Promise<{ capturedAmount: number; winnerSubmissionId: string }> {
     const { taskId, submissionId, approverId } = approveSubmissionDto;
-    const task = await this.tasksRepository.findTaskById(taskId);
+    const task = await this.tasksService.findTaskById(taskId);
     if (!task || task.user.toString() !== approverId) {
       throw new ForbiddenException(
         'Not authorized to approve submissions for this task',
@@ -81,7 +88,7 @@ export class SubmissionService {
     await this.submissionRepository.approveSubmission(submissionId);
     await this.submissionRepository.rejectAllExcept(taskId, submissionId);
 
-    await this.tasksRepository.updateTask(taskId, {
+    await this.tasksService.updateTask(taskId, {
       status: TaskStatus.completed,
       paymentFlowStatus: PaymentFlowStatus.captured,
     });
@@ -96,7 +103,7 @@ export class SubmissionService {
     approveSubmissionDto: ApproveOrRejectDto,
   ): Promise<void> {
     const { taskId, submissionId, approverId } = approveSubmissionDto;
-    const task = await this.tasksRepository.findTaskById(taskId);
+    const task = await this.tasksService.findTaskById(taskId);
     if (!task || task.user.toString() !== approverId) {
       throw new ForbiddenException(
         'Not authorized to reject submissions for this task',
@@ -111,8 +118,15 @@ export class SubmissionService {
     await this.submissionRepository.rejectSubmission(submissionId);
   }
 
-  async getSubmissionsByTaskId(taskId: string): Promise<Submission[]> {
-    return this.submissionRepository.findByTaskId(taskId);
+  async getSubmissionsByTaskId(taskId: string,userId:string): Promise<Submission[]> {
+    const task = await this.tasksService.findTaskById(taskId)
+    if(!task){
+      throw new NotFoundException("Task not found")
+    }
+    if(task.user.toString() !== userId){
+      throw new ForbiddenException("You do not own this task")
+    }
+    return await this.submissionRepository.getSubmissionsByTaskId(taskId);
   }
   async countAllSubmissions(){
     return this.submissionRepository.countTotalSubmissions()
@@ -120,4 +134,5 @@ export class SubmissionService {
   async getAllSubmissions(query:BaseQueryDto){
     return this.submissionRepository.getAllSubmissions(query)
   }
+
 }

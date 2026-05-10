@@ -3,7 +3,7 @@ import mongoose, { Types } from "mongoose";
 import { User } from "../../users/schemas/users.schema";
 import { PaymentFlowStatus, PaymentStatus, TaskStatus } from "../enums/tasks.enum";
 
-
+export type TaskDocument = Task & Document
 @Schema({ timestamps: true })
 export class Task {
     @Prop({ type: Types.ObjectId, ref: User.name, required: true, index: true })

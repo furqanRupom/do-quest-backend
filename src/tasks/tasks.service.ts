@@ -3,6 +3,7 @@ import { CreateNewTaskDto, CreateTaskResponseDto, UpdateTaskDto } from './dto';
 import { TasksRepository } from './tasks.repository';
 import { BaseQueryDto, MetaResponseDto } from '../common/dto';
 import { TaskStatus } from './enums/tasks.enum';
+import { Task } from './schemas/tasks.schema';
 
 @Injectable()
 export class TasksService {
@@ -54,5 +55,10 @@ export class TasksService {
   async getTasksBountiesBarData(): Promise<any> {
     return this.tasksRepository.getTasksBountiesBarData();
   }
-
+  async incrementApprovedSubmissions(taskId: string) {
+    return await this.tasksRepository.incrementApprovedSubmissions(taskId)
+  }
+  async findTaskById(taskId:string) :Promise<Task | null >{
+    return await this.tasksRepository.findTaskById(taskId)
+  }
 }
