@@ -85,6 +85,7 @@ export class UsersRepository {
   }
 
   async getAllUsers(query: UsersBaseQueryDto) {
+    console.log(query)
     const users = new QueryBuilder(this.userModel, query)
       .search(['name', 'email'])
       .filter(UsersFilterableFields)
@@ -93,7 +94,7 @@ export class UsersRepository {
       .fields();
     const data = await users.modelQuery;
     const meta = await users.countTotal();
-    return { data, meta };
+    return { meta,data };
   }
 
   async updateUser(userId: string, userUpdateDto: any) {
