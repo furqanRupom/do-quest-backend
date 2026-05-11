@@ -11,13 +11,15 @@ import {
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { sendResponse } from '../common/utils';
-import { BaseQueryDto } from '../common/dto';
 import { UserRole } from '../auth/enums/role.enum';
 import { Roles } from '../common/decorators/roles.decorators';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { ApiCookieAuth, ApiOkResponse } from '@nestjs/swagger';
 import { CountTotalsResponseDto } from './dto';
 import { TaskStatus } from '../tasks/enums/tasks.enum';
+import { GetTasksQueryDto } from '../tasks/dto';
+import { SubmissionQueryDto } from '../submission/dto/submission.list.dto';
+import { UsersBaseQueryDto } from '../users/dto';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard)
@@ -39,7 +41,7 @@ export class AdminController {
   }
   @HttpCode(HttpStatus.OK)
   @Get('users')
-  async getAllUsers(@Query() query: BaseQueryDto) {
+  async getAllUsers(@Query() query: UsersBaseQueryDto) {
     const result = await this.adminService.getAllUsers(query);
     return sendResponse({
       success: true,
@@ -50,7 +52,7 @@ export class AdminController {
 
   @HttpCode(HttpStatus.OK)
   @Get('submissions')
-  async getAllSubmissions(@Query() query: BaseQueryDto) {
+  async getAllSubmissions(@Query() query: SubmissionQueryDto) {
     const result = await this.adminService.getAllSubmissions(query);
     return sendResponse({
       success: true,
@@ -61,7 +63,7 @@ export class AdminController {
 
   @HttpCode(HttpStatus.OK)
   @Get('tasks')
-  async getAllTasks(@Query() query: BaseQueryDto) {
+  async getAllTasks(@Query() query: GetTasksQueryDto) {
     const result = await this.adminService.getAllTasks(query);
     return sendResponse({
       success: true,

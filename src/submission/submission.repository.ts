@@ -7,7 +7,8 @@ import { SubmissionStatus } from './enums/submission.enum';
 import { BaseQueryDto } from '../common/dto';
 import { QueryBuilder } from '../common/db/query-builder';
 import { RejectSubmissionDto } from './dto/reject-submission.dto';
-
+import { SubmissionFilterableFields } from './constants/submission.constant'; 
+import { SubmissionQueryDto } from './dto/submission.list.dto';
 @Injectable()
 export class SubmissionRepository {
   constructor(
@@ -90,10 +91,10 @@ export class SubmissionRepository {
   async countTotalSubmissions(): Promise<number> {
     return await this.submissionModel.countDocuments().exec();
   }
-  async getAllSubmissions(query: BaseQueryDto) {
+  async getAllSubmissions(query: SubmissionQueryDto) {
     const submissions = new QueryBuilder(this.submissionModel, query)
       .search(['title', 'content'])
-      .filter()
+      .filter(SubmissionFilterableFields)
       .sort()
       .paginate()
       .fields();
@@ -103,10 +104,10 @@ export class SubmissionRepository {
   }
 
 
-  async getMySubmissions(userId: string, query: BaseQueryDto) {
+  async getMySubmissions(userId: string, query: SubmissionQueryDto) {
     const submissions = new QueryBuilder(this.submissionModel, query)
       .search(['title', 'content'])
-      .filter({ user: new Types.ObjectId(userId) })
+      .filter(SubmissionFilterableFields,{ user: new Types.ObjectId(userId) })
       .sort()
       .paginate()
       .populate({

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CreateNewTaskDto, CreateTaskResponseDto, UpdateTaskDto } from './dto';
+import { CreateNewTaskDto, CreateTaskResponseDto, GetAllTaskDto, GetTasksQueryDto, UpdateTaskDto } from './dto';
 import { TasksRepository } from './tasks.repository';
 import { BaseQueryDto, MetaResponseDto } from '../common/dto';
 import { TaskStatus } from './enums/tasks.enum';
-import { Task, TaskDocument } from './schemas/tasks.schema';
+import {  TaskDocument } from './schemas/tasks.schema';
 
 @Injectable()
 export class TasksService {
@@ -24,14 +24,14 @@ export class TasksService {
   }
   async getAllMyTasks(
     userId: string,
-    query: BaseQueryDto,
+    query: GetTasksQueryDto,
   ): Promise<MetaResponseDto<Partial<CreateTaskResponseDto>>> {
     return await this.tasksRepository.getAllTasks(userId, query);
   }
 
   
   async browseAllTasks(
-    query: BaseQueryDto,
+    query: GetTasksQueryDto,
   ): Promise<MetaResponseDto<Partial<any>>> {
     return await this.tasksRepository.browseTasks(query)
   }
@@ -50,7 +50,7 @@ export class TasksService {
   async countAllTasks() {
     return await this.tasksRepository.countTotalTasks()
   }
-  async getAllTasksAdmin(query: BaseQueryDto) {
+  async getAllTasksAdmin(query: GetTasksQueryDto) {
     return await this.tasksRepository.getAllTasksAdmin(query)
   }
   async updateTasksStatus(

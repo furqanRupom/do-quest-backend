@@ -2,11 +2,12 @@ import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundExc
 import { InjectModel } from '@nestjs/mongoose';
 import { Task, TaskDocument } from './schemas/tasks.schema';
 import { Model, Types } from 'mongoose';
-import { CreateNewTaskDto, CreateTaskResponseDto, UpdateTaskDto } from './dto';
+import { CreateNewTaskDto, CreateTaskResponseDto, GetTasksQueryDto, UpdateTaskDto } from './dto';
 import { QueryBuilder } from '../common/db/query-builder';
 import { BaseQueryDto, MetaResponseDto } from '../common/dto';
 import { PaymentFlowStatus, TaskStatus } from './enums/tasks.enum';
 import { SubmissionStatus } from '../submission/enums/submission.enum';
+import { TasksFilterableFields } from './constant/tasks.constant';
 
 @Injectable()
 export class TasksRepository {
@@ -57,7 +58,7 @@ export class TasksRepository {
   ): Promise<MetaResponseDto<Partial<CreateTaskResponseDto>>> {
     const builder = new QueryBuilder(this.taskModel, query)
       .search(['title', 'description'])
-      .filter()
+      .filter(TasksFilterableFields,{isDeleted:false})
       .sort()
       .paginate()
       .fields();
@@ -69,11 +70,11 @@ export class TasksRepository {
   }
 
   async browseTasks(
-    query: BaseQueryDto,
+    query: GetTasksQueryDto,
   ): Promise<MetaResponseDto<Partial<any>>> {
     const builder = new QueryBuilder(this.taskModel, query)
       .search(['title', 'description'])
-      .filter()
+      .filter(TasksFilterableFields,{isDeleted:false})
       .sort()
       .paginate()
       .fields()
@@ -149,10 +150,10 @@ export class TasksRepository {
   async countTotalTasks(): Promise<number> {
     return this.taskModel.countDocuments().exec();
   }
-  async getAllTasksAdmin(query: BaseQueryDto) {
+  async getAllTasksAdmin(query: GetTasksQueryDto) {
     const tasks = new QueryBuilder(this.taskModel, query)
       .search(['title', 'description'])
-      .filter()
+      .filter(TasksFilterableFields)
       .sort()
       .paginate()
       .fields();

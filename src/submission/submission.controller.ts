@@ -7,10 +7,9 @@ import { ApproveResponseDto, CreateSubmissionDto, CreateSubmissionResponseDto, R
 import type { AuthRequest } from '../auth/types/auth-request.type';
 import { sendResponse } from '../common/utils';
 import { ApiBearerAuth, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
-import { SubmissionListDto } from './dto/submission.list.dto';
+import { SubmissionListDto, SubmissionQueryDto } from './dto/submission.list.dto';
 import { RejectSubmissionDto } from './dto/reject-submission.dto';
 import { RequestRevisionDto } from './dto/request-revision.dto';
-import { BaseQueryDto } from '../common/dto';
 
 @Controller('tasks/:taskId/submissions')
 @UseGuards(JwtAuthGuard)
@@ -52,7 +51,7 @@ export class SubmissionController {
     @Get('my')
     @HttpCode(HttpStatus.OK)
     @ApiOkResponse({ type: SubmissionListDto })
-    async mySubmissions(@Req()req :AuthRequest ,@Query() query:BaseQueryDto): Promise<SubmissionListDto> {
+    async mySubmissions(@Req()req :AuthRequest ,@Query() query:SubmissionQueryDto): Promise<SubmissionListDto> {
         const result = await this.submissionService.getMySubmissions(req.user.sub,query);
         return sendResponse({
             success: true,
@@ -91,10 +90,6 @@ export class SubmissionController {
         @Req() req: AuthRequest,
         @Body() dto: RejectSubmissionDto
     ): Promise<RejectResponseDto> {
-        const rejectSubmissionDto = {
-            submissionId,
-            approverId: req.user.sub
-        };
         await this.submissionService.rejectSubmission(submissionId,req.user.sub,dto);
         return sendResponse({
             success: true,

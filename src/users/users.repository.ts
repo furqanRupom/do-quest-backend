@@ -4,9 +4,10 @@ import { User, UserDocument } from './schemas/users.schema';
 import { Model } from 'mongoose';
 import { IUser } from '../auth/interfaces/user.interface';
 import { UserRole } from '../auth/enums/role.enum';
-import { BaseQueryDto } from '../common/dto';
 import { QueryBuilder } from '../common/db/query-builder';
 import { CreateUserDto } from '../auth/dto';
+import { UsersBaseQueryDto } from './dto';
+import { UsersFilterableFields } from './constant/users.constant';
 
 @Injectable()
 export class UsersRepository {
@@ -83,10 +84,10 @@ export class UsersRepository {
     return this.userModel.countDocuments().exec();
   }
 
-  async getAllUsers(query: BaseQueryDto) {
+  async getAllUsers(query: UsersBaseQueryDto) {
     const users = new QueryBuilder(this.userModel, query)
       .search(['name', 'email'])
-      .filter()
+      .filter(UsersFilterableFields)
       .sort()
       .paginate()
       .fields();

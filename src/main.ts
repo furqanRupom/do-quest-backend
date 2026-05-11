@@ -8,7 +8,8 @@ import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    rawBody: true,   });
+    rawBody: true,
+  });
 
   app.setGlobalPrefix('api/v1');
 
@@ -19,7 +20,7 @@ async function bootstrap() {
     express.raw({ type: 'application/json' }),
   );
 
-  app.use((req, res, next) => {
+  app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (req.path === '/api/v1/stripe/webhook') return next();
     express.json()(req, res, next);
   });
@@ -60,7 +61,11 @@ async function bootstrap() {
   });
 
   app.useGlobalFilters(new AllExceptionsFilter());
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true, transform: true, transformOptions: {
+      enableImplicitConversion: true
+    }
+  }));
 
   await app.listen(process.env.PORT ?? 3000);
 }

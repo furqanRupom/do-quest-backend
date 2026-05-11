@@ -11,12 +11,12 @@ import { StripeService } from '../stripe/stripe.service';
 import { ApproveOrRejectDto, CreateSubmissionDto } from './dto';
 import { PaymentFlowStatus, TaskStatus } from '../tasks/enums/tasks.enum';
 import { Submission } from './schemas/submission.schema';
-import { BaseQueryDto } from '../common/dto';
 import { TasksService } from '../tasks/tasks.service';
 import { SubmissionStatus } from './enums/submission.enum';
 import { WalletService } from '../wallet/wallet.service';
 import { RejectSubmissionDto } from './dto/reject-submission.dto';
 import { RequestRevisionDto } from './dto/request-revision.dto';
+import { SubmissionQueryDto } from './dto/submission.list.dto';
 
 @Injectable()
 export class SubmissionService {
@@ -235,10 +235,10 @@ export class SubmissionService {
   async countAllSubmissions() {
     return this.submissionRepository.countTotalSubmissions()
   }
-  async getAllSubmissions(query: BaseQueryDto) {
+  async getAllSubmissions(query:SubmissionQueryDto) {
     return this.submissionRepository.getAllSubmissions(query)
   }
-  async getMySubmissions(userId: string, query: BaseQueryDto) {
+  async getMySubmissions(userId: string, query: SubmissionQueryDto) {
     return await this.submissionRepository.getMySubmissions(userId, query)
   }
 

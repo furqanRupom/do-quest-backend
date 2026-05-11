@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { BaseQueryDto } from '../common/dto';
 import { TaskStatus } from '../tasks/enums/tasks.enum';
 import { UsersService } from '../users/users.service';
 import { TasksService } from '../tasks/tasks.service';
 import { SubmissionService } from '../submission/submission.service';
+import { GetTasksQueryDto } from '../tasks/dto';
+import { SubmissionQueryDto } from '../submission/dto/submission.list.dto';
+import { UsersBaseQueryDto } from '../users/dto';
 
 @Injectable()
 export class AdminService {
@@ -24,15 +26,15 @@ export class AdminService {
     return { users, submissions, tasks };
   }
 
-  async getAllUsers(query: BaseQueryDto): Promise<any> {
+  async getAllUsers(query: UsersBaseQueryDto): Promise<any> {
     return this.usersService.getAllUsers(query);
   }
 
-  async getAllSubmissions(query: BaseQueryDto): Promise<any> {
+  async getAllSubmissions(query: SubmissionQueryDto): Promise<any> {
     return this.submissionsService.getAllSubmissions(query);
   }
 
-  async getAllTasks(query: BaseQueryDto): Promise<any> {
+  async getAllTasks(query: GetTasksQueryDto): Promise<any> {
     return this.tasksService.getAllTasksAdmin(query);
   }
   async getTasksBountiesBarData():Promise<any>{
