@@ -9,94 +9,126 @@ export class QueryBuilder<T, Q extends Record<string, any> = Record<string, any>
     this.query = (query ?? {}) as Q;
   }
 
+  // 🔍 Search
   search(searchableFields: (keyof T | string)[]) {
     const searchTerm = (this.query as any)?.searchTerm;
     if (!searchTerm) return this;
+
     this.modelQuery = this.modelQuery.find({
-      $or: searchableFields.map(field => ({
-        [field]: { $regex: searchTerm, $options: 'i' },
+      $or: searchableFields.map((field) => ({
+        [field]: { $regex: searchTerm, $options: "i" },
       })),
     });
+
     return this;
   }
 
-  filter(filterableFields: (keyof T | string)[] = [], additionalFilter: Record<string, any> = {}) {
+  filter(
+    filterableFields: (keyof T | string)[] = [],
+    additionalFilter: Record<string, any> = {}
+  ) {
     const queryObj = { ...(this.query ?? {}) };
-    const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
-    excludeFields.forEach(el => delete queryObj[el]);
 
-    const filteredQuery = filterableFields.length
-      ? Object.fromEntries(
-        Object.entries(queryObj).filter(([key]) =>
-          (filterableFields as string[]).includes(key)
-        )
-      )
-      : queryObj;
+    // remove non-filter fields
+    const excludeFields = ["searchTerm", "sort", "limit", "page", "fields"];
+    excludeFields.forEach((el) => delete queryObj[el]);
 
+    const filteredQuery = Object.fromEntries(
+      Object.entries(queryObj).filter(([key, value]) => {
+        const isAllowed =
+          !filterableFields.length ||
+          (filterableFields as string[]).includes(key);
 
-      
-
-
- const normalizedQuery = Object.fromEntries(
-        Object.entries(filteredQuery).map(([key, value]) => {
-            if (value === 'true') return [key, true];
-            if (value === 'false') return [key, false];
-            return [key, value];
-        })
+        return isAllowed && value !== undefined;
+      })
     );
 
-     const rangeFilter: Record<string, any> = {};
+    const normalizedQuery = Object.fromEntries(
+      Object.entries(filteredQuery).map(([key, value]) => {
+        if (value === "true") return [key, true];
+        if (value === "false") return [key, false];
+        return [key, value];
+      })
+    );
 
-    if ((this.query as any)?.budgetMin || (this.query as any)?.budgetMax) {
+    const rangeFilter: Record<string, any> = {};
+
+    const q: any = this.query;
+
+    if (q?.budgetMin !== undefined || q?.budgetMax !== undefined) {
       rangeFilter.budget = {
-        ...((this.query as any).budgetMin && { $gte: Number((this.query as any).budgetMin) }),
-        ...((this.query as any).budgetMax && { $lte: Number((this.query as any).budgetMax) }),
+        ...(q.budgetMin !== undefined && { $gte: Number(q.budgetMin) }),
+        ...(q.budgetMax !== undefined && { $lte: Number(q.budgetMax) }),
       };
     }
 
-    if ((this.query as any)?.deadlineMin || (this.query as any)?.deadlineMax) {
+    if (q?.deadlineMin !== undefined || q?.deadlineMax !== undefined) {
       rangeFilter.deadline = {
-        ...((this.query as any).deadlineMin && { $gte: new Date((this.query as any).deadlineMin) }),
-        ...((this.query as any).deadlineMax && { $lte: new Date((this.query as any).deadlineMax) }),
+        ...(q.deadlineMin !== undefined && {
+          $gte: new Date(q.deadlineMin),
+        }),
+        ...(q.deadlineMax !== undefined && {
+          $lte: new Date(q.deadlineMax),
+        }),
       };
     }
 
-    const finalFilter = { ...filteredQuery,...normalizedQuery, ...rangeFilter, ...additionalFilter }; this.modelQuery = this.modelQuery.find(finalFilter);
+    const finalFilter = {
+      ...normalizedQuery,
+      ...rangeFilter,
+      ...additionalFilter,
+    };
+
+    this.modelQuery = this.modelQuery.find(finalFilter);
+
     return this;
   }
 
+  // 🔃 Sort
   sort() {
-    const sort = (this.query as any)?.sort?.split(',').join(' ') || '-createdAt';
+    const sort =
+      (this.query as any)?.sort?.split(",").join(" ") || "-createdAt";
+
     this.modelQuery = this.modelQuery.sort(sort);
     return this;
   }
 
+  // 📄 Pagination
   paginate() {
     const page = Number((this.query as any)?.page) || 1;
     const limit = Number((this.query as any)?.limit) || 10;
     const skip = (page - 1) * limit;
+
     this.modelQuery = this.modelQuery.skip(skip).limit(limit);
     return this;
   }
 
   fields() {
-    const fields = (this.query as any)?.fields?.split(',').join(' ') || '-__v';
+    const fields =
+      (this.query as any)?.fields?.split(",").join(" ") || "-__v";
+
     this.modelQuery = this.modelQuery.select(fields);
     return this;
   }
 
+  // 🔗 Populate
   populate(populateOptions: any) {
     if (!populateOptions) return this;
+
     this.modelQuery = this.modelQuery.populate(populateOptions);
     return this;
   }
 
   async countTotal() {
     const filter = this.modelQuery.getFilter();
+
     const total = await this.modelQuery.model.countDocuments(filter);
+
     const page = Number((this.query as any)?.page) || 1;
     const limit = Number((this.query as any)?.limit) || 10;
-    const totalPage = Math.ceil(total / limit);
+
+    const totalPage = Math.ceil(total / limit) || 1;
+
     return { page, limit, total, totalPage };
   }
 }

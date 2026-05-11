@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards, Query, Put } from '@nestjs/common';
 import { TasksService } from './tasks.service';
-import { CreateNewTaskDto, CreateNewTaskResponseDto, DeleteTaskDto, GetAllTaskDto, SingleTaskDto, UpdateTaskDto, UpdateWholeTaskDto } from './dto';
+import { CreateNewTaskDto, CreateNewTaskResponseDto, DeleteTaskDto, GetAllTaskDto, GetTasksQueryDto, SingleTaskDto, UpdateTaskDto, UpdateWholeTaskDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { Roles } from '../common/decorators';
 import { UserRole } from '../auth/enums/role.enum';
@@ -15,7 +15,7 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) { }
 
   @Get()
-  async browseTasks(query: BaseQueryDto) {
+  async browseTasks(@Query() query: GetTasksQueryDto) {
     const result = await this.tasksService.browseAllTasks(query)
     return sendResponse({
       success: true,
