@@ -19,8 +19,8 @@ export class WalletService {
   async createWalletForUser(userId:string ){
     return await this.walletRepository.createWallet(userId)
   }
-  async getTransactions(userId:string,page:number,limit:number){
-    return await this.walletRepository.getTransactions(userId,page,limit)
+  async getTransactions(userId:string,query:Record<string,unknown>){
+    return await this.walletRepository.getTransactions(userId,query)
   }
   async holdEscrow(userId:string,taskId:string,amount:number) {
     return await this.walletRepository.holdEscrow(userId,taskId,amount)

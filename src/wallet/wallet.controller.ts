@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body,Query, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { UserRole } from '../auth/enums/role.enum';
@@ -34,6 +34,22 @@ export class WalletController {
       success: true,
       message: 'Withdrawal initiated. Funds will arrive in 1-2 business days.',
       data: result
+    })
+  }
+
+  @Get('transactions')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.User)
+  async getTransactions(
+    @Req() req: AuthRequest,
+    @Query() query:Record<string,unknown>
+  ) {
+    const result = await this.walletService.getTransactions(req.user.sub, query)
+    return sendResponse({
+      success: true,
+      message: 'Fetched wallet transactions successfully',
+      meta:result.meta,
+      data: result.data
     })
   }
 }

@@ -4,6 +4,7 @@ import mongoose, { Model, Types } from 'mongoose';
 import { Wallet, WalletDocument } from './schemas/wallet.schema';
 import { WalletTransaction } from './schemas/wallet-transaction.schema';
 import { TransactionCategory, TransactionStatus, TransactionType } from './enums/wallet.enum';
+import { QueryBuilder } from 'src/common/db/query-builder';
 
 @Injectable()
 export class WalletRepository {
@@ -48,27 +49,20 @@ export class WalletRepository {
 
   async getTransactions(
     userId: string,
-    page = 1,
-    limit = 20,
+    query: Record<string, unknown>
   ) {
-    const skip = (page - 1) * limit;
-    const [data, total] = await Promise.all([
-      await this.walletTransactinModel
-        .find({ user: new Types.ObjectId(userId) })
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .populate('task', 'title budget')
-        .populate('submission', 'message status')
-        .lean(),
-      await this.walletTransactinModel.countDocuments({
-        user: new Types.ObjectId(userId),
-      }),
-    ]);
-    return {
-      data,
-      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
-    };
+    const queryBuilder = new QueryBuilder(this.walletTransactinModel, query)
+      .search(['description'])
+      .filter(['status', 'type', 'category'], { user: new Types.ObjectId(userId) })
+      .sort()
+      .paginate()
+      .populate([
+        { path: 'task', select: 'title budget' },
+        { path: 'submission', select: 'message status' }
+      ]);
+    const data = await queryBuilder.modelQuery
+    const meta = await queryBuilder.countTotal()
+    return { data, meta }
   }
 
   // ─── Mutations ───────────────────────────────────────────────
