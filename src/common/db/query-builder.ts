@@ -33,7 +33,19 @@ export class QueryBuilder<T, Q extends Record<string, any> = Record<string, any>
       )
       : queryObj;
 
-    const rangeFilter: Record<string, any> = {};
+
+      
+
+
+ const normalizedQuery = Object.fromEntries(
+        Object.entries(filteredQuery).map(([key, value]) => {
+            if (value === 'true') return [key, true];
+            if (value === 'false') return [key, false];
+            return [key, value];
+        })
+    );
+
+     const rangeFilter: Record<string, any> = {};
 
     if ((this.query as any)?.budgetMin || (this.query as any)?.budgetMax) {
       rangeFilter.budget = {
@@ -49,7 +61,7 @@ export class QueryBuilder<T, Q extends Record<string, any> = Record<string, any>
       };
     }
 
-    const finalFilter = { ...filteredQuery, ...rangeFilter, ...additionalFilter }; this.modelQuery = this.modelQuery.find(finalFilter);
+    const finalFilter = { ...filteredQuery,...normalizedQuery, ...rangeFilter, ...additionalFilter }; this.modelQuery = this.modelQuery.find(finalFilter);
     return this;
   }
 

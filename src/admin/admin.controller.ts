@@ -46,7 +46,8 @@ export class AdminController {
     return sendResponse({
       success: true,
       message: 'Users retrieved successfully',
-      data: result,
+      meta:result.meta,
+      data: result.data,
     });
   }
 
@@ -57,7 +58,8 @@ export class AdminController {
     return sendResponse({
       success: true,
       message: 'Submissions retrieved successfully',
-      data: result,
+      meta:result.meta,
+      data: result.data,
     });
   }
 
