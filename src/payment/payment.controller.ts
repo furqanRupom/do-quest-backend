@@ -17,7 +17,6 @@ constructor(private readonly paymentService:PaymentService){}
     @Post("tasks")
     @ApiOkResponse({ type: CreateNewTaskResponseDto })
     async createNewTask(@Body() createTaskDto: CreateNewTaskDto, @Req() req: AuthRequest): Promise<CreateNewTaskResponseDto> {
-        console.log(req.user.sub)
         const result = await this.paymentService.createTaskWithPayment(createTaskDto, req.user.sub)
         return sendResponse({
             success: true,
