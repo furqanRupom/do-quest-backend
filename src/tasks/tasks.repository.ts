@@ -87,7 +87,7 @@ export class TasksRepository {
     return { data, meta };
   }
   async getTaskById(taskId: string): Promise<Partial<CreateTaskResponseDto>> {
-    const task = await this.taskModel.findById(taskId);
+    const task = await this.taskModel.findById(taskId).populate('user', 'name username email');
     if (!task) {
       throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
     }
