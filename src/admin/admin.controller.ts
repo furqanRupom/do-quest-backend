@@ -16,7 +16,6 @@ import { Roles } from '../common/decorators/roles.decorators';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { ApiCookieAuth, ApiOkResponse } from '@nestjs/swagger';
 import { CountTotalsResponseDto } from './dto';
-import { TaskStatus } from '../tasks/enums/tasks.enum';
 import { GetTasksQueryDto } from '../tasks/dto';
 import { SubmissionQueryDto } from '../submission/dto/submission.list.dto';
 import { UsersBaseQueryDto } from '../users/dto';
@@ -82,22 +81,6 @@ export class AdminController {
     return sendResponse({
       success: true,
       message: 'Tasks and bounties bar chart data retrieved successfully',
-      data: result,
-    });
-  }
-  @HttpCode(HttpStatus.OK)
-  @Put('tasks/:id')
-  async updateTaskStatus(
-    @Param('id') taskId: string,
-    @Body() updateTaskDto: { taskStatus: TaskStatus },
-  ) {
-    const result = await this.adminService.updateTasksStatus(
-      taskId,
-      updateTaskDto,
-    );
-    return sendResponse({
-      success: true,
-      message: 'Tasks status updated successfully',
       data: result,
     });
   }

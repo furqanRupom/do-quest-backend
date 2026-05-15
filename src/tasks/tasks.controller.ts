@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards, Query, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param,  Req, UseGuards, Query, Put, HttpCode, HttpStatus } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateNewTaskDto, CreateNewTaskResponseDto, DeleteTaskDto, GetAllTaskDto, GetTasksQueryDto, SingleTaskDto, UpdateTaskDto, UpdateWholeTaskDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
@@ -8,6 +8,7 @@ import { sendResponse } from '../common/utils';
 import { ApiBearerAuth, ApiOkResponse, ApiParam } from '@nestjs/swagger';
 import type { AuthRequest } from '../auth/types/auth-request.type';
 import { BaseQueryDto } from '../common/dto/base-query.dto';
+import { TaskStatus } from './enums/tasks.enum';
 
 
 @Controller('tasks')
@@ -83,4 +84,22 @@ export class TasksController {
     })
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.User, UserRole.Admin)
+  @HttpCode(HttpStatus.OK)
+  @Put('status/:id')
+  async updateTaskStatus(
+    @Param('id') taskId: string,
+    @Body() updateTaskDto: { taskStatus: TaskStatus },
+  ) {
+    const result = await this.tasksService.updateTasksStatus(
+      taskId,
+      updateTaskDto,
+    );
+    return sendResponse({
+      success: true,
+      message: 'Tasks status updated successfully',
+      data: result,
+    });
+  }
 }
