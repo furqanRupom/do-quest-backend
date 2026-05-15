@@ -17,7 +17,7 @@ import { WalletService } from '../wallet/wallet.service';
 import { RejectSubmissionDto } from './dto/reject-submission.dto';
 import { RequestRevisionDto } from './dto/request-revision.dto';
 import { SubmissionQueryDto } from './dto/submission.list.dto';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class SubmissionService {
