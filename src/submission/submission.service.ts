@@ -17,6 +17,7 @@ import { WalletService } from '../wallet/wallet.service';
 import { RejectSubmissionDto } from './dto/reject-submission.dto';
 import { RequestRevisionDto } from './dto/request-revision.dto';
 import { SubmissionQueryDto } from './dto/submission.list.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class SubmissionService {
@@ -24,7 +25,8 @@ export class SubmissionService {
     private readonly submissionRepository: SubmissionRepository,
     private readonly stripeService: StripeService,
     private readonly tasksService: TasksService,
-    private readonly walletService: WalletService
+    private readonly walletService: WalletService,
+    private readonly usersService:UsersService
   ) { }
 
   async createSubmission(
@@ -33,7 +35,14 @@ export class SubmissionService {
     userId: string,
   ): Promise<Submission> {
     const task = await this.tasksService.findTaskById(taskId);
-    if (!task) {
+    const user = await this.usersService.getUserProfile(userId)
+
+    
+    if(!user.payoutsEnabled) {
+      throw new ForbiddenException("You must enable payouts before submitting a bounty.")
+    }
+
+      if (!task) {
       throw new BadRequestException('Task not found');
     }
     if (task.status !== TaskStatus.active) {
