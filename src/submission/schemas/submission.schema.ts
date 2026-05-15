@@ -34,4 +34,7 @@ export class Submission {
 
 }
 
+
 export const SubmissionSchema = SchemaFactory.createForClass(Submission);
+
+SubmissionSchema.index({ task: 1, user: 1 }, { unique: true });

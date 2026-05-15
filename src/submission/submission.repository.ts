@@ -31,9 +31,9 @@ export class SubmissionRepository {
   }
   async existingSubmission(taskId: string, userId: string): Promise<SubmissionDocument | null> {
     return await this.submissionModel.findOne({
-      task: new Types.ObjectId(taskId),
-      user: new Types.ObjectId(userId),
-      status: { $in: [SubmissionStatus.pending, SubmissionStatus.approved] }
+      task: taskId,
+      user: userId,
+      status: { $ne: SubmissionStatus.rejected }
     })
   }
   async getSubmissionsByTaskId(taskId: string) {

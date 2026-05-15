@@ -44,6 +44,7 @@ export class SubmissionService {
     if (task.user.equals(userId)) {
       throw new BadRequestException('You cannot submit your own tasks!');
     }
+
     const isSubmissionExit = await this.submissionRepository.existingSubmission(taskId, userId)
     if (isSubmissionExit) {
       throw new HttpException("You already have an active submission for this task", HttpStatus.CONFLICT)
