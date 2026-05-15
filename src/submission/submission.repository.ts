@@ -7,7 +7,7 @@ import { SubmissionStatus } from './enums/submission.enum';
 import { BaseQueryDto } from '../common/dto';
 import { QueryBuilder } from '../common/db/query-builder';
 import { RejectSubmissionDto } from './dto/reject-submission.dto';
-import { SubmissionFilterableFields } from './constants/submission.constant'; 
+import { SubmissionFilterableFields } from './constants/submission.constant';
 import { SubmissionQueryDto } from './dto/submission.list.dto';
 @Injectable()
 export class SubmissionRepository {
@@ -18,10 +18,21 @@ export class SubmissionRepository {
   async createSubmission(dto: CreateSubmissionDto, taskId: string, userId: string): Promise<Submission> {
     return await this.submissionModel.create({ ...dto, task: taskId, user: userId });
   }
+
+
   async findById(submissionId: string): Promise<Submission | null> {
-    return await this.submissionModel.findById(submissionId).exec();
-  }
-  async findByTaskId(taskId: string): Promise<Submission[]> {
+    return await this.submissionModel
+      .findById(submissionId)
+      .populate({
+        path: 'task',
+        select: 'title description status',   
+      })
+      .populate({
+        path: 'user',
+        select: 'name email username',       
+      })
+      .exec();
+  } async findByTaskId(taskId: string): Promise<Submission[]> {
     return await this.submissionModel.find({ task: taskId }).exec();
   }
   async findPendingTaskById(taskId: string): Promise<Submission | null> {
@@ -107,7 +118,7 @@ export class SubmissionRepository {
   async getMySubmissions(userId: string, query: SubmissionQueryDto) {
     const submissions = new QueryBuilder(this.submissionModel, query)
       .search(['title', 'content'])
-      .filter(SubmissionFilterableFields,{ user: new Types.ObjectId(userId) })
+      .filter(SubmissionFilterableFields, { user: new Types.ObjectId(userId) })
       .sort()
       .paginate()
       .populate({

@@ -130,4 +130,16 @@ export class SubmissionController {
             data: null
         });
     }
+
+    @Get(":submissionId")
+    @HttpCode(HttpStatus.OK)
+    async getSubmission(@Param('submissionId') submissionId: string): Promise<any> {
+        const result = await this.submissionService.getSubmission(submissionId)
+        return sendResponse({
+            success: true,
+            message: "Submission retrieved successfully",
+            data: result
+        });
+    }
+    
 }

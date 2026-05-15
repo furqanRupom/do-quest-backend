@@ -26,7 +26,7 @@ export class SubmissionService {
     private readonly stripeService: StripeService,
     private readonly tasksService: TasksService,
     private readonly walletService: WalletService,
-    private readonly usersService:UsersService
+    private readonly usersService: UsersService
   ) { }
 
   async createSubmission(
@@ -37,12 +37,12 @@ export class SubmissionService {
     const task = await this.tasksService.findTaskById(taskId);
     const user = await this.usersService.getUserProfile(userId)
 
-    
-    if(!user.payoutsEnabled) {
+
+    if (!user.payoutsEnabled) {
       throw new ForbiddenException("You must enable payouts before submitting a bounty.")
     }
 
-      if (!task) {
+    if (!task) {
       throw new BadRequestException('Task not found');
     }
     if (task.status !== TaskStatus.active) {
@@ -80,6 +80,7 @@ export class SubmissionService {
       );
     }
 
+    const worker = await this.usersService.getUserProfile(task.user.toString())
     if (task.paymentIntentId == null) {
       throw new BadRequestException(
         'No payment intent associated with this task',
@@ -103,7 +104,6 @@ export class SubmissionService {
       )
     }
 
-    const worker = submission.user as any
     if (!worker.userStripeId || !worker.payoutsEnabled) {
       throw new HttpException(
         "Worker has not completed Stripe onboarding. Cannot pay out.",
@@ -176,7 +176,7 @@ export class SubmissionService {
 
     if (submission.status !== SubmissionStatus.pending) {
       throw new HttpException(
-        `Submission is already ${submission.status}`,
+        `Submission is already ${submission.status.toLowerCase()}`,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -192,7 +192,7 @@ export class SubmissionService {
 
     if (submission.status !== SubmissionStatus.pending) {
       throw new HttpException(
-        `Submission is already ${submission.status}`,
+        `Submission is already ${submission.status.toLowerCase()}`,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -211,26 +211,26 @@ export class SubmissionService {
 
 
   async reSubmit(
-    submissionId:string,
-    workerId:string,
-    dto:CreateSubmissionDto
-  ){
+    submissionId: string,
+    workerId: string,
+    dto: CreateSubmissionDto
+  ) {
     const submission = await this.submissionRepository.findById(submissionId)
-    if(!submission){
+    if (!submission) {
       throw new NotFoundException("Submission not found")
     }
-    if(submission.user.toString()!== workerId){
+    if (submission.user.toString() !== workerId) {
       throw new ForbiddenException("This is not your submission")
     }
 
-    if(submission.status !== SubmissionStatus.revision_requested) {
+    if (submission.status !== SubmissionStatus.revision_requested) {
       throw new HttpException(
         "Only submissions with revision requested can be resubmitted.",
         HttpStatus.BAD_REQUEST
       )
     }
 
-    await this.submissionRepository.resubmitSubmission(submissionId,dto)
+    await this.submissionRepository.resubmitSubmission(submissionId, dto)
   }
   async getSubmissionsByTaskId(taskId: string, userId: string): Promise<Submission[]> {
     const task = await this.tasksService.findTaskById(taskId)
@@ -245,13 +245,17 @@ export class SubmissionService {
   async countAllSubmissions() {
     return this.submissionRepository.countTotalSubmissions()
   }
-  async getAllSubmissions(query:SubmissionQueryDto) {
+  async getAllSubmissions(query: SubmissionQueryDto) {
     return this.submissionRepository.getAllSubmissions(query)
   }
   async getMySubmissions(userId: string, query: SubmissionQueryDto) {
     return await this.submissionRepository.getMySubmissions(userId, query)
   }
-
-
-
+  async getSubmission(submissionId: string) {
+    const submission = await this.submissionRepository.findById(submissionId)
+    if (!submission) {
+      throw new NotFoundException("Submission not found")
+    }
+    return submission
+  }
 }

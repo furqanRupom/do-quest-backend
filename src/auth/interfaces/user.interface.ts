@@ -12,4 +12,5 @@ export interface IUser {
   socialLinks?: string[];
   needPasswordChange: boolean;
   payoutsEnabled: boolean;
+  userStripeId?:string;
 }
