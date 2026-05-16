@@ -77,7 +77,7 @@ export class SubmissionController {
 
         return sendResponse({
             success: true,
-            message: "My submissions for this task retrieved successfully",
+            message: "My submissions retrieved successfully",
             meta: result.meta,
             data: result.data
         });
