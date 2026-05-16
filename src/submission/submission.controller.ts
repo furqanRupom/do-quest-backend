@@ -63,7 +63,7 @@ export class SubmissionController {
     }
 
 
-    @Get('my')
+    @Get('tasks/my')
     @HttpCode(HttpStatus.OK)
     @ApiOkResponse({ type: SubmissionListDto })
     async myTaskSubmissions(
@@ -84,7 +84,7 @@ export class SubmissionController {
     }
 
 
-    @Get(':submissionId')
+    @Get('tasks/:submissionId')
     @HttpCode(HttpStatus.OK)
     async getSubmission(@Param('submissionId') submissionId: string) {
         const result = await this.submissionService.getSubmission(submissionId);
@@ -117,7 +117,7 @@ export class SubmissionController {
         });
     }
 
-    @Put(':submissionId/reject')
+    @Put('tasks/:submissionId/reject')
     @HttpCode(HttpStatus.OK)
     @ApiResponse({ type: RejectResponseDto })
     async rejectSubmission(
@@ -134,7 +134,7 @@ export class SubmissionController {
         });
     }
 
-    @Patch(':submissionId/revision')
+    @Patch('tasks/:submissionId/revision')
     @HttpCode(HttpStatus.OK)
     @ApiResponse({ type: RejectResponseDto })
     async requestRevision(
@@ -151,7 +151,7 @@ export class SubmissionController {
         });
     }
 
-    @Patch(':submissionId/resubmit')
+    @Patch('tasks/:submissionId/resubmit')
     @HttpCode(HttpStatus.OK)
     @ApiResponse({ type: RejectResponseDto })
     async resubmitSubmission(
