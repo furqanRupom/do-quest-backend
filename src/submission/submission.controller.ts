@@ -70,7 +70,7 @@ export class SubmissionController {
         @Req() req: AuthRequest,
         @Query() query: SubmissionQueryDto,
     ): Promise<SubmissionListDto> {
-        const result = await this.submissionService.getSubmissionsByTaskId(
+        const result = await this.submissionService.getMySubmissions(
             req.user.sub, 
             query
         );
