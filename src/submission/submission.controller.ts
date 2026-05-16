@@ -39,12 +39,13 @@ export class SubmissionController {
     @Get()
     @HttpCode(HttpStatus.OK)
     @ApiOkResponse({ type: SubmissionListDto })
-    async list(@Param('taskId') taskId: string,@Req()req :AuthRequest): Promise<SubmissionListDto> {
-        const result = await this.submissionService.getSubmissionsByTaskId(taskId,req.user.sub);
+    async list(@Query() query:SubmissionQueryDto, @Param('taskId') taskId: string,@Req()req :AuthRequest): Promise<SubmissionListDto> {
+        const result = await this.submissionService.getSubmissionsByTaskId(taskId,query);
         return sendResponse({
             success: true,
             message: "Submissions retrieved successfully",
-            data: result
+            meta:result.meta,
+            data: result.data
         });
     }
 

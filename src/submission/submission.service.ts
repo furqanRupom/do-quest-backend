@@ -232,16 +232,17 @@ export class SubmissionService {
 
     await this.submissionRepository.resubmitSubmission(submissionId, dto)
   }
-  async getSubmissionsByTaskId(taskId: string, userId: string): Promise<Submission[]> {
+
+  
+  async getSubmissionsByTaskId(taskId: string,submissioinQueryDto:SubmissionQueryDto){
     const task = await this.tasksService.findTaskById(taskId)
     if (!task) {
       throw new NotFoundException("Task not found")
     }
-    if (task.user.toString() !== userId) {
-      throw new ForbiddenException("You do not own this task")
-    }
-    return await this.submissionRepository.getSubmissionsByTaskId(taskId);
+    return await this.submissionRepository.getSubmissionsByTasksId(taskId, submissioinQueryDto)
   }
+
+  
   async countAllSubmissions() {
     return this.submissionRepository.countTotalSubmissions()
   }
