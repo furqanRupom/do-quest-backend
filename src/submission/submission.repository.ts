@@ -118,7 +118,7 @@ export class SubmissionRepository {
   async getMySubmissions(userId: string, query: SubmissionQueryDto) {
     const submissions = new QueryBuilder(this.submissionModel, query)
       .search(['title', 'content'])
-      .filter(SubmissionFilterableFields, { user: new Types.ObjectId(userId) })
+      .filter(SubmissionFilterableFields, { user: userId })
       .sort()
       .paginate()
       .populate({
@@ -136,7 +136,7 @@ export class SubmissionRepository {
   async getSubmissionsByTasksId(taskId: string, query: SubmissionQueryDto) {
     const submissions = new QueryBuilder(this.submissionModel, query)
       .search(['title', 'content'])
-      .filter(SubmissionFilterableFields, { task: new Types.ObjectId(taskId) })
+      .filter(SubmissionFilterableFields, { task: taskId })
       .sort()
       .paginate()
       .populate({
