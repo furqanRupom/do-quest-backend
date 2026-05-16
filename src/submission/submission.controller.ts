@@ -1,9 +1,14 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Req, UseGuards ,Query} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Req, UseGuards, Query } from '@nestjs/common';
 import { UserRole } from '../auth/enums/role.enum';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard';
 import { Roles } from '../common/decorators';
 import { SubmissionService } from './submission.service';
-import { ApproveResponseDto, CreateSubmissionDto, CreateSubmissionResponseDto, RejectResponseDto } from './dto';
+import { 
+  ApproveResponseDto, 
+  CreateSubmissionDto, 
+  CreateSubmissionResponseDto, 
+  RejectResponseDto 
+} from './dto';
 import type { AuthRequest } from '../auth/types/auth-request.type';
 import { sendResponse } from '../common/utils';
 import { ApiBearerAuth, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
@@ -11,58 +16,87 @@ import { SubmissionListDto, SubmissionQueryDto } from './dto/submission.list.dto
 import { RejectSubmissionDto } from './dto/reject-submission.dto';
 import { RequestRevisionDto } from './dto/request-revision.dto';
 
-@Controller('tasks/:taskId/submissions')
+@Controller('submissions')
 @UseGuards(JwtAuthGuard)
 @Roles(UserRole.User)
 @ApiBearerAuth()
 export class SubmissionController {
-    constructor(
-        private readonly submissionService: SubmissionService,
-    ) { }
+    constructor(private readonly submissionService: SubmissionService) {}
 
-    @Post()
+
+    @Post(':taskId')
     @HttpCode(HttpStatus.CREATED)
     @ApiOkResponse({ type: CreateSubmissionResponseDto })
     async createSubmission(
         @Param('taskId') taskId: string,
         @Body() createSubmissionDto: CreateSubmissionDto,
         @Req() req: AuthRequest,
-    ): Promise<CreateSubmissionResponseDto> {
-        const result = await this.submissionService.createSubmission(createSubmissionDto, taskId, req.user.sub);
+    ) {
+        const result = await this.submissionService.createSubmission(
+            createSubmissionDto, 
+            taskId, 
+            req.user.sub
+        );
+
         return sendResponse({
             success: true,
             message: "Submission created successfully",
             data: result
-        })
+        });
     }
 
-    @Get()
+    @Get(':taskId')
     @HttpCode(HttpStatus.OK)
     @ApiOkResponse({ type: SubmissionListDto })
-    async list(@Query() query:SubmissionQueryDto, @Param('taskId') taskId: string,@Req()req :AuthRequest): Promise<SubmissionListDto> {
-        const result = await this.submissionService.getSubmissionsByTaskId(taskId,query);
+    async listTaskSubmissions(
+        @Param('taskId') taskId: string,
+        @Query() query: SubmissionQueryDto,
+    ) {
+        const result = await this.submissionService.getSubmissionsByTaskId(taskId, query);
+
         return sendResponse({
             success: true,
-            message: "Submissions retrieved successfully",
-            meta:result.meta,
+            message: "Task submissions retrieved successfully",
+            meta: result.meta,
             data: result.data
         });
     }
+
 
     @Get('my')
     @HttpCode(HttpStatus.OK)
     @ApiOkResponse({ type: SubmissionListDto })
-    async mySubmissions(@Req()req :AuthRequest ,@Query() query:SubmissionQueryDto): Promise<SubmissionListDto> {
-        const result = await this.submissionService.getMySubmissions(req.user.sub,query);
+    async myTaskSubmissions(
+        @Req() req: AuthRequest,
+        @Query() query: SubmissionQueryDto,
+    ): Promise<SubmissionListDto> {
+        const result = await this.submissionService.getSubmissionsByTaskId(
+            req.user.sub, 
+            query
+        );
+
         return sendResponse({
             success: true,
-            message: "My submissions retrieved successfully",
-            meta:result.meta,
+            message: "My submissions for this task retrieved successfully",
+            meta: result.meta,
             data: result.data
         });
     }
 
-    @Put(':submissionId/approve')
+
+    @Get(':submissionId')
+    @HttpCode(HttpStatus.OK)
+    async getSubmission(@Param('submissionId') submissionId: string) {
+        const result = await this.submissionService.getSubmission(submissionId);
+
+        return sendResponse({
+            success: true,
+            message: "Submission retrieved successfully",
+            data: result
+        });
+    }
+
+    @Put(':taskId/:submissionId/approve')
     @ApiResponse({ type: ApproveResponseDto })
     @HttpCode(HttpStatus.OK)
     async approveSubmission(
@@ -70,12 +104,12 @@ export class SubmissionController {
         @Param('submissionId') submissionId: string,
         @Req() req: AuthRequest,
     ): Promise<ApproveResponseDto> {
-        const approveSubmissionDto = {
+        const result = await this.submissionService.approveSubmission({
             taskId,
             submissionId,
-            approverId: req.user.sub
-        };
-        const result = await this.submissionService.approveSubmission(approveSubmissionDto);
+            approverId: req.user.sub,
+        });
+
         return sendResponse({
             success: true,
             message: "Submission approved successfully",
@@ -89,9 +123,10 @@ export class SubmissionController {
     async rejectSubmission(
         @Param('submissionId') submissionId: string,
         @Req() req: AuthRequest,
-        @Body() dto: RejectSubmissionDto
-    ): Promise<RejectResponseDto> {
-        await this.submissionService.rejectSubmission(submissionId,req.user.sub,dto);
+        @Body() dto: RejectSubmissionDto,
+    ) {
+        await this.submissionService.rejectSubmission(submissionId, req.user.sub, dto);
+
         return sendResponse({
             success: true,
             message: "Submission rejected successfully",
@@ -102,45 +137,34 @@ export class SubmissionController {
     @Patch(':submissionId/revision')
     @HttpCode(HttpStatus.OK)
     @ApiResponse({ type: RejectResponseDto })
-    async revisionSubmission(
+    async requestRevision(
         @Param('submissionId') submissionId: string,
         @Req() req: AuthRequest,
-        @Body() dto: RequestRevisionDto
-    ): Promise<RejectResponseDto> {
-        await this.submissionService.revisionSubmission(submissionId,req.user.sub,dto);
+        @Body() dto: RequestRevisionDto,
+    ) {
+        await this.submissionService.revisionSubmission(submissionId, req.user.sub, dto);
+
         return sendResponse({
             success: true,
-            message: "Submission revisioned successfully",
+            message: "Revision requested successfully",
             data: null
         });
     }
 
-    
     @Patch(':submissionId/resubmit')
     @HttpCode(HttpStatus.OK)
     @ApiResponse({ type: RejectResponseDto })
     async resubmitSubmission(
         @Param('submissionId') submissionId: string,
         @Req() req: AuthRequest,
-        @Body() dto: CreateSubmissionDto
-    ): Promise<RejectResponseDto> {
-        await this.submissionService.reSubmit(submissionId,req.user.sub,dto);
+        @Body() dto: CreateSubmissionDto,
+    ) {
+        await this.submissionService.reSubmit(submissionId, req.user.sub, dto);
+
         return sendResponse({
             success: true,
             message: "Submission resubmitted successfully",
             data: null
         });
     }
-
-    @Get(":submissionId")
-    @HttpCode(HttpStatus.OK)
-    async getSubmission(@Param('submissionId') submissionId: string): Promise<any> {
-        const result = await this.submissionService.getSubmission(submissionId)
-        return sendResponse({
-            success: true,
-            message: "Submission retrieved successfully",
-            data: result
-        });
-    }
-    
 }
