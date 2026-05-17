@@ -12,6 +12,11 @@ export class StripeService {
 
   private readonly stripe: Stripe
   private readonly logger = new Logger(StripeService.name)
+  
+  // Separate secrets
+  private readonly connectWebhookSecret: string;
+  private readonly platformWebhookSecret: string;
+
   constructor(
 
     private readonly usersService: UsersService,
@@ -24,8 +29,12 @@ export class StripeService {
   ) {
 
     this.stripe = new Stripe(configService.getOrThrow<string>('stripe.secretKey'), {
-      apiVersion: '2025-12-15.clover' as Stripe.LatestApiVersion, // Cast to avoid TS errors if it's a preview version
+      apiVersion: '2025-12-15.clover' as Stripe.LatestApiVersion,
     });
+
+    // Initialize both secrets
+    this.connectWebhookSecret = this.configService.getOrThrow<string>('stripe.webhookSecret');
+    this.platformWebhookSecret = this.configService.getOrThrow<string>('stripe.platformWebhookSecret');
   }
 
 
@@ -85,29 +94,71 @@ export class StripeService {
     return this.stripe.paymentIntents.cancel(paymentIntentId);
   }
 
-  async stripeWebhook(body: Buffer, sig: string) {
-    const webhookSecretKey = this.configService.getOrThrow<string>('stripe.webhookSecret');
+  // ──────────────────────────────────────────────────────
+  // CONNECT WEBHOOK (account.updated, payouts, etc.)
+  // ──────────────────────────────────────────────────────
+  async handleConnectWebhook(body: Buffer, sig: string) {
     let event: Stripe.Event;
     try {
-      event = this.stripe.webhooks.constructEvent(body, sig, webhookSecretKey);
+      event = this.stripe.webhooks.constructEvent(body, sig, this.connectWebhookSecret);
     } catch (err) {
-      // ✅ This gives you the exact reason Stripe rejects (sig mismatch, etc.)
       throw new HttpException(
-        `Webhook signature verification failed: ${err.message}`,
+        `Connect Webhook verification failed: ${err.message}`,
         HttpStatus.BAD_REQUEST,
       );
     }
 
+    this.logger.log(`Connect webhook received: ${event.type}`);
+
+    try {
+      switch (event.type) {
+        // ── Payout Events (connected accounts) ──────────────
+        case 'payout.paid':
+          await this.handlePayoutPaid(event.data.object as Stripe.Payout, event.account);
+          break;
+
+        case 'payout.failed':
+          await this.handlePayoutFailed(event.data.object as Stripe.Payout, event.account);
+          break;
+
+        // ── Connected Account Events ─────────────────────────
+        case 'account.updated':
+          await this.handleAccountUpdated(event.data.object as Stripe.Account);
+          break;
+
+        case 'account.application.deauthorized':
+          await this.handleAccountDeauthorized(event.data.object as Stripe.Application, event.account);
+          break;
+
+        default:
+          this.logger.verbose(`Unhandled connect webhook event type: ${event.type}`);
+      }
+    } catch (err) {
+      this.logger.error(`Error handling connect webhook ${event.type}: ${err.message}`, err.stack);
+    }
+    return { received: true };
+  }
 
 
-    this.logger.log(`Stripe webhook received: ${event.type}`);
+  // ──────────────────────────────────────────────────────
+  // PLATFORM WEBHOOK (payment_intents, charges, transfers)
+  // ──────────────────────────────────────────────────────
+  async handlePlatformWebhook(body: Buffer, sig: string) {
+    let event: Stripe.Event;
+    try {
+      event = this.stripe.webhooks.constructEvent(body, sig, this.platformWebhookSecret);
+    } catch (err) {
+      throw new HttpException(
+        `Platform Webhook verification failed: ${err.message}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
-
+    this.logger.log(`Platform webhook received: ${event.type}`);
 
     try {
       switch (event.type) {
         // ── Payment Intent Events ────────────────────────────
-
         case 'payment_intent.succeeded':
           await this.handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent);
           break;
@@ -121,37 +172,15 @@ export class StripeService {
           break;
 
         case 'payment_intent.amount_capturable_updated':
-          // Fired when manual-capture PI is authorized and ready to capture
           await this.handlePaymentIntentAuthorized(event.data.object as Stripe.PaymentIntent);
           break;
 
         // ── Transfer Events ──────────────────────────────────
-
         case 'transfer.created':
           await this.handleTransferCreated(event.data.object as Stripe.Transfer);
           break;
-        // ── Payout Events (connected accounts) ──────────────
-
-        case 'payout.paid':
-          await this.handlePayoutPaid(event.data.object as Stripe.Payout, event.account);
-          break;
-
-        case 'payout.failed':
-          await this.handlePayoutFailed(event.data.object as Stripe.Payout, event.account);
-          break;
-
-        // ── Connected Account Events ─────────────────────────
-
-        case 'account.updated':
-          await this.handleAccountUpdated(event.data.object as Stripe.Account);
-          break;
-
-        case 'account.application.deauthorized':
-          await this.handleAccountDeauthorized(event.data.object as Stripe.Application, event.account);
-          break;
 
         // ── Charge Events ────────────────────────────────────
-
         case 'charge.refunded':
           await this.handleChargeRefunded(event.data.object as Stripe.Charge);
           break;
@@ -165,16 +194,13 @@ export class StripeService {
           break;
 
         default:
-          this.logger.verbose(`Unhandled webhook event type: ${event.type}`);
+          this.logger.verbose(`Unhandled platform webhook event type: ${event.type}`);
       }
     } catch (err) {
-      this.logger.error(`Error handling webhook ${event.type}: ${err.message}`, err.stack);
-      // Return 200 so Stripe doesn't retry — log the failure instead
+      this.logger.error(`Error handling platform webhook ${event.type}: ${err.message}`, err.stack);
     }
     return { received: true };
   }
-
-
 
 
   async createPaymentIntent(payload: CreatePaymentDto): Promise<Stripe.Response<Stripe.PaymentIntent>> {
