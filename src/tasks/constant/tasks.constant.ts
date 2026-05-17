@@ -1,2 +1,2 @@
 
-export const TasksFilterableFields = ['status', 'paymentStatus', 'paymentFlowStatus', 'categories', 'tags', 'budget', 'deadline']
+export const TasksFilterableFields = ['status', 'paymentFlowStatus', 'categories', 'tags', 'budget', 'deadline']

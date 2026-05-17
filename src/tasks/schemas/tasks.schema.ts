@@ -33,8 +33,8 @@ export class Task {
     @Prop({ type: String, enum: Object.values(TaskStatus), required: true, default: TaskStatus.pending,index:true })
     status: TaskStatus = TaskStatus.pending
 
-    @Prop({ type: String, enum: Object.values(PaymentStatus), required: true, default: PaymentStatus.active })
-    paymentStatus: PaymentStatus = PaymentStatus.active
+    // @Prop({ type: String, enum: Object.values(PaymentStatus), required: true, default: PaymentStatus.active })
+    // paymentStatus: PaymentStatus = PaymentStatus.active
 
     @Prop({type:[String], required: true })
     categories: string[] = [];
@@ -45,8 +45,8 @@ export class Task {
     @Prop({ type: String })
     paymentIntentId?: string;
 
-    @Prop({ type: String, enum: Object.values(PaymentFlowStatus), default: PaymentFlowStatus.no_payment })
-    paymentFlowStatus: PaymentFlowStatus = PaymentFlowStatus.no_payment;
+    @Prop({ type: String, enum: Object.values(PaymentFlowStatus), default: PaymentFlowStatus.pending })
+    paymentFlowStatus: PaymentFlowStatus = PaymentFlowStatus.pending;
     
     @Prop({ type: Boolean, default:false})
     isDeleted: boolean = false;

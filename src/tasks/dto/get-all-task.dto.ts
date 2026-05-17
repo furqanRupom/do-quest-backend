@@ -1,6 +1,6 @@
 import { IsDateString, IsEnum, IsNumber, IsOptional, IsString, Min } from "class-validator";
 import { ApiMetaResponseDto, BaseQueryDto } from "../../common/dto";
-import { PaymentFlowStatus, PaymentStatus, TaskStatus } from "../enums/tasks.enum";
+import { PaymentFlowStatus,  TaskStatus } from "../enums/tasks.enum";
 import { Type } from "class-transformer"
 export class GetAllTaskDto<T> extends ApiMetaResponseDto<Partial<T>> {
   declare data: Partial<T>[];
@@ -10,9 +10,9 @@ export class GetTasksQueryDto extends BaseQueryDto {
   @IsEnum(TaskStatus)
   status?: TaskStatus;
 
-  @IsOptional()
-  @IsEnum(PaymentStatus)
-  paymentStatus?: PaymentStatus;
+  // @IsOptional()
+  // @IsEnum(PaymentStatus)
+  // paymentStatus?: PaymentStatus;
 
   @IsOptional()
   @IsEnum(PaymentFlowStatus)
