@@ -91,7 +91,7 @@ export class SubmissionService {
       throw new BadRequestException('Funds not authorized');
     }
 
-    const submission = await this.submissionRepository.findSubmissionById(submissionId);
+    const submission = await this.submissionRepository.findById(submissionId);
 
     if (!submission || submission.task.toString() !== taskId) {
       throw new BadRequestException('Submission not found for this task');
@@ -170,9 +170,6 @@ export class SubmissionService {
     }
 
 
-    if (!submission || submission.task.toString()) {
-      throw new BadRequestException('Submission not found for this task');
-    }
 
     if (submission.status !== SubmissionStatus.pending) {
       throw new HttpException(
