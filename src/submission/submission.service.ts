@@ -85,12 +85,16 @@ export class SubmissionService {
       );
     }
 
-    if (task.paymentFlowStatus !== PaymentFlowStatus.authorized) {
-      throw new BadRequestException('Funds not authorized');
+    if (task.paymentFlowStatus === PaymentFlowStatus.authorized) {
+      await this.stripeService.capturePaymentIntent(task.paymentIntentId);
+    } else if (task.paymentFlowStatus === PaymentFlowStatus.paid) {
+      console.warn(`Task ${taskId} was already PAID before approval. Skipping capture.`);
+    } else {
+      throw new BadRequestException(`Funds are not capturable. Current status: ${task.paymentFlowStatus}`);
     }
 
     const submission = await this.submissionRepository.findSubmissionById(submissionId);
-    if(!submission) {
+    if (!submission) {
       throw new NotFoundException("Submission not found")
     }
 
@@ -113,7 +117,6 @@ export class SubmissionService {
       )
     }
 
-    await this.stripeService.capturePaymentIntent(task.paymentIntentId);
 
     const platformFreePercent = 0.10
     const totalAmount = task.budget
@@ -231,8 +234,8 @@ export class SubmissionService {
     await this.submissionRepository.resubmitSubmission(submissionId, dto)
   }
 
-  
-  async getSubmissionsByTaskId(taskId: string,submissioinQueryDto:SubmissionQueryDto){
+
+  async getSubmissionsByTaskId(taskId: string, submissioinQueryDto: SubmissionQueryDto) {
     const task = await this.tasksService.findTaskById(taskId)
     if (!task) {
       throw new NotFoundException("Task not found")
@@ -240,7 +243,7 @@ export class SubmissionService {
     return await this.submissionRepository.getSubmissionsByTasksId(taskId, submissioinQueryDto)
   }
 
-  
+
   async countAllSubmissions() {
     return this.submissionRepository.countTotalSubmissions()
   }
