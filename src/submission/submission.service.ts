@@ -79,8 +79,6 @@ export class SubmissionService {
         'Not authorized to approve submissions for this task',
       );
     }
-
-    const worker = await this.usersService.getUserProfile(task.user.toString())
     if (task.paymentIntentId == null) {
       throw new BadRequestException(
         'No payment intent associated with this task',
@@ -97,6 +95,7 @@ export class SubmissionService {
       throw new BadRequestException('Submission not found for this task');
     }
 
+    const worker = await this.usersService.getUserProfile(submission.user.toString())
     if (submission.status !== SubmissionStatus.pending) {
       throw new HttpException(
         `Submission is already ${submission.status.toLowerCase()}`,
@@ -168,7 +167,6 @@ export class SubmissionService {
         'You do not own this task',
       );
     }
-
 
 
     if (submission.status !== SubmissionStatus.pending) {

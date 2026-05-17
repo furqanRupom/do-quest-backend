@@ -235,7 +235,7 @@ export class StripeService {
     if (!taskId || !userId) return;
 
     await this.tasksService.updateTask(taskId, {
-      paymentFlowStatus: PaymentFlowStatus.paid,
+      paymentFlowStatus: PaymentFlowStatus.authorized,
       status: TaskStatus.active,
     });
 
@@ -265,7 +265,7 @@ export class StripeService {
     // If task was immediate capture, activate it here
     if (task.paymentFlowStatus !== PaymentFlowStatus.paid) {
       await this.tasksService.updateTask(task._id.toString(), {
-        paymentFlowStatus: PaymentFlowStatus.captured,
+        paymentFlowStatus: PaymentFlowStatus.paid,
         status: TaskStatus.active,
       });
     }
