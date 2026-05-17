@@ -218,15 +218,17 @@ export class StripeService {
   async createTransfer(dto: {
     amount: number,
     destination: string,
-    metadata: Record<string, string>
+    metadata: Record<string, string>,
+    sourceTransactionId:string
   }) {
-    const { amount, destination, metadata } = dto
+    const { amount, destination, metadata, sourceTransactionId } = dto
     return await this.stripe.transfers.create({
       amount: amount,
       currency: 'usd',
       destination: destination,
       metadata: metadata || {},
-      transfer_group:metadata?.taskId
+      transfer_group:metadata?.taskId,
+      source_transaction:sourceTransactionId
     })
   }
 

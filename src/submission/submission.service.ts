@@ -85,12 +85,8 @@ export class SubmissionService {
       );
     }
 
-    if (task.paymentFlowStatus === PaymentFlowStatus.authorized) {
-      await this.stripeService.capturePaymentIntent(task.paymentIntentId);
-    } else if (task.paymentFlowStatus === PaymentFlowStatus.paid) {
-      console.warn(`Task ${taskId} was already PAID before approval. Skipping capture.`);
-    } else {
-      throw new BadRequestException(`Funds are not capturable. Current status: ${task.paymentFlowStatus}`);
+    if (task.paymentFlowStatus !== PaymentFlowStatus.authorized) {
+      throw new BadRequestException("Payment is not authorized")
     }
 
     const submission = await this.submissionRepository.findSubmissionById(submissionId);
@@ -118,12 +114,17 @@ export class SubmissionService {
     }
 
 
+    const capturedIntent =   await this.stripeService.capturePaymentIntent(task.paymentIntentId);
     const platformFreePercent = 0.10
     const totalAmount = task.budget
     const platformFee = Math.floor(totalAmount * platformFreePercent)
     const workerAmount = totalAmount - platformFee
 
-    const transfer = await this.stripeService.createTransfer({
+  const chargeId = typeof capturedIntent.latest_charge === 'string' 
+      ? capturedIntent.latest_charge 
+      : capturedIntent.latest_charge?.id;
+
+        const transfer = await this.stripeService.createTransfer({
       amount: workerAmount,
       destination: worker.userStripeId,
       metadata: {
