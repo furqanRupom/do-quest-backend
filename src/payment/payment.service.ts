@@ -3,20 +3,14 @@ import { StripeService } from '../stripe/stripe.service';
 import { CreateNewTaskDto, CreateTaskResponseDto } from '../tasks/dto';
 import { TasksService } from '../tasks/tasks.service';
 import { PaymentFlowStatus, TaskStatus } from '../tasks/enums/tasks.enum';
-import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class PaymentService {
   constructor(
     private readonly stripeService: StripeService,
     private readonly tasksService: TasksService,
-    private readonly usersService:UsersService
   ) { }
   async createTaskWithPayment(payload: CreateNewTaskDto, userId: string): Promise<CreateTaskResponseDto> {
-    const user = await this.usersService.getUserProfile(userId)
-    if(!user.payoutsEnabled) {
-      throw new ForbiddenException("You must enable payouts before creating a new bounty.")
-    }
     const task = await this.tasksService.createNewTask(payload, userId)
     const intent = await this.stripeService.createPaymentIntent({
       amount: payload.budget,
