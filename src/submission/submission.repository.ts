@@ -25,16 +25,25 @@ export class SubmissionRepository {
       .findById(submissionId)
       .populate({
         path: 'task',
-        select: 'title description status',   
+        select: 'title description status user',   
       })
       .populate({
         path: 'user',
         select: 'name email username',       
       })
       .exec();
-  } async findByTaskId(taskId: string): Promise<Submission[]> {
+  }
+
+  async findSubmissionById(submissionId: string): Promise<Submission | null> {
+    return await this.submissionModel
+      .findById(submissionId)
+      .exec();
+  }
+  async findByTaskId(taskId: string): Promise<Submission[]> {
     return await this.submissionModel.find({ task: taskId }).exec();
   }
+
+  
   async findPendingTaskById(taskId: string): Promise<Submission | null> {
     return await this.submissionModel
       .findOne({ task: taskId, status: SubmissionStatus.pending })

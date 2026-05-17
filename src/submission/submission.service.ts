@@ -91,7 +91,7 @@ export class SubmissionService {
       throw new BadRequestException('Funds not authorized');
     }
 
-    const submission = await this.submissionRepository.findById(submissionId);
+    const submission = await this.submissionRepository.findSubmissionById(submissionId);
 
     if (!submission || submission.task.toString() !== taskId) {
       throw new BadRequestException('Submission not found for this task');
@@ -155,7 +155,7 @@ export class SubmissionService {
     dto: RejectSubmissionDto
   ): Promise<void> {
 
-    const submission = await this.submissionRepository.findById(submissionId);
+    const submission = await this.submissionRepository.findSubmissionById(submissionId);
 
     if (!submission) {
       throw new NotFoundException("Submission not found")
@@ -187,7 +187,7 @@ export class SubmissionService {
   }
   async revisionSubmission(submissionId: string, ownerId: string, dto: RequestRevisionDto) {
 
-    const submission = await this.submissionRepository.findById(submissionId);
+    const submission = await this.submissionRepository.findSubmissionById(submissionId);
     if (!submission) throw new NotFoundException('Submission not found');
 
     if (submission.status !== SubmissionStatus.pending) {
@@ -215,7 +215,7 @@ export class SubmissionService {
     workerId: string,
     dto: CreateSubmissionDto
   ) {
-    const submission = await this.submissionRepository.findById(submissionId)
+    const submission = await this.submissionRepository.findSubmissionById(submissionId)
     if (!submission) {
       throw new NotFoundException("Submission not found")
     }
