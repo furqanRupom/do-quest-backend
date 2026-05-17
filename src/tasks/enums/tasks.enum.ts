@@ -3,7 +3,8 @@ export enum TaskStatus {
     active = 'ACTIVE',         
     completed = 'COMPLETED',   
     cancelled = 'CANCELLED',
-    disputed = 'DISPUTED' 
+    disputed = 'DISPUTED',
+    in_review = 'IN_REVIEW' 
 }
 
 

@@ -54,6 +54,14 @@ export class SubmissionService {
       throw new BadRequestException('You cannot submit your own tasks!');
     }
 
+    const activeSubmissionsCount = await this.submissionRepository.countActiveSubmissions(taskId);
+
+
+    if (activeSubmissionsCount >= task.maxSubmissions) {
+      await this.tasksService.updateTask(taskId, { status: TaskStatus.in_review });
+      throw new BadRequestException('This bounty has reached its maximum submissions limit.');
+    }
+
     const isSubmissionExit = await this.submissionRepository.existingSubmission(taskId, userId)
     if (isSubmissionExit) {
       throw new HttpException("You already have an active submission for this task", HttpStatus.CONFLICT)
@@ -147,9 +155,12 @@ export class SubmissionService {
       stripeTransferId: transfer.id
     })
 
-    await this.tasksService.incrementApprovedSubmissions(taskId)
 
+    await this.tasksService.updateTask(taskId, {
+      status: TaskStatus.completed,
+    });
 
+    await this.submissionRepository.expireOtherSubmissions(taskId, submissionId);
     return {
       submission: submission,
       transfer: { id: transfer.id, amount: workerAmount },

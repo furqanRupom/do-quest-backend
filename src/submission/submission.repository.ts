@@ -25,11 +25,11 @@ export class SubmissionRepository {
       .findById(submissionId)
       .populate({
         path: 'task',
-        select: 'title description status user',   
+        select: 'title description status user',
       })
       .populate({
         path: 'user',
-        select: 'name email username',       
+        select: 'name email username',
       })
       .exec();
   }
@@ -43,7 +43,7 @@ export class SubmissionRepository {
     return await this.submissionModel.find({ task: taskId }).exec();
   }
 
-  
+
   async findPendingTaskById(taskId: string): Promise<Submission | null> {
     return await this.submissionModel
       .findOne({ task: taskId, status: SubmissionStatus.pending })
@@ -116,7 +116,7 @@ export class SubmissionRepository {
       .search(['title', 'content'])
       .filter(SubmissionFilterableFields)
       .sort()
-      .paginate() 
+      .paginate()
       .populate({
         path: 'task',
         select: 'title budget status deadline'
@@ -153,7 +153,7 @@ export class SubmissionRepository {
   }
 
 
-  
+
   async getSubmissionsByTasksId(taskId: string, query: SubmissionQueryDto) {
     const submissions = new QueryBuilder(this.submissionModel, query)
       .search(['title', 'content'])
@@ -172,5 +172,25 @@ export class SubmissionRepository {
     const data = await submissions.modelQuery;
     const meta = await submissions.countTotal();
     return { data, meta };
+  }
+
+
+  async countActiveSubmissions(taskId: string): Promise<number> {
+    return this.submissionModel.countDocuments({
+      task: new Types.ObjectId(taskId),
+      status: { $in: [SubmissionStatus.pending, SubmissionStatus.revision_requested] }
+    });
+  }
+
+  async expireOtherSubmissions(taskId: string, approvedSubmissionId: string): Promise<void> {
+    await this.submissionModel.updateMany(
+      {
+        task: new Types.ObjectId(taskId),
+        _id: { $ne: new Types.ObjectId(approvedSubmissionId) },
+        status: { $in: [SubmissionStatus.pending, SubmissionStatus.revision_requested] }       },
+      {
+        status: SubmissionStatus.expired // Set status to expired
+      }
+    )
   }
 }
