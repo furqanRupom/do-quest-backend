@@ -107,7 +107,15 @@ export class SubmissionRepository {
       .search(['title', 'content'])
       .filter(SubmissionFilterableFields)
       .sort()
-      .paginate()
+      .paginate() 
+      .populate({
+        path: 'task',
+        select: 'title budget status deadline'
+      })
+      .populate({
+        path: 'user',
+        select: 'name username email'
+      })
       .fields();
     const data = await submissions.modelQuery;
     const meta = await submissions.countTotal();
@@ -124,6 +132,10 @@ export class SubmissionRepository {
       .populate({
         path: 'task',
         select: 'title budget status deadline'
+      })
+      .populate({
+        path: 'user',
+        select: 'name username email'
       })
       .fields();
     const data = await submissions.modelQuery;
@@ -142,6 +154,10 @@ export class SubmissionRepository {
       .populate({
         path: 'task',
         select: 'title budget status deadline'
+      })
+      .populate({
+        path: 'user',
+        select: 'name username email'
       })
       .fields();
     const data = await submissions.modelQuery;
