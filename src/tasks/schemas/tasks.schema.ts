@@ -46,7 +46,7 @@ export class Task {
     paymentIntentId?: string;
 
     @Prop({ type: String, enum: Object.values(PaymentFlowStatus), default: PaymentFlowStatus.no_payment })
-    paymentFlowStatus: string = '';
+    paymentFlowStatus: PaymentFlowStatus = PaymentFlowStatus.no_payment;
     
     @Prop({ type: Boolean, default:false})
     isDeleted: boolean = false;

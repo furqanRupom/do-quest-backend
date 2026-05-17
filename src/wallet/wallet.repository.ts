@@ -13,13 +13,10 @@ export class WalletRepository {
     @InjectModel(WalletTransaction.name) private walletTransactinModel: Model<WalletTransaction>
   ) { }
 
-  // TODO: return Type
   async getWallet(userId: string) {
     const result = await this.walletModel.findOne({ user: new mongoose.Types.ObjectId(userId) })
     return result?.toObject()
   }
-  // TODO: return Type
-  //
 
   async updateWallet(userId: string, walletData: any) {
     return await this.walletModel.findOneAndUpdate(
@@ -28,7 +25,6 @@ export class WalletRepository {
       { new: true }
     );
   }
-
 
   async createWallet(userId: string) {
     return (await this.walletModel.create({
@@ -39,6 +35,7 @@ export class WalletRepository {
   async removeAll() {
     return await this.walletModel.deleteMany()
   }
+
   async getOrCreateWallet(userId: string): Promise<WalletDocument> {
     const existingWallet = await this.walletModel.findOne({
       user: new Types.ObjectId(userId)
@@ -76,7 +73,10 @@ export class WalletRepository {
     amount: number,
   ) {
     const wallet = await this.getOrCreateWallet(userId);
-    wallet.pendingBalance += amount;
+    
+    //  FIX: Do NOT add to pendingBalance. The funds are held by Stripe, not in the internal wallet.
+    // wallet.pendingBalance += amount; 
+    
     await wallet.save();
 
     await this.walletTransactinModel.create({
@@ -105,9 +105,8 @@ export class WalletRepository {
   }) {
     const { creatorId, workerId, taskId, submissionId, amount, stripeTransferId } = params;
 
-    // Deduct from creator's pending (escrow)
+    //  FIX: Do NOT deduct from creatorWallet.pendingBalance because we never added it.
     const creatorWallet = await this.getOrCreateWallet(creatorId);
-    creatorWallet.pendingBalance = Math.max(0, creatorWallet.pendingBalance - amount);
     await creatorWallet.save();
 
     await this.walletTransactinModel.create({
@@ -122,7 +121,7 @@ export class WalletRepository {
       description: `Escrow released to worker`,
     });
 
-    // Credit worker's available balance
+    // Credit worker's available balance (Worker earned money on the platform)
     const workerWallet = await this.getOrCreateWallet(workerId);
     workerWallet.availableBalance += amount;
     workerWallet.totalEarnings += amount;
@@ -150,7 +149,9 @@ export class WalletRepository {
     amount: number,
   ) {
     const wallet = await this.getOrCreateWallet(userId);
-    wallet.pendingBalance = Math.max(0, wallet.pendingBalance - amount);
+    
+    //  FIX: Do NOT modify pendingBalance. The refund happens directly on their Stripe card.
+    // wallet.pendingBalance = Math.max(0, wallet.pendingBalance - amount);
     await wallet.save();
 
     await this.walletTransactinModel.create({
