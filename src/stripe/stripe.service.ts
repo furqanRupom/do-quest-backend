@@ -219,7 +219,7 @@ export class StripeService {
     amount: number,
     destination: string,
     metadata: Record<string, string>,
-    sourceTransactionId:string
+    sourceTransactionId?:string
   }) {
     const { amount, destination, metadata, sourceTransactionId } = dto
     return await this.stripe.transfers.create({

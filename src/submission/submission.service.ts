@@ -114,19 +114,20 @@ export class SubmissionService {
     }
 
 
-    const capturedIntent =   await this.stripeService.capturePaymentIntent(task.paymentIntentId);
+    const capturedIntent = await this.stripeService.capturePaymentIntent(task.paymentIntentId);
     const platformFreePercent = 0.10
     const totalAmount = task.budget
     const platformFee = Math.floor(totalAmount * platformFreePercent)
     const workerAmount = totalAmount - platformFee
 
-  const chargeId = typeof capturedIntent.latest_charge === 'string' 
-      ? capturedIntent.latest_charge 
+    const chargeId = typeof capturedIntent.latest_charge === 'string'
+      ? capturedIntent.latest_charge
       : capturedIntent.latest_charge?.id;
 
-        const transfer = await this.stripeService.createTransfer({
+    const transfer = await this.stripeService.createTransfer({
       amount: workerAmount,
       destination: worker.userStripeId,
+      sourceTransactionId: chargeId as string,
       metadata: {
         taskId: taskId,
         submissionId,
