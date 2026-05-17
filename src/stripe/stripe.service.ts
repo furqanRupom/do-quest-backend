@@ -212,6 +212,7 @@ export class StripeService {
       automatic_payment_methods: {
         enabled: true,
       },
+      transfer_group:payload?.metadata?.taskId
     });
   }
   async createTransfer(dto: {
@@ -224,7 +225,8 @@ export class StripeService {
       amount: amount,
       currency: 'usd',
       destination: destination,
-      metadata: metadata || {}
+      metadata: metadata || {},
+      transfer_group:metadata?.taskId
     })
   }
 
