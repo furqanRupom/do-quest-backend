@@ -205,7 +205,7 @@ export class StripeService {
 
   async createPaymentIntent(payload: CreatePaymentDto): Promise<Stripe.Response<Stripe.PaymentIntent>> {
     return this.stripe.paymentIntents.create({
-      amount: payload.amount,
+      amount: payload.amount * 100,
       currency: payload.currency || 'usd',
       metadata: payload.metadata,
       capture_method: 'manual',
