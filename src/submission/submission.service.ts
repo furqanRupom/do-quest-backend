@@ -123,10 +123,11 @@ export class SubmissionService {
 
 
     const capturedIntent = await this.stripeService.capturePaymentIntent(task.paymentIntentId);
+
     const platformFreePercent = 0.10
-    const totalAmount = task.budget
-    const platformFee = Math.floor(totalAmount * platformFreePercent)
-    const workerAmount = totalAmount - platformFee
+    const totalAmountCents = Math.round(task.budget * 100)
+    const platformFeeCents = Math.floor(totalAmountCents * platformFreePercent)
+    const workerAmount = totalAmountCents - platformFeeCents
 
     const chargeId = typeof capturedIntent.latest_charge === 'string'
       ? capturedIntent.latest_charge
