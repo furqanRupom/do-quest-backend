@@ -22,7 +22,7 @@ export class PaginationMetaDto {
     total: number = 0;
 
     @ApiProperty({ example: 10 })
-    totalPage: number = 0;
+    totalPages: number = 0;
 }
 
 export class ApiMetaResponseDto<T> extends ApiResponseDto<T[]> {

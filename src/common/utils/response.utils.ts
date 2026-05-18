@@ -2,7 +2,7 @@ interface IMeta {
     page:number,
     limit:number,
     total:number,
-    totalPage:number
+    totalPages:number
 }
 
 export interface SendResponseOptions<T> {

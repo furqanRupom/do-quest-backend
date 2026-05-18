@@ -127,8 +127,8 @@ export class QueryBuilder<T, Q extends Record<string, any> = Record<string, any>
     const page = Number((this.query as any)?.page) || 1;
     const limit = Number((this.query as any)?.limit) || 10;
 
-    const totalPage = Math.ceil(total / limit) || 1;
+    const totalPages = Math.ceil(total / limit) || 1;
 
-    return { page, limit, total, totalPage };
+    return { page, limit, total, totalPages };
   }
 }
