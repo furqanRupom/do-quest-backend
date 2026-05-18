@@ -124,17 +124,19 @@ export class SubmissionService {
 
     const capturedIntent = await this.stripeService.capturePaymentIntent(task.paymentIntentId);
 
-    const platformFreePercent = 0.10
-    const totalAmountCents = Math.round(task.budget * 100)
-    const platformFeeCents = Math.floor(totalAmountCents * platformFreePercent)
-    const workerAmount = totalAmountCents - platformFeeCents
+    const totalAmountCents = capturedIntent.amount;
+
+    const platformFeePercent = 0.10;
+    const platformFeeCents = Math.floor(totalAmountCents * platformFeePercent);
+    const workerAmountCents = totalAmountCents - platformFeeCents;
+
 
     const chargeId = typeof capturedIntent.latest_charge === 'string'
       ? capturedIntent.latest_charge
       : capturedIntent.latest_charge?.id;
 
     const transfer = await this.stripeService.createTransfer({
-      amount: workerAmount,
+      amount: workerAmountCents,
       destination: worker.userStripeId,
       sourceTransactionId: chargeId as string,
       metadata: {
@@ -152,7 +154,7 @@ export class SubmissionService {
       workerId: worker._id.toString(),
       taskId: taskId,
       submissionId,
-      amount: workerAmount,
+      amount: workerAmountCents,
       stripeTransferId: transfer.id
     })
 
@@ -164,7 +166,7 @@ export class SubmissionService {
     await this.submissionRepository.expireOtherSubmissions(taskId, submissionId);
     return {
       submission: submission,
-      transfer: { id: transfer.id, amount: workerAmount },
+      transfer: { id: transfer.id, amount: workerAmountCents },
     };
   }
 
