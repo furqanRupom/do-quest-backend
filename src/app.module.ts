@@ -13,6 +13,8 @@ import { WalletModule } from './wallet/wallet.module';
 import { SubmissionModule } from './submission/submission.module';
 import { StripeModule } from './stripe/stripe.module';
 import { PaymentModule } from './payment/payment.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { ControllerService } from './controller/controller.service';
 
 @Module({
   imports: [
@@ -38,11 +40,12 @@ import { PaymentModule } from './payment/payment.module';
     AdminModule,
     SubmissionModule,
     StripeModule,
-    PaymentModule
+    PaymentModule,
+    DashboardModule
   ],
 
   controllers: [AppController],
 
-  providers: [],
+  providers: [ControllerService],
 })
 export class AppModule {}
