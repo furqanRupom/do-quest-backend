@@ -27,7 +27,7 @@ async function bootstrap() {
 
   const allowedOrigins = [
     'http://localhost:3000',
-    'https://do-quest.vercel.app',
+    'https://do-quests.vercel.app',
   ];
 
   app.enableCors({
