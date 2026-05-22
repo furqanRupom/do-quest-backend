@@ -9,7 +9,6 @@ export class QueryBuilder<T, Q extends Record<string, any> = Record<string, any>
     this.query = (query ?? {}) as Q;
   }
 
-  // 🔍 Search
   search(searchableFields: (keyof T | string)[]) {
     const searchTerm = (this.query as any)?.searchTerm;
     if (!searchTerm) return this;
@@ -84,7 +83,6 @@ export class QueryBuilder<T, Q extends Record<string, any> = Record<string, any>
     return this;
   }
 
-  // 🔃 Sort
   sort() {
     const sort =
       (this.query as any)?.sort?.split(",").join(" ") || "-createdAt";
@@ -93,7 +91,6 @@ export class QueryBuilder<T, Q extends Record<string, any> = Record<string, any>
     return this;
   }
 
-  // 📄 Pagination
   paginate() {
     const page = Number((this.query as any)?.page) || 1;
     const limit = Number((this.query as any)?.limit) || 10;
@@ -111,7 +108,6 @@ export class QueryBuilder<T, Q extends Record<string, any> = Record<string, any>
     return this;
   }
 
-  // 🔗 Populate
   populate(populateOptions: any) {
     if (!populateOptions) return this;
 
