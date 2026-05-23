@@ -85,7 +85,6 @@ export class UsersRepository {
   }
 
   async getAllUsers(query: UsersBaseQueryDto) {
-    console.log(query)
     const users = new QueryBuilder(this.userModel, query)
       .search(['name', 'email'])
       .filter(UsersFilterableFields)
