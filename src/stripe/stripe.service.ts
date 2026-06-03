@@ -7,6 +7,8 @@ import { TasksService } from '../tasks/tasks.service';
 import { WalletService } from '../wallet/wallet.service';
 import { PaymentFlowStatus, TaskStatus } from '../tasks/enums/tasks.enum';
 
+
+// TODO : We have to troubleshout the issues of why every tasks simultinouly get cancelled after few days. 
 @Injectable()
 export class StripeService {
 
