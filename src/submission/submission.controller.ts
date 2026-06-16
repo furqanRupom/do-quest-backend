@@ -18,7 +18,7 @@ import { RequestRevisionDto } from './dto/request-revision.dto';
 
 @Controller('submissions')
 @UseGuards(JwtAuthGuard)
-@Roles(UserRole.User)
+@Roles(UserRole.User,UserRole.Admin)
 @ApiBearerAuth()
 export class SubmissionController {
     constructor(private readonly submissionService: SubmissionService) {}
@@ -43,6 +43,22 @@ export class SubmissionController {
             message: "Submission created successfully",
             data: result
         });
+    }
+
+
+    @Get()
+    @HttpCode(HttpStatus.OK)
+    @ApiOkResponse({type : SubmissionListDto})
+    async getAllSubmissions(
+        @Query() query : SubmissionQueryDto
+    ){
+        const result = await this.submissionService.getAllSubmissions(query);
+        return sendResponse({
+            success:true,
+            message:"Fetched all submissioins successfully",
+            meta:result.meta,
+            data:result.data
+        })
     }
 
     @Get(':taskId')
