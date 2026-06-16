@@ -44,6 +44,9 @@ export class AdminService {
   async updateUser(userId:string,updateUserDto:any){
     return await this.usersService.updateUser(userId,updateUserDto)
   }
+  async getUser(userId:string) {
+    return await this.usersService.getUserProfile(userId)
+  }
   async updateTasksStatus(
     taskId: string,
     taskStatus: { taskStatus: TaskStatus },

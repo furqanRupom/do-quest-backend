@@ -101,4 +101,18 @@ export class AdminController {
       data: result,
     });
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('users/:id')
+  async getUser(
+    @Param('id') userId: string,
+  ) {
+    const result = await this.adminService.getUser(userId);
+    return sendResponse({
+      success: true,
+      message: 'Fetched user details successfully',
+      data: result,
+    });
+  }
+  
 }
