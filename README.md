@@ -1,4 +1,4 @@
-# DoQuest
+# DoQuest — Backend
 
 <p align="center">
   <a href="https://do-quest.vercel.app" target="_blank"><img src="./src/assests/assests.svg" width="120" alt="DoQuest Logo" /></a>
@@ -10,30 +10,92 @@
   <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
   <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
   <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
- 
+  <img src="https://img.shields.io/badge/status-active--development-yellow" alt="Status" />
 </p>
+
+<p align="center">
+  <a href="https://do-quest.vercel.app">Live Frontend</a> ·
+  <a href="https://do-quest-backend.vercel.app/api/v1/docs">API Docs</a> ·
+  <a href="https://github.com/furqanRupom/do-quest-backend">Repo</a>
+</p>
+
+---
+
+## Table of Contents
+
+- [Description](#description)
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Available Scripts](#available-scripts)
+- [Running Tests](#running-tests)
+- [Project Structure](#project-structure)
+- [Resources](#resources)
+- [Support](#support)
+- [Stay in Touch](#stay-in-touch)
+- [License](#license)
+
+---
 
 ## Description
 
 [DoQuest](https://github.com/furqanRupom/do-quest-backend) is a robust backend repository for the DoQuest platform, inspired by similar marketplaces like Bounty Quest. It serves as a thriving ecosystem where users can post quests (tasks or bounties), hunters can discover and complete them, and rewards are distributed seamlessly. Built on the NestJS framework, it provides efficient, scalable server-side architecture for handling user authentication, quest management, payments, and more.
 
-Key features include:
-- **Quest Posting and Hunting**: Users can create detailed quests with descriptions, requirements, and rewards. Hunters browse, apply, and complete tasks.
-- **Reward System**: Secure handling of rewards, including cryptocurrency or fiat integrations (configurable).
-- **User Profiles and Ratings**: Build reputation through completed quests, reviews, and ratings.
-- **Secure Authentication**: Includes password reset flows, email notifications, and JWT-based sessions.
-- **Admin Dashboard Tools**: Moderation features for managing quests and users.
-- **Integration Ready**: APIs for frontend clients, mobile apps, and third-party services.
+This repository provides the foundation for building and deploying your own quest-based marketplace.
 
-This starter repository provides the foundation for building and deploying your own quest-based marketplace.
+---
 
-## Project Setup
+## Key Features
+
+- **Quest Posting and Hunting** — Users can create detailed quests with descriptions, requirements, and rewards. Hunters browse, apply, and complete tasks.
+- **Reward System** — Secure handling of rewards, including cryptocurrency or fiat integrations (configurable).
+- **User Profiles and Ratings** — Build reputation through completed quests, reviews, and ratings.
+- **Secure Authentication** — Password reset flows, email notifications, and JWT-based sessions.
+- **Admin Dashboard Tools** — Moderation features for managing quests and users.
+- **Integration Ready** — APIs for frontend clients, mobile apps, and third-party services.
+
+---
+
+## Tech Stack
+
+| Category         | Technology              |
+| ----------------- | ------------------------ |
+| Runtime           | Node.js                  |
+| Framework         | NestJS                   |
+| Language          | TypeScript                |
+| Package Manager   | pnpm                      |
+| Auth              | JWT                       |
+| Payments          | Stripe / Crypto (configurable) |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js >= 18
+- pnpm >= 8
+- A running database instance (see `.env.example` for connection variables)
+
+### Installation
 
 ```bash
-$ pnpm install
+git clone https://github.com/furqanRupom/do-quest-backend.git
+cd do-quest-backend
+pnpm install
 ```
 
-## Compile and Run the Project
+### Environment Setup
+
+```bash
+cp .env.example .env
+```
+
+Update `.env` with your database, JWT, and payment provider credentials.
+
+---
+
+## Available Scripts
 
 ```bash
 # development
@@ -46,7 +108,7 @@ $ pnpm run start:dev
 $ pnpm run start:prod
 ```
 
-## Run Tests
+## Running Tests
 
 ```bash
 # unit tests
@@ -59,6 +121,21 @@ $ pnpm run test:e2e
 $ pnpm run test:cov
 ```
 
+---
+
+## Project Structure
+
+```
+src/
+├── modules/       # Feature modules (quests, users, auth, payments, etc.)
+├── common/        # Shared decorators, guards, pipes, filters
+├── config/        # Environment & app configuration
+├── assests/       # Static assets (logo, images)
+└── main.ts        # Application entry point
+```
+
+---
+
 ## Resources
 
 - Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the underlying framework.
@@ -70,15 +147,21 @@ $ pnpm run test:cov
 - Stay updated on [X (Twitter)](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
 - Job opportunities? Visit the [NestJS Jobs board](https://jobs.nestjs.com).
 
+---
+
 ## Support
 
 DoQuest is an open-source project licensed under MIT. It thrives with community contributions and sponsorships. If you'd like to support development, please [learn more here](https://github.com/furqanRupom/do-quest-backend).
+
+---
 
 ## Stay in Touch
 
 - Author: [Furqan Rupom](https://github.com/furqanRupom)
 - Website: [https://do-quest.vercel.app](https://do-quest.vercel.app)
 - Twitter: [@doquestplatform](https://twitter.com/doquestplatform)
+
+---
 
 ## License
 
